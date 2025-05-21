@@ -1,0 +1,117 @@
+// pages/contact/index.scss
+// 页面整体样式优化
+.contact-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 16px 12px;
+  box-sizing: border-box;
+}
+
+// 加载容器优化
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  
+  .loading-text {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #64748b;
+  }
+}
+
+// 内容容器优化
+.contact-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// 卡片通用样式优化
+.contact-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: visible; /* 确保内容不被截断 */
+  margin-bottom: 16px;
+  
+  // 预约卡片特殊样式优化
+  &.booking-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(203, 213, 225, 0.5);
+  }
+  
+  // 关于我们卡片特殊样式优化
+  &.about-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+    border: 1px solid rgba(186, 230, 253, 0.5);
+  }
+}
+
+// 卡片头部样式优化
+.card-header {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.card-subtitle {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+}
+
+// 卡片内容区域优化
+.card-content {
+  padding: 16px;
+  overflow: visible; /* 确保内容不被截断 */
+}
+
+// 响应式样式优化
+@media screen and (min-width: 768px) {
+  .contact-page {
+    padding: 24px;
+  }
+  
+  .contact-container {
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: 20px;
+  }
+  
+  .contact-card {
+    margin-bottom: 0;
+    height: fit-content;
+  }
+  
+  .about-card {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .contact-page {
+    padding: 12px 10px;
+  }
+  
+  .card-header {
+    padding: 14px 12px 12px;
+  }
+  
+  .card-content {
+    padding: 14px 12px;
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "waterproof",
+  "description": "郑氏修缮",
+  "appid": "touristappid",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram"
+}

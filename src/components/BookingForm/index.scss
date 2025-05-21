@@ -1,0 +1,152 @@
+/* 预约表单样式 */
+.booking-form {
+  position: relative;
+  padding: 0 4px;
+  
+  /* ===== 基础表单项样式 ===== */
+  .form-item {
+    margin-bottom: 20px;
+  }
+  
+  /* 表单标签 */
+  .form-item-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 8px;
+    
+    /* 必填项标记 */
+    &.required::before {
+      content: '*';
+      color: #ef4444;
+      font-size: 16px;
+      margin-right: 4px;
+    }
+  }
+  
+  /* 错误提示 */
+  .form-error-tip {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 4px;
+    padding-left: 16px;
+    position: relative;
+    
+    &::before {
+      content: "!";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+    }
+  }
+  
+  /* ===== 表单控件通用样式 ===== */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #dce0e4;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1e293b;
+    box-sizing: border-box;
+    margin-top: 8px;
+    transition: border-color 0.2s ease;
+    
+    &:focus, 
+    &:active {
+      border-color: #3b82f6;
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+  
+  /* 输入框 */
+  .form-input {
+    display: block;
+    height: 44px;
+    padding: 0 14px;
+  }
+  
+  /* 选择器 */
+  .form-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 14px;
+    position: relative;
+    
+    .select-placeholder {
+      color: #9ca3af;
+    }
+    
+    .select-value {
+      color: #1e293b;
+    }
+    
+    /* 箭头图标 */
+    .select-arrow {
+      width: 8px;
+      height: 8px;
+      border-top: 2px solid #94a3b8;
+      border-right: 2px solid #94a3b8;
+      transform: rotate(45deg);
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+  }
+  
+  /* 文本域 */
+  .form-textarea {
+    display: block;
+    min-height: 100px;
+    padding: 12px 14px;
+    resize: none;
+  }
+  
+  /* ===== 提交按钮 ===== */
+  .submit-container {
+    margin-top: 24px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .submit-button {
+    display: block;
+    width: 100%;
+    height: 46px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #2563EB;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    
+    &:active {
+      opacity: 0.9;
+    }
+    
+    &.loading {
+      opacity: 0.8;
+    }
+  }
+}

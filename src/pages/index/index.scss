@@ -1,0 +1,23 @@
+/* 防水服务小程序样式 */
+
+// 页面整体样式
+.page {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+// 加载状态
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  
+  .loading-text {
+    margin-top: 12px;
+    color: #666;
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,1348 @@
+📁 src
+  📄 app.config.ts
+  📄 app.scss
+  📄 app.ts
+  📄 index.html
+  📁 pages
+    📁 index
+      📄 index.config.ts
+      📄 index.scss
+      📄 index.tsx
+  📁 services
+    📁 api
+      📁 index
+        📄 data.ts
+        📄 indexApi.ts
+        📄 types.ts
+    📁 http
+      📄 cache.ts
+      📄 config.ts
+      📄 errorHandler.ts
+      📄 index.ts
+      📄 interceptor.ts
+      📄 request.ts
+      📄 types.ts
+  📁 styles
+    📄 theme.css
+
+===== File: app.config.ts =====
+export default defineAppConfig({
+  // 将所有TabBar页面放在主包中
+  pages: [
+    'pages/index/index',
+    'pages/product/index',
+    'pages/cases/index',
+    'pages/contact/index'
+  ],
+  window: {
+    backgroundTextStyle: 'light',
+    navigationBarBackgroundColor: '#FFFFFF', // 保持白色背景
+    navigationBarTitleText: '防水服务',
+    navigationBarTextStyle: 'black'
+  },
+  // 非TabBar页面可以放在分包中
+  subPackages: [],
+  tabBar: {
+    color: '#757575',         // 更改为主题中的次要文本颜色
+    selectedColor: '#2563EB', // 保持品牌蓝色不变
+    backgroundColor: '#FFFFFF', // 保持白色背景
+    borderStyle: 'white',     // 添加白色边框样式，更现代
+    list: [
+      {
+        pagePath: 'pages/index/index',
+        text: '首页',
+        iconPath: 'assets/tab-bar/home.png',
+        selectedIconPath: 'assets/tab-bar/home-active.png'
+      },
+      {
+        pagePath: 'pages/product/index',
+        text: '产品',
+        iconPath: 'assets/tab-bar/service.png',
+        selectedIconPath: 'assets/tab-bar/service-active.png'
+      },
+      {
+        pagePath: 'pages/cases/index',
+        text: '案例',
+        iconPath: 'assets/tab-bar/case.png',
+        selectedIconPath: 'assets/tab-bar/case-active.png'
+      },
+      {
+        pagePath: 'pages/contact/index',
+        text: '联系我们',
+        iconPath: 'assets/tab-bar/contact.png',
+        selectedIconPath: 'assets/tab-bar/contact-active.png'
+      }
+    ]
+  },
+  lazyCodeLoading: "requiredComponents"
+})
+===== End of File: app.config.ts =====
+
+
+===== File: app.scss =====
+/* app.scss - 适用于 Taro + NutUI React 多端项目 */
+
+/* 全局基础样式 */
+page {
+    height: 100%;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--nutui-gray-7);
+    background-color: var(--nutui-gray-3);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  /* 容器布局 */
+  .container {
+    padding: 10px;
+  }
+  
+  /* 弹性布局工具 */
+  .flex {
+    display: flex;
+    
+    &-center {
+      align-items: center;
+      justify-content: center;
+    }
+    
+    &-between {
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    &-column {
+      flex-direction: column;
+    }
+  }
+  
+  /* 间距辅助类 - 精简版 */
+  .mt-10 { margin-top: 10px; }
+  .mr-10 { margin-right: 10px; }
+  .mb-10 { margin-bottom: 10px; }
+  .ml-10 { margin-left: 10px; }
+  .pt-10 { padding-top: 10px; }
+  .pr-10 { padding-right: 10px; }
+  .pb-10 { padding-bottom: 10px; }
+  .pl-10 { padding-left: 10px; }
+  
+  /* 常用文本样式 */
+  .text-primary { color: var(--nutui-color-primary); }
+  .text-center { text-align: center; }
+  .text-bold { font-weight: bold; }
+  
+  /* 卡片组件 */
+  .card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 1px 边框解决方案 */
+  .hairline-bottom {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background-color: var(--nutui-gray-4);
+      transform: scaleY(0.5);
+    }
+  }
+  
+  /* 安全区适配 */
+  .safe-bottom {
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+===== End of File: app.scss =====
+
+
+===== File: app.ts =====
+import  { useEffect } from 'react'
+import { useDidShow, useDidHide } from '@tarojs/taro'
+
+// 全局样式
+import './styles/theme.css'
+import './app.scss'
+
+function App(props) {
+  // 可以使用所有的 React Hooks
+  useEffect(() => {})
+
+  // 对应 onShow
+  useDidShow(() => {})
+
+  // 对应 onHide
+  useDidHide(() => {})
+
+  return props.children
+}
+
+export default App
+===== End of File: app.ts =====
+
+
+===== File: index.html =====
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <meta name="format-detection" content="telephone=no,address=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="white">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" >
+  <title>waterproof</title>
+  <script><%= htmlWebpackPlugin.options.script %></script>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
+===== End of File: index.html =====
+
+
+===== File: pages\index\index.config.ts =====
+export default {
+  navigationBarTitleText: '专业防水服务',
+  enablePullDownRefresh: true,
+  backgroundColor: '#f5f5f5',
+  backgroundTextStyle: 'dark',
+  navigationBarBackgroundColor: '#ffffff',
+  navigationBarTextStyle: 'black'
+}
+===== End of File: pages\index\index.config.ts =====
+
+
+===== File: pages\index\index.scss =====
+/* 防水服务小程序样式 */
+
+// 页面整体样式
+.page {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+// 加载状态
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  
+  .loading-text {
+    margin-top: 12px;
+    color: #666;
+    font-size: 14px;
+  }
+}
+===== End of File: pages\index\index.scss =====
+
+
+===== File: pages\index\index.tsx =====
+// pages/index/index.tsx
+import { useEffect, useState } from 'react'
+import { View, Text } from '@tarojs/components'
+import { Toast, Loading } from '@nutui/nutui-react-taro'
+import Taro from '@tarojs/taro'
+import './index.scss'
+
+// 导入组件
+import BannerCarousel from 'src/components/BannerCarousel'
+import QuickContact from 'src/components/QuickContact'
+import ServiceSection from 'src/components/ServiceSection'
+import ShowcaseSection from 'src/components/ShowcaseSection'
+
+// 直接导入API和类型
+import { IndexData } from 'src/services/api/index/types'
+import { getIndexData, handleIndexError } from 'src/services/api/index/indexApi'
+
+export default function IndexPage() {
+  // 状态管理
+  const [loading, setLoading] = useState(true)
+  const [indexData, setIndexData] = useState<IndexData | null>(null)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMsg, setToastMsg] = useState('')
+  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('success')
+  
+  // 显示提示消息
+  const showToastMessage = (message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
+    if (showToast) {
+      setShowToast(false)
+      setTimeout(() => {
+        setToastMsg(message)
+        setToastType(type)
+        setShowToast(true)
+      }, 100)
+    } else {
+      setToastMsg(message)
+      setToastType(type)
+      setShowToast(true)
+    }
+  }
+  
+  // 获取数据
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      
+      try {
+        // 获取所有首页数据
+        const result = await getIndexData()
+        
+        if (result.success && result.data) {
+          setIndexData(result.data)
+        } else {
+          showToastMessage(result.error || '获取首页数据失败', 'fail')
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        showToastMessage(handleIndexError(error), 'fail')
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [])
+  
+  // 下拉刷新处理
+  useEffect(() => {
+    Taro.eventCenter.on('pullDownRefresh', async () => {
+      try {
+        // 刷新首页数据
+        const result = await getIndexData()
+        
+        if (result.success && result.data) {
+          setIndexData(result.data)
+          showToastMessage('刷新成功', 'success')
+        } else {
+          showToastMessage(result.error || '刷新数据失败', 'fail')
+        }
+      } catch (error) {
+        showToastMessage(handleIndexError(error), 'fail')
+      } finally {
+        Taro.stopPullDownRefresh()
+      }
+    })
+    
+    return () => {
+      Taro.eventCenter.off('pullDownRefresh')
+    }
+  }, [])
+  
+  // 加载状态
+  if (loading || !indexData) {
+    return (
+      <View className='loading-container'>
+        <Loading type='spinner' />
+        <Text className='loading-text'>加载中...</Text>
+      </View>
+    )
+  }
+  
+  return (
+    <View className='page'>
+      {/* Banner区域 */}
+      <BannerCarousel banners={indexData.banners} badgeText="10年专业品质" />
+      
+      {/* 快速联系 */}
+      <QuickContact 
+        contactInfo={indexData.contactInfo}
+        onShowToast={showToastMessage}
+      />
+      
+      {/* 服务分类 */}
+      <ServiceSection services={indexData.services} />
+      
+      {/* 精选案例 */}
+      <ShowcaseSection 
+        showcases={indexData.showcases}
+        contactPhone={indexData.contactInfo.phone}
+        onShowToast={showToastMessage}
+      />
+      
+      {/* Toast组件 */}
+      <Toast
+        msg={toastMsg}
+        visible={showToast}
+        type={toastType}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+        position='center'
+        closeOnOverlayClick
+      />
+    </View>
+  )
+}
+===== End of File: pages\index\index.tsx =====
+
+
+===== File: services\api\index\data.ts =====
+// services/api/index/data.ts
+import { IndexData } from './types';
+
+// 首页模拟数据
+export const indexData: IndexData = {
+  // 服务数据
+  services: [
+    {
+      id: 1,
+      title: '卫生间防水',
+      description: '专业卫生间防水施工，解决渗漏问题',
+      features: ['耐候耐磨', '持久防护', '无缝施工']
+    },
+    {
+      id: 2,
+      title: '外墙防水',
+      description: '全方位外墙防水，根治渗漏难题',
+      features: ['高空作业', '全面防护', '防紫外线']
+    },
+    {
+      id: 3,
+      title: '地下室防水',
+      description: '专业地下室防水工程，彻底解决渗水问题',
+      features: ['防积水', '耐腐蚀', '抗压防渗']
+    },
+    {
+      id: 4,
+      title: '屋顶防水',
+      description: '专业屋顶防水维修，杜绝屋顶漏水',
+      features: ['免拆修复', '抗紫外线', '终身质保']
+    },
+    {
+      id: 5,
+      title: '阳台防水',
+      description: '阳台防水翻新，彻底解决渗漏问题',
+      features: ['美观实用', '快速施工', '长期保固']
+    },
+    {
+      id: 6,
+      title: '裂缝补漏',
+      description: '墙体裂缝修复，防止渗水扩散',
+      features: ['精准注浆', '彻底修复', '隐蔽施工']
+    }
+  ],
+  
+  // 精选案例数据 (Showcase)
+  showcases: [
+    {
+      id: '1',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
+      title: '城市花园小区屋顶防水工程',
+      description: '解决屋顶长期渗水问题，采用最新防水材料，5年质保',
+      content: '城市花园小区建于2010年，屋顶长期存在渗水问题，影响居民正常生活。我们使用高分子防水卷材对屋顶进行全面防水处理，并增加了排水系统改造，彻底解决了漏水问题。该工程覆盖面积达2000平方米，工期15天，提供5年质保服务。'
+    },
+    {
+      id: '2',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
+      title: '滨江豪庭别墅防水工程',
+      description: '别墅地下室、游泳池、卫生间整体防水，确保万无一失',
+      content: '滨江豪庭别墅是高端住宅项目，业主要求对地下室、游泳池及卫生间进行高标准防水处理。我们采用了双层防水技术，内层使用柔性防水涂料，外层使用自粘防水卷材，并在关键部位增加了防水附加层。整个工程历时25天，防水面积达800平方米，通过了72小时蓄水测试，确保万无一失。'
+    },
+    {
+      id: '3',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
+      title: '阳光商城外墙防水翻新',
+      description: '大型商业综合体外墙防水，美观与实用并重',
+      content: '阳光商城是市中心大型商业综合体，建成已有8年，外墙出现多处渗水和墙面脱落现象。我们对整个外墙进行了清洁、修复和防水处理，采用了新型纳米防水涂料，具有优异的防水性能和耐候性。工程面积达5000平方米，不仅解决了渗水问题，还恢复了建筑外观，使商城焕然一新。'
+    }
+  ],
+  
+  // 联系信息
+  contactInfo: {
+    phone: '400-123-4567',
+    wechat: 'waterproof123'
+  },
+  
+  // Banner数据
+  banners: [
+    {
+      id: '1',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
+      title: '专业防水服务',
+      subtitle: '10年专注防水 · 品质保障'
+    },
+    {
+      id: '2',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
+      title: '专业防水服务',
+      subtitle: '10年专注防水 · 品质保障'
+    },
+    {
+      id: '3',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
+      title: '专业防水服务',
+      subtitle: '10年专注防水 · 品质保障'
+    }
+  ]
+};
+===== End of File: services\api\index\data.ts =====
+
+
+===== File: services\api\index\indexApi.ts =====
+// services/api/index/indexApi.ts
+import http from '../../http';
+import { IndexData, ApiResponse } from './types';
+import { indexData } from './data';
+
+// API端点
+const ENDPOINTS = {
+  GET_INDEX_DATA: '/index',
+};
+
+/**
+ * 获取首页所有数据
+ */
+export const getIndexData = async (): Promise<ApiResponse<IndexData>> => {
+  try {
+    // 替换为实际API调用当后端准备好时
+    // const data = await http.get<IndexData>(ENDPOINTS.GET_INDEX_DATA);
+    
+    // 模拟API调用延迟
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 返回模拟数据
+    return {
+      success: true,
+      data: indexData
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '获取首页数据失败'
+    };
+  }
+};
+
+/**
+ * 首页模块错误处理工具
+ */
+export const handleIndexError = (err: any): string => {
+  console.error('Index API Error:', err);
+  return err instanceof Error ? err.message : '获取首页数据时发生未知错误';
+};
+
+// 导出类型和数据
+export * from './types';
+export * from './data';
+===== End of File: services\api\index\indexApi.ts =====
+
+
+===== File: services\api\index\types.ts =====
+// services/index/api/types.ts
+
+// 服务项接口
+export interface Service {
+    id: number | string;
+    title: string;
+    description: string;
+    features: string[];
+  }
+  
+  // 精选案例接口
+  export interface Showcase {
+    id: string;
+    imageUrl: string;
+    title: string;
+    description: string;
+    content: string;
+  }
+  
+  // 联系信息接口
+  export interface ContactInfo {
+    phone: string;
+    wechat: string;
+  }
+  
+  // Banner接口
+  export interface Banner {
+    id: string;
+    imageUrl: string;
+    title?: string;
+    subtitle?: string;
+  }
+  
+  // 首页数据接口
+  export interface IndexData {
+    services: Service[];
+    showcases: Showcase[];
+    contactInfo: ContactInfo;
+    banners: Banner[];
+  }
+  
+  // API响应包装器
+  export interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+  }
+===== End of File: services\api\index\types.ts =====
+
+
+===== File: services\http\cache.ts =====
+import Taro from '@tarojs/taro';
+import type { CacheData } from './types';
+
+// 缓存键前缀
+const CACHE_PREFIX = 'http_cache_';
+
+/**
+ * 生成缓存键
+ */
+export function generateCacheKey(url: string, data?: any): string {
+  return `${CACHE_PREFIX}${url}_${JSON.stringify(data || {})}`;
+}
+
+/**
+ * 获取缓存数据
+ */
+export function getCacheData<T>(key: string): CacheData<T> | null {
+  try {
+    const cacheData = Taro.getStorageSync(key);
+    return cacheData ? JSON.parse(cacheData) : null;
+  } catch (error) {
+    console.error('获取缓存数据失败', error);
+    return null;
+  }
+}
+
+/**
+ * 设置缓存数据
+ */
+export function setCacheData<T>(key: string, data: T): void {
+    try {
+      const cacheData: CacheData<T> = {
+        data,
+        timestamp: Date.now()
+      };
+      
+      Taro.setStorageSync(key, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('设置缓存数据失败', error);
+    }
+  }
+
+/**
+ * 清除缓存数据
+ */
+export function clearCacheData(key: string): void {
+  try {
+    Taro.removeStorageSync(key);
+  } catch (error) {
+    console.error('清除缓存数据失败', error);
+  }
+}
+
+/**
+ * 清除所有HTTP缓存
+ */
+export function clearAllCache(): void {
+  try {
+    const storageInfo = Taro.getStorageInfoSync();
+    const keys = storageInfo.keys || [];
+    
+    keys.forEach(key => {
+      if (key.startsWith(CACHE_PREFIX)) {
+        Taro.removeStorageSync(key);
+      }
+    });
+  } catch (error) {
+    console.error('清除所有缓存失败', error);
+  }
+}
+
+/**
+ * 检查缓存是否有效
+ */
+export function isCacheValid<T>(cache: CacheData<T>, cacheTime: number): boolean {
+  if (!cache || !cache.timestamp) return false;
+  
+  return Date.now() - cache.timestamp < cacheTime;
+}
+===== End of File: services\http\cache.ts =====
+
+
+===== File: services\http\config.ts =====
+import type { RequestConfig } from './types';
+
+// API基础URL
+export const API_BASE_URL = {
+  // 开发环境
+  development: 'https://dev-api.example.com/v1',
+  // 生产环境
+  production: 'https://api.example.com/v1'
+};
+
+// 环境判断
+export const ENV = process.env.NODE_ENV || 'development';
+
+// HTTP状态码
+export const HTTP_STATUS = {
+  SUCCESS: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500
+};
+
+// 业务状态码
+export const BUSINESS_CODE = {
+  SUCCESS: 0,           // 成功
+  TOKEN_EXPIRED: 10001, // token过期
+  PARAM_ERROR: 10002,   // 参数错误
+  SERVER_ERROR: 50000   // 服务器错误
+};
+
+// 默认请求配置
+export const DEFAULT_CONFIG: RequestConfig = {
+  baseURL: API_BASE_URL[ENV],
+  showLoading: true,
+  loadingText: '加载中',
+  showErrorToast: true,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 10000,       // 10秒
+  useCache: false,
+  cacheTime: 5 * 60 * 1000,  // 5分钟
+  retry: 0,
+  retryDelay: 1000,
+  withToken: true
+};
+===== End of File: services\http\config.ts =====
+
+
+===== File: services\http\errorHandler.ts =====
+import Taro from '@tarojs/taro';
+import { HTTP_STATUS, BUSINESS_CODE } from './config';
+import type { RequestError, RequestOptions } from './types';
+
+/**
+ * 处理HTTP状态错误
+ */
+export function handleHttpError(statusCode: number): RequestError {
+  let message = '未知错误';
+  
+  switch (statusCode) {
+    case HTTP_STATUS.BAD_REQUEST:
+      message = '请求参数错误';
+      break;
+    case HTTP_STATUS.UNAUTHORIZED:
+      message = '未授权，请登录';
+      break;
+    case HTTP_STATUS.FORBIDDEN:
+      message = '没有权限访问';
+      break;
+    case HTTP_STATUS.NOT_FOUND:
+      message = '请求资源不存在';
+      break;
+    case HTTP_STATUS.SERVER_ERROR:
+      message = '服务器内部错误';
+      break;
+    default:
+      message = `HTTP错误 (${statusCode})`;
+  }
+  
+  return {
+    code: statusCode,
+    message
+  };
+}
+
+/**
+ * 处理业务状态错误
+ */
+export function handleBusinessError<T>(response: { code: number; message: string; data?: T }): RequestError {
+  let message = response.message || '未知错误';
+  
+  switch (response.code) {
+    case BUSINESS_CODE.TOKEN_EXPIRED:
+      message = '登录已过期，请重新登录';
+      break;
+    case BUSINESS_CODE.PARAM_ERROR:
+      message = '参数错误';
+      break;
+    case BUSINESS_CODE.SERVER_ERROR:
+      message = '服务器内部错误';
+      break;
+  }
+  
+  return {
+    code: response.code,
+    message,
+    data: response.data
+  };
+}
+
+/**
+ * 处理网络错误
+ */
+export function handleNetworkError(error: any): RequestError {
+  let message = '网络异常';
+  
+  if (error?.errMsg) {
+    if (error.errMsg.includes('timeout')) {
+      message = '请求超时，请检查网络';
+    } else if (error.errMsg.includes('fail')) {
+      message = '网络连接失败，请检查网络设置';
+    }
+  }
+  
+  return {
+    code: -1,
+    message
+  };
+}
+
+/**
+ * 综合错误处理
+ */
+export function handleRequestError(error: any, options: RequestOptions): RequestError {
+  // 已格式化的错误
+  if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: error.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return error as RequestError;
+  }
+  
+  // HTTP错误
+  if (error && typeof error === 'object' && 'statusCode' in error) {
+    const httpError = handleHttpError(error.statusCode);
+    
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: httpError.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return httpError;
+  }
+  
+  // 网络错误
+  if (error && typeof error === 'object' && 'errMsg' in error) {
+    const networkError = handleNetworkError(error);
+    
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: networkError.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return networkError;
+  }
+  
+  // 其他错误
+  const unknownError: RequestError = {
+    code: -1,
+    message: typeof error === 'string' ? error : '未知错误'
+  };
+  
+  if (options.showErrorToast) {
+    Taro.showToast({
+      title: unknownError.message,
+      icon: 'none',
+      duration: 2000
+    });
+  }
+  
+  return unknownError;
+}
+===== End of File: services\http\errorHandler.ts =====
+
+
+===== File: services\http\index.ts =====
+import { request } from './request';
+import type { RequestOptions} from './types';
+import { addRequestInterceptor, addResponseInterceptor, addErrorInterceptor } from './interceptor';
+import { clearAllCache, clearCacheData } from './cache';
+
+/**
+ * HTTP客户端
+ */
+const http = {
+  /**
+   * 发送GET请求
+   */
+  get: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'GET', data, ...options }),
+  
+  /**
+   * 发送POST请求
+   */  
+  post: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'POST', data, ...options }),
+  
+  /**
+   * 发送PUT请求
+   */
+  put: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'PUT', data, ...options }),
+  
+  /**
+   * 发送DELETE请求
+   */
+  delete: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'DELETE', data, ...options }),
+  
+  /**
+   * 原始请求方法
+   */
+  request,
+  
+  /**
+   * 清除指定缓存
+   */
+  clearCache: clearCacheData,
+  
+  /**
+   * 清除所有缓存
+   */
+  clearAllCache,
+  
+  /**
+   * 添加请求拦截器
+   */
+  addRequestInterceptor,
+  
+  /**
+   * 添加响应拦截器
+   */
+  addResponseInterceptor,
+  
+  /**
+   * 添加错误拦截器
+   */
+  addErrorInterceptor
+};
+
+export default http;
+
+// 导出类型
+export * from './types';
+export { DEFAULT_CONFIG } from './config';
+===== End of File: services\http\index.ts =====
+
+
+===== File: services\http\interceptor.ts =====
+import Taro from '@tarojs/taro';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, RequestOptions, ResponseData } from './types';
+import { BUSINESS_CODE } from './config';
+
+// 请求拦截器数组
+const requestInterceptors: RequestInterceptor[] = [];
+
+// 响应拦截器数组
+const responseInterceptors: ResponseInterceptor[] = [];
+
+// 错误拦截器数组
+const errorInterceptors: ErrorInterceptor[] = [];
+
+/**
+ * 添加请求拦截器
+ */
+export function addRequestInterceptor(interceptor: RequestInterceptor): void {
+  requestInterceptors.push(interceptor);
+}
+
+/**
+ * 添加响应拦截器
+ */
+export function addResponseInterceptor(interceptor: ResponseInterceptor): void {
+  responseInterceptors.push(interceptor);
+}
+
+/**
+ * 添加错误拦截器
+ */
+export function addErrorInterceptor(interceptor: ErrorInterceptor): void {
+  errorInterceptors.push(interceptor);
+}
+
+/**
+ * 应用请求拦截器
+ */
+export async function applyRequestInterceptors(options: RequestOptions): Promise<RequestOptions> {
+  let config = { ...options };
+  
+  for (const interceptor of requestInterceptors) {
+    config = await interceptor(config);
+  }
+  
+  return config;
+}
+
+/**
+ * 应用响应拦截器
+ */
+export async function applyResponseInterceptors<T>(response: ResponseData<T>, options: RequestOptions): Promise<ResponseData<T>> {
+  let result = { ...response };
+  
+  for (const interceptor of responseInterceptors) {
+    result = await interceptor(result, options);
+  }
+  
+  return result;
+}
+
+/**
+ * 应用错误拦截器
+ */
+export async function applyErrorInterceptors(error: any, options: RequestOptions): Promise<any> {
+  let result = error;
+  
+  for (const interceptor of errorInterceptors) {
+    result = await interceptor(result, options);
+  }
+  
+  return result;
+}
+
+// 添加默认Token拦截器
+addRequestInterceptor(async (options) => {
+  if (options.withToken) {
+    try {
+      const token = Taro.getStorageSync('token');
+      if (token) {
+        options.headers = {
+          ...options.headers,
+          'Authorization': `Bearer ${token}`
+        };
+      }
+    } catch (error) {
+      console.error('获取Token失败', error);
+    }
+  }
+  
+  return options;
+});
+
+// 添加默认日志拦截器
+if (process.env.NODE_ENV === 'development') {
+  // 请求日志
+  addRequestInterceptor((options) => {
+    console.log(`[Request] ${options.method} ${options.url}`, options.data);
+    return options;
+  });
+  
+  // 响应日志
+  addResponseInterceptor((response, options) => {
+    console.log(`[Response] ${options.method} ${options.url}`, response);
+    return response;
+  });
+  
+  // 错误日志
+  addErrorInterceptor((error, options) => {
+    console.error(`[Error] ${options.method} ${options.url}`, error);
+    return error;
+  });
+}
+
+// 添加默认Token过期处理
+addErrorInterceptor((error) => {
+  if (error && error.code === BUSINESS_CODE.TOKEN_EXPIRED) {
+    // 清除本地Token
+    Taro.removeStorageSync('token');
+    
+    // 跳转到登录页
+    Taro.navigateTo({
+      url: '/pages/login/index'
+    });
+  }
+  
+  return error;
+});
+===== End of File: services\http\interceptor.ts =====
+
+
+===== File: services\http\request.ts =====
+import Taro from '@tarojs/taro';
+import type { RequestOptions, ResponseData } from './types';
+import { DEFAULT_CONFIG, BUSINESS_CODE } from './config';
+import { applyRequestInterceptors, applyResponseInterceptors, applyErrorInterceptors } from './interceptor';
+import { handleRequestError, handleBusinessError } from './errorHandler';
+import { generateCacheKey, getCacheData, setCacheData, isCacheValid } from './cache';
+
+// 请求计数器
+let loadingCount = 0;
+
+/**
+ * 显示加载提示
+ */
+function showLoading(text: string): void {
+  loadingCount++;
+  
+  if (loadingCount === 1) {
+    Taro.showLoading({ title: text });
+  }
+}
+
+/**
+ * 隐藏加载提示
+ */
+function hideLoading(): void {
+  loadingCount--;
+  
+  if (loadingCount === 0) {
+    Taro.hideLoading();
+  }
+}
+
+/**
+ * 延迟函数
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * 统一请求函数
+ */
+export async function request<T = any>(options: RequestOptions): Promise<T> {
+  // 合并配置
+  const config = { ...DEFAULT_CONFIG, ...options };
+  const { url, method = 'GET', data, baseURL, showLoading: shouldShowLoading, loadingText, useCache, cacheTime, retry, retryDelay } = config;
+  
+  // 完整URL
+  const fullUrl = url.startsWith('http') ? url : `${baseURL}${url.startsWith('/') ? url : `/${url}`}`;
+  
+  // 检查缓存
+  if (useCache && method === 'GET') {
+    const cacheKey = generateCacheKey(fullUrl, data);
+    const cached = getCacheData<T>(cacheKey);
+    
+    if (cached && isCacheValid(cached, cacheTime || DEFAULT_CONFIG.cacheTime || 0)) {
+      return cached.data;
+    }
+  }
+  
+  // 请求前处理
+  let requestConfig = await applyRequestInterceptors({ ...config, url: fullUrl });
+  
+  // 重试计数
+  let retryCount = retry || 0;
+  
+  // 显示加载提示
+  if (shouldShowLoading) {
+    showLoading(loadingText || '加载中');
+  }
+  
+  try {
+    // 发送请求
+    const executeRequest = async (): Promise<T> => {
+      try {
+        const response = await Taro.request({
+          url: fullUrl,
+          data: requestConfig.data,
+          method: requestConfig.method as any,
+          header: requestConfig.headers,
+          timeout: requestConfig.timeout
+        });
+        
+        // HTTP状态检查
+        if (response.statusCode !== 200) {
+          throw { statusCode: response.statusCode };
+        }
+        
+        // 业务状态检查
+        const responseData = response.data as ResponseData<T>;
+        
+        if (responseData.code !== BUSINESS_CODE.SUCCESS) {
+          throw handleBusinessError(responseData);
+        }
+        
+        // 响应拦截处理
+        const processedResponse = await applyResponseInterceptors(responseData, requestConfig);
+        
+        // 设置缓存
+        if (useCache && method === 'GET') {
+          const cacheKey = generateCacheKey(fullUrl, data);
+          setCacheData(cacheKey, processedResponse.data);
+        }
+        
+        return processedResponse.data;
+      } catch (error) {
+        // 请求失败但还有重试次数
+        if (retryCount > 0) {
+          retryCount--;
+          // 延迟后重试
+          await delay(retryDelay || DEFAULT_CONFIG.retryDelay || 1000);
+          return executeRequest();
+        }
+        
+        // 重试次数用完，向上抛出错误
+        throw error;
+      }
+    };
+    
+    return await executeRequest();
+  } catch (error) {
+    // 错误处理
+    const processedError = await applyErrorInterceptors(error, requestConfig);
+    throw handleRequestError(processedError, requestConfig);
+  } finally {
+    // 隐藏加载提示
+    if (shouldShowLoading) {
+      hideLoading();
+    }
+  }
+}
+===== End of File: services\http\request.ts =====
+
+
+===== File: services\http\types.ts =====
+// 请求方法类型
+export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+// 请求配置
+export interface RequestConfig {
+  // 基础URL
+  baseURL?: string;
+  // 是否显示加载提示
+  showLoading?: boolean;
+  // 加载提示文字
+  loadingText?: string;
+  // 是否显示错误提示
+  showErrorToast?: boolean;
+  // 请求头
+  headers?: Record<string, string>;
+  // 超时时间(ms)
+  timeout?: number;
+  // 是否使用缓存(仅GET请求)
+  useCache?: boolean;
+  // 缓存时间(ms)
+  cacheTime?: number;
+  // 重试次数
+  retry?: number;
+  // 重试延迟(ms)
+  retryDelay?: number;
+  // 是否自动携带token
+  withToken?: boolean;
+}
+
+// 请求参数
+export interface RequestOptions extends RequestConfig {
+  // 请求地址
+  url: string;
+  // 请求方法
+  method?: RequestMethod;
+  // 请求数据
+  data?: any;
+}
+
+// 响应数据结构
+export interface ResponseData<T = any> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+// 缓存数据结构
+export interface CacheData<T = any> {
+  data: T;
+  timestamp: number;
+}
+
+// 错误信息结构
+export interface RequestError {
+  code: number;
+  message: string;
+  data?: any;
+}
+
+// 请求拦截器
+export type RequestInterceptor = (options: RequestOptions) => RequestOptions | Promise<RequestOptions>;
+
+// 响应拦截器
+export type ResponseInterceptor = <T>(response: ResponseData<T>, options: RequestOptions) => ResponseData<T> | Promise<ResponseData<T>>;
+
+// 错误拦截器
+export type ErrorInterceptor = (error: any, options: RequestOptions) => any;
+===== End of File: services\http\types.ts =====
+
+
+===== File: styles\theme.css =====
+:root,
+page{
+  /* 主品牌色系 - 蓝色系列，从浅到深 */
+  --nutui-brand-1: #EFF6FF; /* 最浅蓝色 - 适合背景、高亮区域 */
+  --nutui-brand-2: #DBEAFE; /* 浅蓝色 - 用于轻量强调和背景 */
+  --nutui-brand-3: #BFDBFE; /* 中浅蓝色 - 禁用状态 */
+  --nutui-brand-4: #93C5FD; /* 渐变起始色 */
+  --nutui-brand-5: #60A5FA; /* 中间过渡色 */
+  --nutui-brand-6: #3B82F6; /* 主色调 - 亮蓝色 */
+  --nutui-brand-7: #2563EB; /* 按压状态色 - 与TabBar选中色相同 */
+  --nutui-brand-8: #1D4ED8; /* 深蓝色 - 渐变结束色 */
+  --nutui-brand-9: #1E40AF; /* 很深蓝色 */
+  --nutui-brand-10: #1E3A8A; /* 最深蓝色 */
+  
+  /* 渐变色设置 */
+  --nutui-brand-stop-1: #60A5FA; /* 渐变起始色 - 对应brand-5 */
+  --nutui-brand-stop-2: #2563EB; /* 渐变结束色 - 对应brand-7，与TabBar一致 */
+  
+  /* 强调色 - 用于特殊元素，防水主题可以用蓝绿色 */
+  --nutui-secondary-1: #0EA5E9; /* 蓝绿色强调色 - 与水相关 */
+  
+  /* 主色调映射 */
+  --nutui-color-primary: #2563EB; /* 与TabBar选中色保持一致 */
+  --nutui-color-primary-stop-1: var(--nutui-brand-stop-1);
+  --nutui-color-primary-stop-2: var(--nutui-brand-stop-2);
+  --nutui-color-primary-pressed: var(--nutui-brand-8);
+  --nutui-color-primary-disabled: var(--nutui-brand-3);
+  --nutui-color-primary-text: #FFFFFF;
+  --nutui-color-primary-light: var(--nutui-brand-2);
+  
+  /* 文本系统 */
+  --nutui-gray-7: #1F2937; /* 主要文本 */
+  --nutui-gray-6: #4B5563; /* 重要次要文本 */
+  --nutui-gray-5: #6B7280; /* 次要文本 */
+  --nutui-gray-4: #9CA3AF; /* 分割线/禁用文本 */
+  
+  /* 背景系统 */
+  --nutui-gray-1: #FFFFFF; /* 白色背景 - 与navigationBar背景一致 */
+  --nutui-gray-2: #F9FAFB; /* 浅灰背景 - 卡片内嵌背景 */
+  --nutui-gray-3: #F3F4F6; /* 灰色背景 - 页面基底色 */
+  
+  /* 功能色设置 - 与防水服务主题相协调 */
+  --nutui-color-success: #10B981; /* 成功色 - 绿色，代表安全可靠 */
+  --nutui-color-success-disabled: #D1FAE5;
+  --nutui-color-danger: #EF4444; /* 危险色 - 红色，代表警示 */
+  --nutui-color-danger-disabled: #FEE2E2;
+  --nutui-color-warning: #F59E0B; /* 警告色 - 橙色 */
+  --nutui-color-warning-disabled: #FEF3C7;
+  --nutui-color-info: #3B82F6; /* 信息色 - 蓝色，与水相关 */
+  --nutui-color-info-disabled: #BFDBFE;
+  --nutui-color-info-background: linear-gradient(315deg, #60A5FA 0%, #2563EB 100%);
+  
+  /* TabBar颜色设置 - 保持一致性 */
+  --nutui-tabbar-active-color: #2563EB; /* 与TabBar选中色保持一致 */
+  --nutui-tabbar-inactive-color: #999999; /* 与TabBar未选中色保持一致 */
+
+  --nutui-picker-title-ok-font-size: 16px;/*picker面板确认字号*/
+  --nutui-picker-item-height: 40px; /*picker面板每一条数据高度*/
+  --nutui-picker-list-height: 180px;
+  --nutui-picker-title-cancel-font-size: 16px;
+}
+===== End of File: styles\theme.css =====
+

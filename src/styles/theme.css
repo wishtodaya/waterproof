@@ -1,0 +1,61 @@
+:root,
+page{
+  /* 主品牌色系 - 蓝色系列，从浅到深 */
+  --nutui-brand-1: #EFF6FF; /* 最浅蓝色 - 适合背景、高亮区域 */
+  --nutui-brand-2: #DBEAFE; /* 浅蓝色 - 用于轻量强调和背景 */
+  --nutui-brand-3: #BFDBFE; /* 中浅蓝色 - 禁用状态 */
+  --nutui-brand-4: #93C5FD; /* 渐变起始色 */
+  --nutui-brand-5: #60A5FA; /* 中间过渡色 */
+  --nutui-brand-6: #3B82F6; /* 主色调 - 亮蓝色 */
+  --nutui-brand-7: #2563EB; /* 按压状态色 - 与TabBar选中色相同 */
+  --nutui-brand-8: #1D4ED8; /* 深蓝色 - 渐变结束色 */
+  --nutui-brand-9: #1E40AF; /* 很深蓝色 */
+  --nutui-brand-10: #1E3A8A; /* 最深蓝色 */
+  
+  /* 渐变色设置 */
+  --nutui-brand-stop-1: #60A5FA; /* 渐变起始色 - 对应brand-5 */
+  --nutui-brand-stop-2: #2563EB; /* 渐变结束色 - 对应brand-7，与TabBar一致 */
+  
+  /* 强调色 - 用于特殊元素，防水主题可以用蓝绿色 */
+  --nutui-secondary-1: #0EA5E9; /* 蓝绿色强调色 - 与水相关 */
+  
+  /* 主色调映射 */
+  --nutui-color-primary: #2563EB; /* 与TabBar选中色保持一致 */
+  --nutui-color-primary-stop-1: var(--nutui-brand-stop-1);
+  --nutui-color-primary-stop-2: var(--nutui-brand-stop-2);
+  --nutui-color-primary-pressed: var(--nutui-brand-8);
+  --nutui-color-primary-disabled: var(--nutui-brand-3);
+  --nutui-color-primary-text: #FFFFFF;
+  --nutui-color-primary-light: var(--nutui-brand-2);
+  
+  /* 文本系统 */
+  --nutui-gray-7: #1F2937; /* 主要文本 */
+  --nutui-gray-6: #4B5563; /* 重要次要文本 */
+  --nutui-gray-5: #6B7280; /* 次要文本 */
+  --nutui-gray-4: #9CA3AF; /* 分割线/禁用文本 */
+  
+  /* 背景系统 */
+  --nutui-gray-1: #FFFFFF; /* 白色背景 - 与navigationBar背景一致 */
+  --nutui-gray-2: #F9FAFB; /* 浅灰背景 - 卡片内嵌背景 */
+  --nutui-gray-3: #F3F4F6; /* 灰色背景 - 页面基底色 */
+  
+  /* 功能色设置 - 与防水服务主题相协调 */
+  --nutui-color-success: #10B981; /* 成功色 - 绿色，代表安全可靠 */
+  --nutui-color-success-disabled: #D1FAE5;
+  --nutui-color-danger: #EF4444; /* 危险色 - 红色，代表警示 */
+  --nutui-color-danger-disabled: #FEE2E2;
+  --nutui-color-warning: #F59E0B; /* 警告色 - 橙色 */
+  --nutui-color-warning-disabled: #FEF3C7;
+  --nutui-color-info: #3B82F6; /* 信息色 - 蓝色，与水相关 */
+  --nutui-color-info-disabled: #BFDBFE;
+  --nutui-color-info-background: linear-gradient(315deg, #60A5FA 0%, #2563EB 100%);
+  
+  /* TabBar颜色设置 - 保持一致性 */
+  --nutui-tabbar-active-color: #2563EB; /* 与TabBar选中色保持一致 */
+  --nutui-tabbar-inactive-color: #999999; /* 与TabBar未选中色保持一致 */
+
+  --nutui-picker-title-ok-font-size: 16px;/*picker面板确认字号*/
+  --nutui-picker-item-height: 40px; /*picker面板每一条数据高度*/
+  --nutui-picker-list-height: 180px;
+  --nutui-picker-title-cancel-font-size: 16px;
+}

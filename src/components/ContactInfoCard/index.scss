@@ -1,0 +1,215 @@
+/* components/ContactInfoCard/index.scss */
+.contact-info {
+    /* 关于我们描述样式 */
+    .about-description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #475569;
+      margin-bottom: 20px;
+      text-align: justify;
+      padding: 0 2px;
+    }
+    
+    .info-divider {
+      height: 1px;
+      background-color: rgba(0, 0, 0, 0.06);
+      margin: 10px 0 18px;
+    }
+    
+    .info-cells {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    /* 联系信息单元格样式 */
+    .info-cell {
+      margin-bottom: 0;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.2s;
+      overflow: visible; /* 确保内容不被截断 */
+      
+      &:active {
+        background: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+    }
+    
+    /* 联系信息内容布局 */
+    .info-cell-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* 联系信息图标基础样式 */
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    /* 电话图标样式 */
+    .phone-icon {
+      background-color: rgba(14, 165, 233, 0.12);
+      
+      &::before {
+        content: '';
+        width: 15px;
+        height: 15px;
+        border: 2px solid #0ea5e9;
+        border-radius: 50%;
+        position: absolute;
+        left: 11px;
+        top: 10px;
+      }
+      
+      &::after {
+        content: '';
+        width: 6px;
+        height: 8px;
+        border-bottom: 2px solid #0ea5e9;
+        border-left: 2px solid #0ea5e9;
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        transform: rotate(-45deg);
+      }
+    }
+    
+    /* 微信图标样式 */
+    .wechat-icon {
+      background-color: rgba(16, 185, 129, 0.12);
+      
+      &::before {
+        content: '';
+        width: 20px;
+        height: 18px;
+        border: 2px solid #10b981;
+        border-radius: 4px;
+        position: absolute;
+      }
+    }
+    
+    /* 时间图标样式 */
+    .time-icon {
+      background-color: rgba(168, 85, 247, 0.12);
+      
+      &::before {
+        content: '';
+        width: 18px;
+        height: 18px;
+        border: 2px solid #a855f7;
+        border-radius: 50%;
+        position: absolute;
+      }
+      
+      &::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid #a855f7;
+        border-right: 2px solid #a855f7;
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        transform: rotate(45deg);
+      }
+    }
+    
+    /* 地址图标样式 */
+    .address-icon {
+      background-color: rgba(239, 68, 68, 0.12);
+      
+      &::before {
+        content: '';
+        width: 12px;
+        height: 12px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        position: absolute;
+        top: 10px;
+      }
+      
+      &::after {
+        content: '';
+        width: 0;
+        height: 12px;
+        border-left: 2px solid #ef4444;
+        position: absolute;
+        top: 18px;
+      }
+    }
+    
+    /* 联系信息文本样式 */
+    .info-text {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      width: calc(100% - 55px); /* 确保有足够的宽度，减去图标宽度和间距 */
+      overflow: visible; /* 确保不会被截断 */
+    }
+    
+    .info-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+    
+    .info-value {
+      font-size: 14px;
+      color: #1e293b;
+      font-weight: 500;
+      word-break: break-all; /* 允许在任何字符间断行 */
+      white-space: normal; /* 允许正常换行 */
+      line-height: 1.4;
+      overflow: visible; /* 确保不会被截断 */
+      width: 100%; /* 利用所有可用空间 */
+    }
+    
+    /* 地址特殊处理 */
+    .info-cell-address {
+      .info-cell-content {
+        align-items: flex-start; /* 改为顶部对齐 */
+        padding-bottom: 16px; /* 增加底部间距 */
+      }
+      
+      .info-icon {
+        margin-top: 2px; /* 微调图标位置 */
+      }
+      
+      .info-value {
+        min-height: 40px; /* 确保有足够的高度 */
+        width: 100%; /* 确保文本有足够的宽度 */
+        white-space: pre-wrap; /* 保留空格并换行 */
+        line-height: 1.5; /* 增加行高使多行文本更易读 */
+        padding-right: 4px; /* 右侧留出空间，避免文本靠近边缘 */
+      }
+    }
+    
+    /* 电话和微信的点击提示 */
+    .info-cell-clickable {
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        width: 6px;
+        height: 6px;
+        border-top: 1px solid #94a3b8;
+        border-right: 1px solid #94a3b8;
+        transform: translateY(-50%) rotate(45deg);
+      }
+    }
+  }

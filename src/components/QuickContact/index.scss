@@ -1,0 +1,66 @@
+// src/components/QuickContact/index.scss
+
+// 快速联系 - 修改后的样式（更大更醒目的按钮）
+.quick-contact {
+    display: flex;
+    margin: 15px 15px 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
+    
+    .contact-btn {
+      flex: 1;
+      margin: 0 8px;
+      height: 54px;
+      font-weight: 600;
+      font-size: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      
+      &:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+      }
+      
+      .btn-icon {
+        margin-right: 6px;
+        font-size: 20px;
+      }
+    }
+    
+    .call-btn {
+      background: #1155cc;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(17, 85, 204, 0.3);
+    }
+    
+    .wechat-btn {
+      background: #09BB07;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(9, 187, 7, 0.3);
+      
+      &.disabled {
+        opacity: 0.7;
+        background: #71c371;
+        box-shadow: none;
+      }
+    }
+  }
+  
+  // 响应式适配
+  @media screen and (max-width: 375px) {
+    .quick-contact {
+      padding: 12px;
+      
+      .contact-btn {
+        height: 48px;
+        font-size: 14px;
+      }
+    }
+  }
