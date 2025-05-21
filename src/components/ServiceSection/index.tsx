@@ -1,39 +1,37 @@
-// src/components/ServiceSection/index.tsx
-import { View, Text } from '@tarojs/components'
-import ServiceCarousel from 'src/components/ServiceCardCarousel'
-import { Service } from 'src/services/api/index/indexApi'
+import { View, Text, Swiper, SwiperItem } from '@tarojs/components'
+import { Service } from 'src/services/api/index/types'
 import './index.scss'
 
 interface ServiceSectionProps {
-  services: Service[];
-  title?: string;
+  services: Service[]
 }
 
-const ServiceSection: React.FC<ServiceSectionProps> = ({
-  services,
-  title = '我们的服务'
-}) => {
-  // 处理服务点击 - 空实现
-  const handleServiceClick = (service: Service) => {
-    // 空实现，可由父组件通过props传入具体实现
-    console.log('Service clicked:', service);
-  };
-
+export default function ServiceSection({ services }: ServiceSectionProps) {
   return (
-    <View className='section service-section'>
-      <View className='section-header'>
-        <Text className='section-title'>{title}</Text>
+    <View className='service-section card'>
+      <View className='service-section__header'>
+        <Text className='service-section__title'>我们的服务</Text>
+        <Text className='service-section__subtitle'>专业团队，优质服务</Text>
       </View>
-      <ServiceCarousel 
-        services={services}
-        onServiceClick={handleServiceClick}
-        autoPlay={true}
-        interval={5000}
-        initialIndex={0}
-        className="service-carousel-custom"
-      />
+      
+      <Swiper
+        className='service-section__swiper'
+        indicatorColor='#ddd'
+        indicatorActiveColor='#2563EB'
+        circular
+        indicatorDots
+        autoplay
+        interval={5000} // 增加间隔时间，让用户有更多时间阅读
+      >
+        {services.map(service => (
+          <SwiperItem key={service.id}>
+            <View className='service-item'>
+              <Text className='service-item__title'>{service.title}</Text>
+              <Text className='service-item__description'>{service.description}</Text>
+            </View>
+          </SwiperItem>
+        ))}
+      </Swiper>
     </View>
-  );
-};
-
-export default ServiceSection;
+  )
+}

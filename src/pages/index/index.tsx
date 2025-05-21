@@ -102,7 +102,7 @@ export default function IndexPage() {
   return (
     <View className='page'>
       {/* Banner区域 */}
-      <BannerCarousel banners={indexData.banners} badgeText="10年专业品质" />
+      <BannerCarousel banners={indexData.banners} />
       
       {/* 快速联系 */}
       <QuickContact 

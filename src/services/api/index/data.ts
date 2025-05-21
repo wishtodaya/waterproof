@@ -3,47 +3,31 @@ import { IndexData } from './types';
 
 // 首页模拟数据
 export const indexData: IndexData = {
-  // 服务数据
+  // 服务数据 - 修改为新的四项服务
   services: [
     {
       id: 1,
-      title: '卫生间防水',
-      description: '专业卫生间防水施工，解决渗漏问题',
-      features: ['耐候耐磨', '持久防护', '无缝施工']
+      title: '漏水检测',
+      description: '专业检测技术，精准定位漏水点'
     },
     {
       id: 2,
-      title: '外墙防水',
-      description: '全方位外墙防水，根治渗漏难题',
-      features: ['高空作业', '全面防护', '防紫外线']
+      title: '防水施工',
+      description: '高标准防水工程，杜绝后顾之忧'
     },
     {
       id: 3,
-      title: '地下室防水',
-      description: '专业地下室防水工程，彻底解决渗水问题',
-      features: ['防积水', '耐腐蚀', '抗压防渗']
+      title: '渗漏维修',
+      description: '快速应对各类渗漏问题，及时修复'
     },
     {
       id: 4,
-      title: '屋顶防水',
-      description: '专业屋顶防水维修，杜绝屋顶漏水',
-      features: ['免拆修复', '抗紫外线', '终身质保']
-    },
-    {
-      id: 5,
-      title: '阳台防水',
-      description: '阳台防水翻新，彻底解决渗漏问题',
-      features: ['美观实用', '快速施工', '长期保固']
-    },
-    {
-      id: 6,
-      title: '裂缝补漏',
-      description: '墙体裂缝修复，防止渗水扩散',
-      features: ['精准注浆', '彻底修复', '隐蔽施工']
+      title: '材料销售',
+      description: '优质防水材料，专业技术支持'
     }
   ],
   
-  // 精选案例数据 (Showcase)
+  // 精选案例数据
   showcases: [
     {
       id: '1',
@@ -74,25 +58,25 @@ export const indexData: IndexData = {
     wechat: 'waterproof123'
   },
   
-  // Banner数据
+  // Banner数据 - 修改标题
   banners: [
     {
       id: '1',
-      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
-      title: '专业防水服务',
-      subtitle: '10年专注防水 · 品质保障'
+      imageUrl: 'https://img.picui.cn/free/2025/05/21/682d7803ab8ad.png',
+      title: '郑式修缮',
+      subtitle: '专业修缮 · 品质保障'
     },
     {
       id: '2',
-      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
-      title: '专业防水服务',
-      subtitle: '10年专注防水 · 品质保障'
+      imageUrl: 'https://img.picui.cn/free/2025/05/21/682d7803ab8ad.png',
+      title: '郑式修缮',
+      subtitle: '专业修缮 · 品质保障'
     },
     {
       id: '3',
-      imageUrl: 'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
-      title: '专业防水服务',
-      subtitle: '10年专注防水 · 品质保障'
+      imageUrl: 'https://img.picui.cn/free/2025/05/21/682d7803ab8ad.png',
+      title: '郑式修缮',
+      subtitle: '专业修缮 · 品质保障'
     }
   ]
 };

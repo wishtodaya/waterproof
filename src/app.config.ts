@@ -8,17 +8,17 @@ export default defineAppConfig({
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#FFFFFF', // 保持白色背景
-    navigationBarTitleText: '防水服务',
+    navigationBarBackgroundColor: '#FFFFFF',
+    navigationBarTitleText: '郑式修缮', // 修改导航标题
     navigationBarTextStyle: 'black'
   },
   // 非TabBar页面可以放在分包中
   subPackages: [],
   tabBar: {
-    color: '#757575',         // 更改为主题中的次要文本颜色
-    selectedColor: '#2563EB', // 保持品牌蓝色不变
-    backgroundColor: '#FFFFFF', // 保持白色背景
-    borderStyle: 'white',     // 添加白色边框样式，更现代
+    color: '#757575',
+    selectedColor: '#2563EB',
+    backgroundColor: '#FFFFFF',
+    borderStyle: 'white',
     list: [
       {
         pagePath: 'pages/index/index',
