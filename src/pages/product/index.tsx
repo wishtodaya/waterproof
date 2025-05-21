@@ -5,22 +5,18 @@ import {
   Empty, 
   Toast,
   Popup,
-  InfiniteLoading,
-  Loading
+  InfiniteLoading
 } from '@nutui/nutui-react-taro';
-import PageHeader from 'src/components/PageHeader';
 import ProductCard from 'src/components/ProductCard';
 import ProductDetail from 'src/components/ProductDetail';
-import { getCoatingList, getCoatingDetail, COATING_TYPES, WaterproofCoating } from 'src/services/api/product/coatingApi';
+import { getCoatingList, getCoatingDetail, WaterproofCoating } from 'src/services/api/product/coatingApi';
 import './index.scss';
 
 export default function ProductPage() {
-  // States
+  // 状态管理
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [products, setProducts] = useState<WaterproofCoating[]>([]);
-  const [currentType, setCurrentType] = useState('all');
-  const [keyword, setKeyword] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('fail');
@@ -29,7 +25,7 @@ export default function ProductPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   
-  // Component mount state reference
+  // 组件挂载状态引用
   const isMounted = React.useRef(true);
   
   useEffect(() => {
@@ -38,7 +34,7 @@ export default function ProductPage() {
     };
   }, []);
   
-  // Share message configuration
+  // 分享消息配置
   useShareAppMessage(() => {
     return {
       title: '专业防水产品',
@@ -47,7 +43,7 @@ export default function ProductPage() {
     }
   });
 
-  // Toast message helper
+  // Toast消息帮助函数
   const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'fail') => {
     if (!isMounted.current) return;
     setToastMsg(message);
@@ -55,7 +51,7 @@ export default function ProductPage() {
     setShowToast(true);
   }, []);
 
-  // Fetch products with TypeScript-safe implementation
+  // 获取产品列表
   const fetchProducts = useCallback(async (isRefresh = false) => {
     try {
       const page = isRefresh ? 1 : currentPage;
@@ -67,64 +63,60 @@ export default function ProductPage() {
       }
       
       const response = await getCoatingList({
-        type: currentType,
-        keyword,
         page,
         pageSize: 10
       });
 
       if (!isMounted.current) return;
       
-      // Handle success response
+      // 处理成功响应
       if (response.success) {
-        // Handle case where response.data might be undefined
         const productData = response.data || [];
         
-        // Update state based on refresh flag
+        // 根据刷新标志更新状态
         if (isRefresh) {
           setProducts(productData);
         } else {
-          // Use functional update to ensure we have latest state
           setProducts(prevProducts => [...prevProducts, ...productData]);
         }
         
-        // Update pagination state
+        // 更新分页状态
         setHasMore(response.hasMore || false);
         if (!isRefresh) {
           setCurrentPage(prev => prev + 1);
         } else {
-          setCurrentPage(1);
+          setCurrentPage(2);
         }
       } else {
-        // Handle error in response
+        // 处理错误响应
         showToastMessage(response.error || '获取产品数据失败');
       }
     } catch (error) {
-      // Handle exception
+      // 处理异常
       if (!isMounted.current) return;
       console.error('获取产品数据错误', error);
       showToastMessage('获取产品数据失败，请稍后重试');
     } finally {
-      // Reset loading states
+      // 重置加载状态
       if (!isMounted.current) return;
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [currentType, keyword, currentPage, showToastMessage]);
+  }, [currentPage, showToastMessage]);
 
-  // Effect for filter changes
+  // 挂载和刷新时获取产品
   useEffect(() => {
     fetchProducts(true);
-  }, [currentType, keyword, fetchProducts]);
+  }, [fetchProducts]);
 
-  // Check for data on page show
+  // 页面显示时检查数据
   useDidShow(() => {
     if (products.length === 0 && !loading) {
       fetchProducts(true);
     }
   });
 
-  // Pull-to-refresh handler
+  // 下拉刷新处理
   useEffect(() => {
     const handlePullDownRefresh = async () => {
       await fetchProducts(true);
@@ -137,17 +129,7 @@ export default function ProductPage() {
     };
   }, [fetchProducts]);
 
-  // Search handler
-  const handleSearch = useCallback((value: string) => {
-    setKeyword(value);
-  }, []);
-
-  // Type change handler
-  const handleTypeChange = useCallback((value: string) => {
-    setCurrentType(value);
-  }, []);
-
-  // Product click handler
+  // 产品点击处理
   const handleProductClick = useCallback(async (id: number) => {
     try {
       setLoading(true);
@@ -171,18 +153,21 @@ export default function ProductPage() {
     }
   }, [showToastMessage]);
 
-  // Close detail modal
+  // 关闭详情模态框
   const handleCloseDetail = useCallback(() => {
     setShowDetail(false);
+    setTimeout(() => {
+      setSelectedProduct(null);
+    }, 300);
   }, []);
 
-  // Contact button handler
+  // 联系按钮处理
   const handleContactClick = useCallback(() => {
     handleCloseDetail();
     Taro.switchTab({ url: '/pages/contact/index' });
   }, [handleCloseDetail]);
 
-  // Load more handler
+  // 加载更多处理
   const handleLoadMore = useCallback(() => {
     if (hasMore && !loading && !loadingMore) {
       return fetchProducts(false);
@@ -190,18 +175,17 @@ export default function ProductPage() {
     return Promise.resolve();
   }, [hasMore, loading, loadingMore, fetchProducts]);
 
-  // Skeleton UI - memoized for performance
+  // 骨架屏UI - 使用记忆化优化性能
   const renderSkeletons = useMemo(() => {
     return (
-      <View className="product-page-skeletons">
+      <View className="product-grid__skeletons">
         {[1, 2, 3, 4].map(i => (
           <View key={i} className="product-skeleton">
-            <View className="product-skeleton-image"></View>
-            <View className="product-skeleton-content">
-              <View className="product-skeleton-title"></View>
-              <View className="product-skeleton-tag"></View>
-              <View className="product-skeleton-desc"></View>
-              <View className="product-skeleton-specs"></View>
+            <View className="product-skeleton__image"></View>
+            <View className="product-skeleton__content">
+              <View className="product-skeleton__title"></View>
+              <View className="product-skeleton__title" style={{ width: '80%' }}></View>
+              <View className="product-skeleton__price"></View>
             </View>
           </View>
         ))}
@@ -211,79 +195,61 @@ export default function ProductPage() {
 
   return (
     <View className="product-page">
-      {/* Page header */}
-      <View className="product-page-header">
-        <PageHeader
-          keyword={keyword}
-          onSearch={handleSearch}
-          searchPlaceholder="搜索防水涂料产品"
-          currentType={currentType}
-          onTypeChange={handleTypeChange}
-          tabs={COATING_TYPES}
-        />
-      </View>
-
-      {/* Product list content */}
-      <View className="product-page-content">
+      {/* 产品列表内容 */}
+      <View className="product-page__container">
         {loading && products.length === 0 ? (
           renderSkeletons
         ) : products.length > 0 ? (
           <>
-            <View className="product-list">
+            <View className="product-grid">
               {products.map((product) => (
-                <View key={product.id} className="product-item">
+                <View key={product.id} className="product-grid__item">
                   <ProductCard
                     image={product.images[0]}
                     title={product.title}
                     specifications={product.specifications}
-                    type={product.type}
-                    description={product.description}
                     onClick={() => handleProductClick(product.id)}
                   />
                 </View>
               ))}
             </View>
             
-            {/* Infinite loading */}
-            {loadingMore ? (
-              <View className="loading-more">
-                <Loading />
-                <View className="loading-text">加载中...</View>
-              </View>
-            ) : (
-              <InfiniteLoading
-                hasMore={hasMore}
-                threshold={100}
-                loadingText="加载中..."
-                loadMoreText="已经到底啦"
-                onLoadMore={handleLoadMore}
-              />
-            )}
+            {/* 无限加载 */}
+            <InfiniteLoading
+              hasMore={hasMore}
+              threshold={100}
+              loadingText="加载中..."
+              loadMoreText="已经到底啦"
+              onLoadMore={handleLoadMore}
+            />
           </>
         ) : (
-          <View className="product-page-empty">
+          <View className="product-page__empty">
             <Empty description="暂无相关产品" image="empty" />
           </View>
         )}
       </View>
 
-      {/* Product detail popup */}
+      {/* 产品详情弹窗 */}
       <Popup
         visible={showDetail}
         position="bottom"
         round
-        style={{ height: '85%' }}
+        style={{ height: '92%' }}
         onClose={handleCloseDetail}
-        closeable
+        closeable={false}
       >
-        <ProductDetail 
-          product={selectedProduct}
-          visible={showDetail}
-          onClose={handleCloseDetail}
-        />
+        {selectedProduct && (
+          <ProductDetail 
+            product={selectedProduct}
+            visible={showDetail}
+            onClose={handleCloseDetail}
+            onContactClick={handleContactClick}
+          />
+        )}
       </Popup>
 
-      {/* Toast notifications */}
+      {/* Toast提示 */}
       <Toast
         msg={toastMsg}
         visible={showToast}

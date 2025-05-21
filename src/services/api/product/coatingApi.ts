@@ -1,45 +1,34 @@
-// indexApi.ts - 防水涂料产品API
+// 防水涂料产品API服务
 
-import http from '../../http';
-import { WaterproofCoating, CoatingQueryParams, CoatingApiResponse, CoatingsApiResponse } from './types';
+import { 
+  WaterproofCoating, 
+  CoatingQueryParams, 
+  ApiResponse, 
+  CoatingListResponse, 
+  CoatingDetailResponse 
+} from './types';
 import { mockCoatings, PAGE_SIZE } from './data';
-
-// API端点
-const ENDPOINTS = {
-  GET_COATINGS: '/coatings',
-  GET_COATING_DETAIL: '/coatings/:id',
-};
 
 /**
  * 获取防水涂料产品列表
+ * @param params 查询参数
+ * @returns 产品列表响应
  */
 export const getCoatingList = async ({
-  type,
-  keyword,
   page,
   pageSize = PAGE_SIZE
-}: CoatingQueryParams): Promise<CoatingsApiResponse> => {
+}: CoatingQueryParams): Promise<CoatingListResponse> => {
   try {
-    // 实际API调用代码，待后端准备好后替换
-    // return await http.get(ENDPOINTS.GET_COATINGS, { type, keyword, page, pageSize });
-    
     // 模拟API调用延迟
     await new Promise(resolve => setTimeout(resolve, 600));
     
-    // 过滤模拟数据
-    let filteredData = mockCoatings.filter(item => {
-      if (type !== 'all' && item.type !== type) return false;
-      if (keyword && !item.title.includes(keyword) && !item.description.includes(keyword)) return false;
-      return true;
-    });
-    
-    // 分页
+    // 分页处理
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
+    const paginatedData = mockCoatings.slice(startIndex, endIndex);
     
     // 判断是否还有更多数据
-    const hasMore = endIndex < filteredData.length;
+    const hasMore = endIndex < mockCoatings.length;
     
     return {
       success: true,
@@ -57,13 +46,11 @@ export const getCoatingList = async ({
 
 /**
  * 获取防水涂料产品详情
+ * @param id 产品ID
+ * @returns 产品详情响应
  */
-export const getCoatingDetail = async (id: number): Promise<CoatingApiResponse<WaterproofCoating>> => {
+export const getCoatingDetail = async (id: number): Promise<CoatingDetailResponse> => {
   try {
-    // 实际API调用代码，待后端准备好后替换
-    // const url = ENDPOINTS.GET_COATING_DETAIL.replace(':id', id.toString());
-    // return await http.get(url);
-    
     // 模拟API调用延迟
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -86,17 +73,8 @@ export const getCoatingDetail = async (id: number): Promise<CoatingApiResponse<W
   }
 };
 
-/**
- * 错误处理工具
- */
-export const handleCoatingError = (err: any): string => {
-  console.error(err);
-  return err instanceof Error ? err.message : '发生未知错误';
-};
-
 // 导出常量
 export { PAGE_SIZE } from './data';
-export { COATING_TYPES } from './data';
 
 // 导出类型
 export * from './types';
