@@ -1,11 +1,10 @@
-// src/components/QuickContact/index.tsx
 import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
 interface ContactInfo {
-  phone: string;
+  phone: string[];
   wechat: string;
 }
 
@@ -18,15 +17,17 @@ const QuickContact: React.FC<QuickContactProps> = ({
   contactInfo,
   onShowToast
 }) => {
-  // 微信复制状态
   const [isProcessingWechat, setIsProcessingWechat] = useState(false);
 
-  // 电话咨询
+  // 电话咨询 - 优先拨打第一个号码
   const handleCall = () => {
-    if (!contactInfo?.phone) return;
+    if (!contactInfo?.phone?.length) return;
+    
+    // 如果有多个号码，可以弹出选择框，这里简化为直接拨打第一个
+    const primaryPhone = contactInfo.phone[0];
     
     Taro.makePhoneCall({
-      phoneNumber: contactInfo.phone
+      phoneNumber: primaryPhone
     }).catch(err => {
       if (err.errMsg && !err.errMsg.includes('cancel')) {
         onShowToast?.('拨号失败', 'fail');
@@ -34,7 +35,7 @@ const QuickContact: React.FC<QuickContactProps> = ({
     });
   };
 
-  // 微信咨询 - 使用系统默认提示
+  // 微信咨询
   const handleWechat = () => {
     if (!contactInfo?.wechat || isProcessingWechat) return;
     
@@ -42,8 +43,8 @@ const QuickContact: React.FC<QuickContactProps> = ({
     
     Taro.setClipboardData({
       data: contactInfo.wechat,
-      success: function (res) {
-        // 使用系统默认提示，不添加自定义Toast
+      success: function () {
+        // 使用系统默认提示
       },
       fail: (err) => {
         if (!err.errMsg?.includes('cancel')) {
@@ -53,7 +54,7 @@ const QuickContact: React.FC<QuickContactProps> = ({
       complete: () => {
         setTimeout(() => {
           setIsProcessingWechat(false);
-        }, 1600); // 系统提示1.5秒，稍微多等一点时间
+        }, 1600);
       }
     });
   };

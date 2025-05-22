@@ -1,953 +1,2392 @@
 📁 src
+  📄 app.config.ts
+  📄 app.scss
+  📄 app.ts
   📁 components
-    📁 ProductCard
+    📁 BookingForm
       📄 index.scss
       📄 index.tsx
-    📁 ProductDetail
+    📁 ContactInfoCard
       📄 index.scss
       📄 index.tsx
+    📁 QuickContact
+      📄 index.scss
+      📄 index.tsx
+  📄 index.html
+  📁 packageA
+    📁 pages
   📁 pages
-    📁 product
+    📁 contact
       📄 index.config.ts
       📄 index.scss
       📄 index.tsx
+  📁 services
+    📁 api
+      📁 contact
+        📄 contactApi.ts
+        📄 data.ts
+        📄 types.ts
+    📁 http
+      📄 cache.ts
+      📄 config.ts
+      📄 errorHandler.ts
+      📄 index.ts
+      📄 interceptor.ts
+      📄 request.ts
+      📄 types.ts
+  📁 styles
+    📄 theme.css
 
-===== File: components\ProductCard\index.scss =====
-.product-card {
-  width: 100%;
-  background-color: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  margin-bottom: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  
-  &--active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-  }
-  
-  &__image-wrap {
-    width: 100%;
-    height: 180px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  &__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 0.3s ease;
-  }
-  
-  &__image-loading,
-  &__image-error {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f5f5f5;
-  }
-  
-  &__image-error {
-    color: #999;
-    font-size: 14px;
-  }
-  
-  &__info {
-    padding: 12px 16px 16px;
-    text-align: center;
-  }
-  
-  &__title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    line-height: 1.4;
-    margin-bottom: 12px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  &__price-info {
-    display: inline-flex;
-    align-items: center;
-    margin: 0 auto;
-  }
-  
-  &__price-label {
-    font-size: 13px;
-    color: #666;
-    margin-right: 4px;
-  }
-  
-  &__price-value {
-    font-size: 20px;
-    font-weight: 600;
-    color: #FF6010;
-  }
-}
-===== End of File: components\ProductCard\index.scss =====
-
-
-===== File: components\ProductCard\index.tsx =====
-import React, { useState, memo } from 'react';
-import { View, Text, Image } from '@tarojs/components';
-import { Loading } from '@nutui/nutui-react-taro';
-import './index.scss';
-
-interface ProductCardProps {
-  image: string;
-  title: string;
-  specifications: string;
-  onClick?: () => void;
-}
-
-const ProductCard: React.FC<ProductCardProps> = memo(({
-  image,
-  title,
-  specifications,
-  onClick
-}) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  return (
-    <View 
-      className="product-card" 
-      onClick={onClick} 
-      hoverClass="product-card--active"
-    >
-      <View className="product-card__image-wrap">
-        {!imageLoaded && !imageError && (
-          <View className="product-card__image-loading">
-            <Loading  />
-          </View>
-        )}
-        {imageError && (
-          <View className="product-card__image-error">
-            <Text>加载失败</Text>
-          </View>
-        )}
-        <Image 
-          src={image} 
-          mode="aspectFill" 
-          className="product-card__image"
-          lazyLoad
-          onLoad={() => setImageLoaded(true)}
-          onError={() => setImageError(true)}
-          style={{ opacity: imageLoaded ? 1 : 0 }}
-        />
-      </View>
-      
-      <View className="product-card__info">
-        <Text className="product-card__title">{title}</Text>
-        <View className="product-card__price-info">
-          <Text className="product-card__price-label">全国统一零售价：</Text>
-          <Text className="product-card__price-value">{specifications}</Text>
-        </View>
-      </View>
-    </View>
-  );
-});
-
-export default ProductCard;
-===== End of File: components\ProductCard\index.tsx =====
-
-
-===== File: components\ProductDetail\index.scss =====
-.detail {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background-color: #fff;
-  
-  /* 关闭按钮 */
-  &__close {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    width: 36px;
-    height: 36px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    
-    &-icon {
-      color: #fff;
-      font-size: 20px;
-      line-height: 1;
-    }
-  }
-  
-  /* 滚动区域 */
-  &__scroll {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 80px; /* 为底部按钮留出空间 */
-  }
-  
-  /* 图片轮播区域 */
-  &__gallery {
-    position: relative;
-    width: 100%;
-    height: 280px;
-    background-color: #f5f5f5;
-    
-    &-scroll {
-      height: 100%;
-      width: 100%;
-      white-space: nowrap;
-      
-      &::-webkit-scrollbar {
-        display: none;
+===== File: app.config.ts =====
+export default defineAppConfig({
+  // 将所有TabBar页面放在主包中
+  pages: [
+    'pages/index/index',
+    'pages/product/index',
+    'pages/cases/index',
+    'pages/contact/index'
+  ],
+  window: {
+    backgroundTextStyle: 'light',
+    navigationBarBackgroundColor: '#FFFFFF',
+    navigationBarTitleText: '郑式修缮', // 修改导航标题
+    navigationBarTextStyle: 'black'
+  },
+  // 非TabBar页面可以放在分包中
+  subPackages: [],
+  tabBar: {
+    color: '#757575',
+    selectedColor: '#2563EB',
+    backgroundColor: '#FFFFFF',
+    borderStyle: 'white',
+    list: [
+      {
+        pagePath: 'pages/index/index',
+        text: '首页',
+        iconPath: 'assets/tab-bar/home.png',
+        selectedIconPath: 'assets/tab-bar/home-active.png'
+      },
+      {
+        pagePath: 'pages/product/index',
+        text: '产品',
+        iconPath: 'assets/tab-bar/service.png',
+        selectedIconPath: 'assets/tab-bar/service-active.png'
+      },
+      {
+        pagePath: 'pages/cases/index',
+        text: '案例',
+        iconPath: 'assets/tab-bar/case.png',
+        selectedIconPath: 'assets/tab-bar/case-active.png'
+      },
+      {
+        pagePath: 'pages/contact/index',
+        text: '联系我们',
+        iconPath: 'assets/tab-bar/contact.png',
+        selectedIconPath: 'assets/tab-bar/contact-active.png'
       }
-    }
+    ]
+  },
+  lazyCodeLoading: "requiredComponents"
+})
+===== End of File: app.config.ts =====
+
+
+===== File: app.scss =====
+/* app.scss - 适用于 Taro + NutUI React 多端项目 */
+
+/* 全局基础样式 */
+page {
+    height: 100%;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--nutui-gray-7);
+    background-color: var(--nutui-gray-3);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  
+  /* 容器布局 */
+  .container {
+    padding: 10px;
+  }
+  
+  /* 弹性布局工具 */
+  .flex {
+    display: flex;
     
-    &-item {
-      display: inline-block;
-      width: 100%;
-      height: 100%;
-    }
-    
-    &-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    /* 指示器 */
-    &-indicators {
-      position: absolute;
-      bottom: 16px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: center;
+    &-center {
       align-items: center;
-      z-index: 2;
+      justify-content: center;
     }
     
-    &-indicator {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.6);
-      margin: 0 4px;
-      transition: all 0.3s ease;
-      
-      &--active {
-        width: 18px;
-        border-radius: 3px;
-        background-color: #fff;
-      }
-    }
-  }
-  
-  /* 产品信息 */
-  &__info {
-    padding: 16px 20px;
-    text-align: center;
-  }
-  
-  /* 产品标题 */
-  &__title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #333;
-    line-height: 1.4;
-    margin-bottom: 16px;
-    display: block;
-  }
-  
-  /* 价格信息 */
-  &__price-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    text-align: left;
-  }
-  
-  &__price-label {
-    font-size: 15px;
-    color: #666;
-    margin-right: 10px;
-    width: 60px;
-  }
-  
-  &__price-value {
-    font-size: 15px;
-    color: #333;
-    flex: 1;
-    font-weight: 500;
-  }
-  
-  /* 规格信息 */
-  &__specs {
-    text-align: left;
-    padding-bottom: 16px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  &__spec-item {
-    display: flex;
-    align-items: center;
-  }
-  
-  &__spec-label {
-    font-size: 15px;
-    color: #666;
-    margin-right: 10px;
-    width: 60px;
-  }
-  
-  &__spec-value {
-    font-size: 15px;
-    color: #333;
-    flex: 1;
-    font-weight: 500;
-  }
-  
-  /* 内容区块 */
-  &__section {
-    text-align: left;
-    margin-bottom: 22px;
-    
-    &-header {
-      margin-bottom: 12px;
+    &-between {
+      align-items: center;
+      justify-content: space-between;
     }
     
-    &-title {
-      font-size: 17px;
-      font-weight: 600;
-      color: #333;
-      position: relative;
-      padding-left: 12px;
-      display: block;
-      
-      &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 4px;
-        height: 17px;
-        background-color: #2563EB; /* 原始的蓝色 */
-        border-radius: 2px;
-      }
-    }
-    
-    &-content {
-      font-size: 15px;
-      line-height: 1.7;
-      color: #555;
-      display: block;
+    &-column {
+      flex-direction: column;
     }
   }
   
-  /* 底部固定操作栏 */
-  &__footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  /* 间距辅助类 - 精简版 */
+  .mt-10 { margin-top: 10px; }
+  .mr-10 { margin-right: 10px; }
+  .mb-10 { margin-bottom: 10px; }
+  .ml-10 { margin-left: 10px; }
+  .pt-10 { padding-top: 10px; }
+  .pr-10 { padding-right: 10px; }
+  .pb-10 { padding-bottom: 10px; }
+  .pl-10 { padding-left: 10px; }
+  
+  /* 常用文本样式 */
+  .text-primary { color: var(--nutui-color-primary); }
+  .text-center { text-align: center; }
+  .text-bold { font-weight: bold; }
+  
+  /* 卡片组件 */
+  .card {
     background-color: #fff;
-    padding: 16px 20px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    z-index: 5;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
-  &__contact-btn {
-    height: 48px;
+  /* 1px 边框解决方案 */
+  .hairline-bottom {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background-color: var(--nutui-gray-4);
+      transform: scaleY(0.5);
+    }
+  }
+  
+  /* 安全区适配 */
+  .safe-bottom {
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+===== End of File: app.scss =====
+
+
+===== File: app.ts =====
+import  { useEffect } from 'react'
+import { useDidShow, useDidHide } from '@tarojs/taro'
+
+// 全局样式
+import './styles/theme.css'
+import './app.scss'
+
+function App(props) {
+  // 可以使用所有的 React Hooks
+  useEffect(() => {})
+
+  // 对应 onShow
+  useDidShow(() => {})
+
+  // 对应 onHide
+  useDidHide(() => {})
+
+  return props.children
+}
+
+export default App
+===== End of File: app.ts =====
+
+
+===== File: components\BookingForm\index.scss =====
+/* 预约表单样式 */
+.booking-form {
+  position: relative;
+  padding: 0 4px;
+  
+  /* ===== 基础表单项样式 ===== */
+  .form-item {
+    margin-bottom: 20px;
+  }
+  
+  /* 表单标签 */
+  .form-item-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 8px;
+    
+    /* 必填项标记 */
+    &.required::before {
+      content: '*';
+      color: #ef4444;
+      font-size: 16px;
+      margin-right: 4px;
+    }
+  }
+  
+  /* 错误提示 */
+  .form-error-tip {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 4px;
+    padding-left: 16px;
+    position: relative;
+    
+    &::before {
+      content: "!";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+    }
+  }
+  
+  /* ===== 表单控件通用样式 ===== */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #dce0e4;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1e293b;
+    box-sizing: border-box;
+    margin-top: 8px;
+    transition: border-color 0.2s ease;
+    
+    &:focus, 
+    &:active {
+      border-color: #3b82f6;
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+  
+  /* 输入框 */
+  .form-input {
+    display: block;
+    height: 44px;
+    padding: 0 14px;
+  }
+  
+  /* 选择器 */
+  .form-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 14px;
+    position: relative;
+    
+    .select-placeholder {
+      color: #9ca3af;
+    }
+    
+    .select-value {
+      color: #1e293b;
+    }
+    
+    /* 箭头图标 */
+    .select-arrow {
+      width: 8px;
+      height: 8px;
+      border-top: 2px solid #94a3b8;
+      border-right: 2px solid #94a3b8;
+      transform: rotate(45deg);
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+  }
+  
+  /* 文本域 */
+  .form-textarea {
+    display: block;
+    min-height: 100px;
+    padding: 12px 14px;
+    resize: none;
+  }
+  
+  /* ===== 提交按钮 ===== */
+  .submit-container {
+    margin-top: 24px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .submit-button {
+    display: block;
+    width: 100%;
+    height: 46px;
     font-size: 16px;
     font-weight: 500;
+    color: #ffffff;
+    background: #2563EB;
     border-radius: 8px;
-    background: #2563EB; /* 原始的蓝色 */
     border: none;
+    outline: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    
+    &:active {
+      opacity: 0.9;
+    }
+    
+    &.loading {
+      opacity: 0.8;
+    }
   }
 }
-===== End of File: components\ProductDetail\index.scss =====
+===== End of File: components\BookingForm\index.scss =====
 
 
-===== File: components\ProductDetail\index.tsx =====
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, ScrollView } from '@tarojs/components';
-import { Button } from '@nutui/nutui-react-taro';
-import { WaterproofCoating } from 'src/services/api/product/types';
-import './index.scss';
+===== File: components\BookingForm\index.tsx =====
+import { useState} from 'react'
+import { View, Text, Picker as TaroPicker, Input, Textarea, Button } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { Toast, Picker } from '@nutui/nutui-react-taro'
+import './index.scss'
 
-interface ProductDetailProps {
-  product: WaterproofCoating;
-  visible: boolean;
-  onClose: () => void;
-  onContactClick?: () => void;
+export interface BookingFormData {
+  name: string;
+  phone: string;
+  serviceType: string;
+  serviceTypeName: string;
+  region: string[];
+  address: string;
+  remark: string;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ 
-  product, 
-  visible, 
-  onClose,
-  onContactClick
+interface BookingFormProps {
+  serviceTypes: { text: string; value: string }[];
+  loading: boolean;
+  initialValues?: Partial<BookingFormData>;
+  onSubmit: (data: BookingFormData) => void;
+  onServiceTypeSelect: (type: string) => void;
+}
+
+const BookingForm: React.FC<BookingFormProps> = ({ 
+  serviceTypes, 
+  loading,
+  initialValues = {},
+  onSubmit, 
+  onServiceTypeSelect
 }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // 表单状态
+  const [formData, setFormData] = useState<Partial<BookingFormData>>(initialValues);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showToast, setShowToast] = useState(false);
+  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
   
-  useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [product?.id]);
+  // Picker状态
+  const [showServicePicker, setShowServicePicker] = useState(false);
   
-  const handleContactClick = () => {
-    if (onContactClick) {
-      onContactClick();
+  // 直接使用serviceTypes，不做映射转换
+  const pickerServiceOptions = [serviceTypes];
+  
+  // 显示提示消息
+  const showMessage = (content, icon = 'success') => {
+    setToastInfo({ content, icon });
+    setShowToast(true);
+  };
+  
+  // 更新表单字段
+  const updateField = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // 清除错误
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   };
   
-  if (!visible || !product) return null;
+  // 处理服务类型确认
+  const handleServiceConfirm = (selectedOptions) => {
+    if (selectedOptions && selectedOptions[0]) {
+      updateField('serviceType', selectedOptions[0].value);
+      updateField('serviceTypeName', selectedOptions[0].text);
+      onServiceTypeSelect(selectedOptions[0].value);
+      
+      // 添加震动反馈
+      Taro.vibrateShort();
+    }
+  };
+  
+  // 处理地区选择
+  const handleRegionChange = (e) => {
+    updateField('region', e.detail.value);
+  };
+  
+  // 表单验证
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // 验证姓名
+    if (!formData.name || formData.name.trim().length < 2) {
+      newErrors.name = '请输入联系人姓名(至少2个字符)';
+    }
+    
+    // 验证手机号
+    if (!formData.phone || !/^1[3-9]\d{9}$/.test(formData.phone)) {
+      newErrors.phone = '请输入正确的手机号';
+    }
+    
+    // 验证服务类型
+    if (!formData.serviceType) {
+      newErrors.serviceType = '请选择服务类型';
+    }
+    
+    // 验证所在地区
+    if (!formData.region || !formData.region.length) {
+      newErrors.region = '请选择所在地区';
+    }
+    
+    // 验证详细地址
+    if (!formData.address || formData.address.trim().length < 5) {
+      newErrors.address = '请输入详细地址(至少5个字符)';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  // 提交表单
+  const handleSubmit = () => {
+    if (validateForm()) {
+      // 添加震动反馈
+      Taro.vibrateShort();
+      onSubmit(formData as BookingFormData);
+    } else {
+      // 提交失败震动
+      Taro.vibrateShort();
+      showMessage('请完善必填信息', 'fail');
+    }
+  };
+  
+  // 根据表单值获取显示文本
+  const getServiceTypeText = () => {
+    if (formData.serviceType) {
+      const selectedType = serviceTypes.find(item => item.value === formData.serviceType);
+      return selectedType?.text || '请选择服务类型';
+    }
+    return '请选择服务类型';
+  };
+  
+  const getRegionText = () => {
+    if (formData.region && formData.region.length > 0) {
+      return formData.region.join(' ');
+    }
+    return '请选择所在地区';
+  };
   
   return (
-    <View className="detail">
-      {/* 关闭按钮 */}
-      <View className="detail__close" onClick={onClose}>
-        <Text className="detail__close-icon">×</Text>
+    <View className="booking-form">
+      {/* 联系人姓名 */}
+      <View className="form-item">
+        <Text className="form-item-label required">联系人姓名</Text>
+        <Input 
+          className="form-input"
+          placeholder="请输入姓名"
+          value={formData.name}
+          onInput={e => updateField('name', e.detail.value)}
+        />
+        {errors.name && <Text className="form-error-tip">{errors.name}</Text>}
       </View>
       
-      <ScrollView 
-        scrollY 
-        className="detail__scroll"
-        enhanced
-        showScrollbar={false}
-      >
-        {/* 图片轮播区域 */}
-        <View className="detail__gallery">
-          <ScrollView 
-            scrollX 
-            className="detail__gallery-scroll"
-            scrollWithAnimation
-            onScroll={(e) => {
-              if (product.images.length > 1) {
-                const { scrollLeft, scrollWidth } = e.detail;
-                const itemWidth = scrollWidth / product.images.length;
-                const index = Math.round(scrollLeft / itemWidth);
-                if (index !== currentImageIndex && index >= 0 && index < product.images.length) {
-                  setCurrentImageIndex(index);
-                }
-              }
-            }}
-          >
-            {product.images.map((image, index) => (
-              <View 
-                key={`img-${index}`}
-                className="detail__gallery-item"
-              >
-                <Image 
-                  src={image} 
-                  className="detail__gallery-image" 
-                  mode="aspectFill"
-                  lazyLoad
-                />
-              </View>
-            ))}
-          </ScrollView>
-          
-          {/* 图片指示器 */}
-          {product.images.length > 1 && (
-            <View className="detail__gallery-indicators">
-              {product.images.map((_, index) => (
-                <View 
-                  key={`indicator-${index}`}
-                  className={`detail__gallery-indicator ${
-                    currentImageIndex === index ? 'detail__gallery-indicator--active' : ''
-                  }`}
-                />
-              ))}
-            </View>
-          )}
-        </View>
-        
-        {/* 产品信息 */}
-        <View className="detail__info">
-          {/* 产品标题 */}
-          <Text className="detail__title">{product.title}</Text>
-          
-          {/* 价格信息 */}
-          <View className="detail__price-info">
-            <Text className="detail__price-label">全国统一零售价：</Text>
-            <Text className="detail__price-value">{product.specifications}</Text>
-          </View>
-          
-          {/* 规格信息 */}
-          <View className="detail__specs">
-            <View className="detail__spec-item">
-              <Text className="detail__spec-label">规格:</Text>
-              <Text className="detail__spec-value">{product.type}</Text>
-            </View>
-          </View>
-          
-          {/* 产品简介 */}
-          <View className="detail__section">
-            <View className="detail__section-header">
-              <Text className="detail__section-title">产品简介</Text>
-            </View>
-            <Text className="detail__section-content">{product.description}</Text>
-          </View>
-          
-          {/* 适用范围 */}
-          <View className="detail__section">
-            <View className="detail__section-header">
-              <Text className="detail__section-title">适用范围</Text>
-            </View>
-            <Text className="detail__section-content">{product.content}</Text>
-          </View>
-        </View>
-      </ScrollView>
+      {/* 联系电话 */}
+      <View className="form-item">
+        <Text className="form-item-label required">联系电话</Text>
+        <Input
+          className="form-input"
+          placeholder="请输入手机号码"
+          type="number"
+          value={formData.phone}
+          onInput={e => updateField('phone', e.detail.value)}
+        />
+        {errors.phone && <Text className="form-error-tip">{errors.phone}</Text>}
+      </View>
       
-      {/* 固定在底部的咨询按钮 */}
-      <View className="detail__footer">
-        <Button 
-          type="primary" 
-          block
-          className="detail__contact-btn"
-          onClick={handleContactClick}
+      {/* 服务类型 */}
+      <View className="form-item">
+        <Text className="form-item-label required">服务类型</Text>
+        <View 
+          className="form-select"
+          onClick={() => setShowServicePicker(true)}
         >
-          咨询此产品
+          <Text className={formData.serviceType ? 'select-value' : 'select-placeholder'}>
+            {getServiceTypeText()}
+          </Text>
+          <View className="select-arrow" />
+        </View>
+        {errors.serviceType && <Text className="form-error-tip">{errors.serviceType}</Text>}
+      </View>
+      
+      {/* 所在地区 */}
+      <View className="form-item">
+        <Text className="form-item-label required">所在地区</Text>
+        <TaroPicker
+          mode="region"
+          onChange={handleRegionChange}
+        >
+          <View className="form-select">
+            <Text className={formData.region?.length ? 'select-value' : 'select-placeholder'}>
+              {getRegionText()}
+            </Text>
+            <View className="select-arrow" />
+          </View>
+        </TaroPicker>
+        {errors.region && <Text className="form-error-tip">{errors.region}</Text>}
+      </View>
+      
+      {/* 详细地址 */}
+      <View className="form-item">
+        <Text className="form-item-label required">详细地址</Text>
+        <Input
+          className="form-input"
+          placeholder="请输入详细地址"
+          value={formData.address}
+          onInput={e => updateField('address', e.detail.value)}
+        />
+        {errors.address && <Text className="form-error-tip">{errors.address}</Text>}
+      </View>
+      
+      {/* 补充说明 */}
+      <View className="form-item">
+        <Text className="form-item-label">补充说明</Text>
+        <Textarea
+          className="form-textarea"
+          placeholder="请输入您的具体需求或其他说明（选填）"
+          maxlength={200}
+          value={formData.remark}
+          onInput={e => updateField('remark', e.detail.value)}
+        />
+      </View>
+      
+      {/* 提交按钮 */}
+      <View className="submit-container">
+        <Button
+          className={`submit-button ${loading ? 'loading' : ''}`}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? '提交中...' : '立即预约'}
         </Button>
+      </View>
+      
+      {/* NutUI Picker 服务类型选择器 */}
+      <Picker
+        title="选择服务类型"
+        visible={showServicePicker}
+        options={pickerServiceOptions}
+        defaultValue={formData.serviceType ? [formData.serviceType] : []}
+        onClose={() => setShowServicePicker(false)}
+        onConfirm={handleServiceConfirm}
+      />
+      
+      {/* 提示信息 */}
+      <Toast
+        visible={showToast}
+        content={toastInfo.content}
+        icon={toastInfo.icon}
+        onClose={() => setShowToast(false)}
+      />
+    </View>
+  );
+};
+
+export default BookingForm;
+===== End of File: components\BookingForm\index.tsx =====
+
+
+===== File: components\ContactInfoCard\index.scss =====
+/* components/ContactInfoCard/index.scss */
+.contact-info {
+    /* 关于我们描述样式 */
+    .about-description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #475569;
+      margin-bottom: 20px;
+      text-align: justify;
+      padding: 0 2px;
+    }
+    
+    .info-divider {
+      height: 1px;
+      background-color: rgba(0, 0, 0, 0.06);
+      margin: 10px 0 18px;
+    }
+    
+    .info-cells {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    /* 联系信息单元格样式 */
+    .info-cell {
+      margin-bottom: 0;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.2s;
+      overflow: visible; /* 确保内容不被截断 */
+      
+      &:active {
+        background: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+    }
+    
+    /* 联系信息内容布局 */
+    .info-cell-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* 联系信息图标基础样式 */
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    /* 电话图标样式 */
+    .phone-icon {
+      background-color: rgba(14, 165, 233, 0.12);
+      
+      &::before {
+        content: '';
+        width: 15px;
+        height: 15px;
+        border: 2px solid #0ea5e9;
+        border-radius: 50%;
+        position: absolute;
+        left: 11px;
+        top: 10px;
+      }
+      
+      &::after {
+        content: '';
+        width: 6px;
+        height: 8px;
+        border-bottom: 2px solid #0ea5e9;
+        border-left: 2px solid #0ea5e9;
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        transform: rotate(-45deg);
+      }
+    }
+    
+    /* 微信图标样式 */
+    .wechat-icon {
+      background-color: rgba(16, 185, 129, 0.12);
+      
+      &::before {
+        content: '';
+        width: 20px;
+        height: 18px;
+        border: 2px solid #10b981;
+        border-radius: 4px;
+        position: absolute;
+      }
+    }
+    
+    /* 时间图标样式 */
+    .time-icon {
+      background-color: rgba(168, 85, 247, 0.12);
+      
+      &::before {
+        content: '';
+        width: 18px;
+        height: 18px;
+        border: 2px solid #a855f7;
+        border-radius: 50%;
+        position: absolute;
+      }
+      
+      &::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-top: 2px solid #a855f7;
+        border-right: 2px solid #a855f7;
+        position: absolute;
+        left: 15px;
+        top: 12px;
+        transform: rotate(45deg);
+      }
+    }
+    
+    /* 地址图标样式 */
+    .address-icon {
+      background-color: rgba(239, 68, 68, 0.12);
+      
+      &::before {
+        content: '';
+        width: 12px;
+        height: 12px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        position: absolute;
+        top: 10px;
+      }
+      
+      &::after {
+        content: '';
+        width: 0;
+        height: 12px;
+        border-left: 2px solid #ef4444;
+        position: absolute;
+        top: 18px;
+      }
+    }
+    
+    /* 联系信息文本样式 */
+    .info-text {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      width: calc(100% - 55px); /* 确保有足够的宽度，减去图标宽度和间距 */
+      overflow: visible; /* 确保不会被截断 */
+    }
+    
+    .info-label {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+    
+    .info-value {
+      font-size: 14px;
+      color: #1e293b;
+      font-weight: 500;
+      word-break: break-all; /* 允许在任何字符间断行 */
+      white-space: normal; /* 允许正常换行 */
+      line-height: 1.4;
+      overflow: visible; /* 确保不会被截断 */
+      width: 100%; /* 利用所有可用空间 */
+    }
+    
+    /* 地址特殊处理 */
+    .info-cell-address {
+      .info-cell-content {
+        align-items: flex-start; /* 改为顶部对齐 */
+        padding-bottom: 16px; /* 增加底部间距 */
+      }
+      
+      .info-icon {
+        margin-top: 2px; /* 微调图标位置 */
+      }
+      
+      .info-value {
+        min-height: 40px; /* 确保有足够的高度 */
+        width: 100%; /* 确保文本有足够的宽度 */
+        white-space: pre-wrap; /* 保留空格并换行 */
+        line-height: 1.5; /* 增加行高使多行文本更易读 */
+        padding-right: 4px; /* 右侧留出空间，避免文本靠近边缘 */
+      }
+    }
+    
+    /* 电话和微信的点击提示 */
+    .info-cell-clickable {
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        width: 6px;
+        height: 6px;
+        border-top: 1px solid #94a3b8;
+        border-right: 1px solid #94a3b8;
+        transform: translateY(-50%) rotate(45deg);
+      }
+    }
+  }
+===== End of File: components\ContactInfoCard\index.scss =====
+
+
+===== File: components\ContactInfoCard\index.tsx =====
+// components/ContactInfoCard/index.tsx
+import { useState } from 'react'
+import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { Toast } from '@nutui/nutui-react-taro'
+// 直接导入类型
+import { ContactData } from 'src/services/api/contact/types'
+import './index.scss'
+
+interface ContactInfoCardProps {
+  data: ContactData;
+  onCopyWechat?: () => void;
+  onPhoneCall?: () => void;
+}
+
+const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ 
+  data,
+  onCopyWechat,
+  onPhoneCall
+}) => {
+  const [showToast, setShowToast] = useState(false);
+  const [toastContent, setToastContent] = useState('');
+  const [toastIcon, setToastIcon] = useState<'success' | 'fail' | 'loading'>('success');
+  
+  // 显示提示消息
+  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
+    setToastContent(content);
+    setToastIcon(icon);
+    setShowToast(true);
+  };
+  
+  // 拨打电话
+  const makePhoneCall = () => {
+    // 添加震动反馈
+    Taro.vibrateShort({ type: 'medium' });
+    
+    if (onPhoneCall) {
+      onPhoneCall();
+    } else {
+      Taro.makePhoneCall({
+        phoneNumber: data.phone,
+        fail: () => {
+          showMessage('拨打电话失败，请重试', 'fail');
+        }
+      });
+    }
+  };
+  
+  // 复制微信号
+  const copyWechat = () => {
+    // 添加震动反馈
+    Taro.vibrateShort({ type: 'medium' });
+    
+    if (onCopyWechat) {
+      onCopyWechat();
+    } else {
+      Taro.setClipboardData({
+        data: data.wechat,
+        success: () => {
+          showMessage('微信号已复制，快去添加吧');
+        },
+        fail: () => {
+          showMessage('复制失败，请重试', 'fail');
+        }
+      });
+    }
+  };
+  
+  // 渲染联系信息单元格
+  const renderInfoCell = (type: 'phone' | 'wechat' | 'time' | 'address', label: string, value: string, onClick?: () => void) => {
+    const isAddress = type === 'address';
+    const isClickable = Boolean(onClick);
+    
+    return (
+      <View 
+        className={`info-cell ${isAddress ? 'info-cell-address' : ''} ${isClickable ? 'info-cell-clickable' : ''}`} 
+        onClick={onClick}
+      >
+        <View className="info-cell-content">
+          <View className={`info-icon ${type}-icon`}></View>
+          <View className="info-text">
+            <Text className="info-label">{label}</Text>
+            <Text className="info-value">{value}</Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+  
+  return (
+    <View className="contact-info">
+      <View className="about-description">
+        <Text>{data.description}</Text>
+      </View>
+      
+      <View className="info-divider"></View>
+      
+      <View className="info-cells">
+        {renderInfoCell('phone', '电话咨询', data.phone, makePhoneCall)}
+        {renderInfoCell('wechat', '微信咨询', data.wechat, copyWechat)}
+        {renderInfoCell('time', '营业时间', data.businessHours)}
+        {renderInfoCell('address', '公司地址', data.address)}
+      </View>
+      
+      {/* 提示信息 */}
+      <Toast
+        visible={showToast}
+        content={toastContent}
+        icon={toastIcon}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+      />
+    </View>
+  );
+};
+
+export default ContactInfoCard;
+===== End of File: components\ContactInfoCard\index.tsx =====
+
+
+===== File: components\QuickContact\index.scss =====
+// src/components/QuickContact/index.scss
+
+// 快速联系 - 修改后的样式（更大更醒目的按钮）
+.quick-contact {
+    display: flex;
+    margin: 15px 15px 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
+    
+    .contact-btn {
+      flex: 1;
+      margin: 0 8px;
+      height: 54px;
+      font-weight: 600;
+      font-size: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      
+      &:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+      }
+      
+      .btn-icon {
+        margin-right: 6px;
+        font-size: 20px;
+      }
+    }
+    
+    .call-btn {
+      background: #1155cc;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(17, 85, 204, 0.3);
+    }
+    
+    .wechat-btn {
+      background: #09BB07;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(9, 187, 7, 0.3);
+      
+      &.disabled {
+        opacity: 0.7;
+        background: #71c371;
+        box-shadow: none;
+      }
+    }
+  }
+  
+  // 响应式适配
+  @media screen and (max-width: 375px) {
+    .quick-contact {
+      padding: 12px;
+      
+      .contact-btn {
+        height: 48px;
+        font-size: 14px;
+      }
+    }
+  }
+===== End of File: components\QuickContact\index.scss =====
+
+
+===== File: components\QuickContact\index.tsx =====
+// src/components/QuickContact/index.tsx
+import { useState } from 'react'
+import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import './index.scss'
+
+interface ContactInfo {
+  phone: string;
+  wechat: string;
+}
+
+interface QuickContactProps {
+  contactInfo: ContactInfo;
+  onShowToast?: (message: string, type: 'success' | 'fail' | 'warn') => void;
+}
+
+const QuickContact: React.FC<QuickContactProps> = ({ 
+  contactInfo,
+  onShowToast
+}) => {
+  // 微信复制状态
+  const [isProcessingWechat, setIsProcessingWechat] = useState(false);
+
+  // 电话咨询
+  const handleCall = () => {
+    if (!contactInfo?.phone) return;
+    
+    Taro.makePhoneCall({
+      phoneNumber: contactInfo.phone
+    }).catch(err => {
+      if (err.errMsg && !err.errMsg.includes('cancel')) {
+        onShowToast?.('拨号失败', 'fail');
+      }
+    });
+  };
+
+  // 微信咨询 - 使用系统默认提示
+  const handleWechat = () => {
+    if (!contactInfo?.wechat || isProcessingWechat) return;
+    
+    setIsProcessingWechat(true);
+    
+    Taro.setClipboardData({
+      data: contactInfo.wechat,
+      success: function (res) {
+        // 使用系统默认提示，不添加自定义Toast
+      },
+      fail: (err) => {
+        if (!err.errMsg?.includes('cancel')) {
+          onShowToast?.('复制失败', 'fail');
+        }
+      },
+      complete: () => {
+        setTimeout(() => {
+          setIsProcessingWechat(false);
+        }, 1600); // 系统提示1.5秒，稍微多等一点时间
+      }
+    });
+  };
+
+  return (
+    <View className='quick-contact'>
+      <View 
+        className='contact-btn call-btn'
+        onClick={handleCall}
+      >
+        <Text className='btn-icon'>📞</Text> 电话咨询
+      </View>
+      <View 
+        className={`contact-btn wechat-btn ${isProcessingWechat ? 'disabled' : ''}`}
+        onClick={(e) => {
+          if (isProcessingWechat) return;
+          e?.stopPropagation && e.stopPropagation();
+          handleWechat();
+        }}
+      >
+        <Text className='btn-icon'>💬</Text> 微信咨询
       </View>
     </View>
   );
 };
 
-export default ProductDetail;
-===== End of File: components\ProductDetail\index.tsx =====
+export default QuickContact;
+===== End of File: components\QuickContact\index.tsx =====
 
 
-===== File: pages\product\index.config.ts =====
+===== File: index.html =====
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <meta content="width=device-width,initial-scale=1,user-scalable=no" name="viewport">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <meta name="format-detection" content="telephone=no,address=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="white">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" >
+  <title>waterproof</title>
+  <script><%= htmlWebpackPlugin.options.script %></script>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
+===== End of File: index.html =====
+
+
+===== File: pages\contact\index.config.ts =====
 export default definePageConfig({
-  navigationBarTitleText: '产品'
-})
-===== End of File: pages\product\index.config.ts =====
+    navigationBarTitleText: '联系我们'
+  })
+===== End of File: pages\contact\index.config.ts =====
 
 
-===== File: pages\product\index.scss =====
-.product-page {
+===== File: pages\contact\index.scss =====
+// pages/contact/index.scss
+// 页面整体样式优化
+.contact-page {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 16px 12px;
+  box-sizing: border-box;
+}
+
+// 加载容器优化
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
   
-  &__container {
-    padding: 16px;
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-top: calc(env(safe-area-inset-top) + 10px);
-  }
-  
-  /* 产品列表 */
-  .product-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-    
-    &__item {
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.4s ease forwards;
-      
-      @for $i from 1 through 10 {
-        &:nth-child(#{$i}) {
-          animation-delay: #{$i * 0.08}s;
-        }
-      }
-    }
-    
-    /* 骨架屏 */
-    &__skeletons {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-  }
-  
-  /* 产品骨架屏 */
-  .product-skeleton {
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-    
-    &__image {
-      width: 100%;
-      height: 200px;
-      background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-    }
-    
-    &__content {
-      padding: 12px 16px 16px;
-    }
-    
-    &__title {
-      height: 16px;
-      width: 90%;
-      margin-bottom: 6px;
-      background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 4px;
-    }
-    
-    &__title:nth-child(2) {
-      width: 70%;
-      margin-bottom: 14px;
-    }
-    
-    &__price {
-      height: 36px;
-      width: 100%;
-      background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 6px;
-    }
-  }
-  
-  /* 空状态 */
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
-    margin-top: 10%;
-  }
-  
-  /* 动画效果 */
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes shimmer {
-    0% {
-      background-position: 100% 0;
-    }
-    100% {
-      background-position: -100% 0;
-    }
+  .loading-text {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #64748b;
   }
 }
 
-/* 响应式布局 */
+// 内容容器优化
+.contact-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// 卡片通用样式优化
+.contact-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: visible; /* 确保内容不被截断 */
+  margin-bottom: 16px;
+  
+  // 预约卡片特殊样式优化
+  &.booking-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(203, 213, 225, 0.5);
+  }
+  
+  // 关于我们卡片特殊样式优化
+  &.about-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+    border: 1px solid rgba(186, 230, 253, 0.5);
+  }
+}
+
+// 卡片头部样式优化
+.card-header {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.card-subtitle {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+}
+
+// 卡片内容区域优化
+.card-content {
+  padding: 16px;
+  overflow: visible; /* 确保内容不被截断 */
+}
+
+// 响应式样式优化
 @media screen and (min-width: 768px) {
-  .product-page {
-    .product-grid, 
-    .product-grid__skeletons {
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 1080px;
-      margin: 0 auto 20px;
-    }
+  .contact-page {
+    padding: 24px;
+  }
+  
+  .contact-container {
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: 20px;
+  }
+  
+  .contact-card {
+    margin-bottom: 0;
+    height: fit-content;
+  }
+  
+  .about-card {
+    position: sticky;
+    top: 24px;
   }
 }
 
-/* 安全区适配 */
-@supports (padding-top: constant(safe-area-inset-top)) {
-  .product-page__container {
-    padding-top: calc(16px + constant(safe-area-inset-top));
-    padding-bottom: calc(16px + constant(safe-area-inset-bottom));
+@media screen and (max-width: 375px) {
+  .contact-page {
+    padding: 12px 10px;
+  }
+  
+  .card-header {
+    padding: 14px 12px 12px;
+  }
+  
+  .card-content {
+    padding: 14px 12px;
   }
 }
-
-@supports (padding-top: env(safe-area-inset-top)) {
-  .product-page__container {
-    padding-top: calc(16px + env(safe-area-inset-top));
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  }
-}
-===== End of File: pages\product\index.scss =====
+===== End of File: pages\contact\index.scss =====
 
 
-===== File: pages\product\index.tsx =====
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View } from '@tarojs/components';
-import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro';
+===== File: pages\contact\index.tsx =====
+// pages/contact/index.tsx
+import { useState, useEffect } from 'react'
+import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { Loading, Toast } from '@nutui/nutui-react-taro'
+import BookingForm from '../../components/BookingForm'
+import ContactInfoCard from '../../components/ContactInfoCard'
+import './index.scss'
+
+// 直接导入所需类型和函数
 import { 
-  Empty, 
-  Toast,
-  Popup,
-  InfiniteLoading
-} from '@nutui/nutui-react-taro';
-import ProductCard from 'src/components/ProductCard';
-import ProductDetail from 'src/components/ProductDetail';
-import { getCoatingList, getCoatingDetail, WaterproofCoating } from 'src/services/api/product/coatingApi';
-import './index.scss';
+  ServiceType, 
+  ContactData, 
+  BookingFormData 
+} from 'src/services/api/contact/types'
+import { 
+  getServiceTypes, 
+  getContactData, 
+  submitBooking, 
+  handleContactError 
+} from 'src/services/api/contact/contactApi'
 
-export default function ProductPage() {
-  // 状态管理
+export default function ContactPage() {
+  // 页面状态
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [products, setProducts] = useState<WaterproofCoating[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('fail');
-  const [selectedProduct, setSelectedProduct] = useState<WaterproofCoating | null>(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
   
-  // 组件挂载状态引用
-  const isMounted = React.useRef(true);
+  // 数据状态
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
+  const [contactData, setContactData] = useState<ContactData | null>(null);
   
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-  
-  // 分享消息配置
-  useShareAppMessage(() => {
-    return {
-      title: '专业防水产品',
-      path: '/pages/product/index',
-      imageUrl: products.length > 0 ? products[0].images[0] : undefined
-    }
+  // 表单数据
+  const [formData, setFormData] = useState<Partial<BookingFormData>>({
+    name: '',
+    phone: '',
+    serviceType: '',
+    serviceTypeName: '',
+    region: [],
+    address: '',
+    remark: ''
   });
-
-  // Toast消息帮助函数
-  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'fail') => {
-    if (!isMounted.current) return;
-    setToastMsg(message);
-    setToastType(type);
-    setShowToast(true);
-  }, []);
-
-  // 获取产品列表
-  const fetchProducts = useCallback(async (isRefresh = false) => {
-    try {
-      const page = isRefresh ? 1 : currentPage;
-      
-      if (isRefresh) {
+  
+  // 加载数据
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
         setLoading(true);
-      } else {
-        setLoadingMore(true);
-      }
-      
-      const response = await getCoatingList({
-        page,
-        pageSize: 10
-      });
-
-      if (!isMounted.current) return;
-      
-      // 处理成功响应
-      if (response.success) {
-        const productData = response.data || [];
         
-        // 根据刷新标志更新状态
-        if (isRefresh) {
-          setProducts(productData);
+        // 并行加载所有数据
+        const [serviceTypesRes, contactDataRes] = await Promise.all([
+          getServiceTypes(),
+          getContactData()
+        ]);
+        
+        // 处理服务类型数据
+        if (serviceTypesRes.success && serviceTypesRes.data) {
+          setServiceTypes(serviceTypesRes.data);
         } else {
-          setProducts(prevProducts => [...prevProducts, ...productData]);
+          showMessage(serviceTypesRes.error || '获取服务类型失败', 'fail');
         }
         
-        // 更新分页状态
-        setHasMore(response.hasMore || false);
-        if (!isRefresh) {
-          setCurrentPage(prev => prev + 1);
+        // 处理联系信息数据
+        if (contactDataRes.success && contactDataRes.data) {
+          setContactData(contactDataRes.data);
         } else {
-          setCurrentPage(2);
+          showMessage(contactDataRes.error || '获取联系信息失败', 'fail');
         }
-      } else {
-        // 处理错误响应
-        showToastMessage(response.error || '获取产品数据失败');
+      } catch (error) {
+        console.error('加载数据失败:', error);
+        showMessage('加载数据失败，请稍后重试', 'fail');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      // 处理异常
-      if (!isMounted.current) return;
-      console.error('获取产品数据错误', error);
-      showToastMessage('获取产品数据失败，请稍后重试');
-    } finally {
-      // 重置加载状态
-      if (!isMounted.current) return;
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [currentPage, showToastMessage]);
-
-  // 挂载和刷新时获取产品
-  useEffect(() => {
-    fetchProducts(true);
-  }, [fetchProducts]);
-
-  // 页面显示时检查数据
-  useDidShow(() => {
-    if (products.length === 0 && !loading) {
-      fetchProducts(true);
-    }
-  });
-
-  // 下拉刷新处理
-  useEffect(() => {
-    const handlePullDownRefresh = async () => {
-      await fetchProducts(true);
-      Taro.stopPullDownRefresh();
     };
     
-    Taro.eventCenter.on('pullDownRefresh', handlePullDownRefresh);
-    return () => {
-      Taro.eventCenter.off('pullDownRefresh');
-    };
-  }, [fetchProducts]);
-
-  // 产品点击处理
-  const handleProductClick = useCallback(async (id: number) => {
+    fetchData();
+  }, []);
+  
+  // 显示提示消息
+  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
+    setToastInfo({ content, icon });
+    setShowToast(true);
+  };
+  
+  // 处理表单提交
+  const handleFormSubmit = async (data: BookingFormData) => {
+    setSubmitting(true);
+    
     try {
-      setLoading(true);
-      const response = await getCoatingDetail(id);
+      const res = await submitBooking(data);
       
-      if (!isMounted.current) return;
-      
-      if (response.success && response.data) {
-        setSelectedProduct(response.data);
-        setShowDetail(true);
+      if (res.success) {
+        Taro.vibrateShort({ type: 'medium' });
+        showMessage('预约成功，我们将尽快与您联系！');
+        
+        // 重置表单
+        setFormData({
+          name: '',
+          phone: '',
+          serviceType: '',
+          serviceTypeName: '',
+          region: [],
+          address: '',
+          remark: ''
+        });
       } else {
-        showToastMessage(response.error || '获取产品详情失败');
+        showMessage(res.error || '提交失败，请重试', 'fail');
       }
     } catch (error) {
-      if (!isMounted.current) return;
-      console.error('获取产品详情错误', error);
-      showToastMessage('获取产品详情失败，请稍后重试');
+      showMessage(handleContactError(error), 'fail');
     } finally {
-      if (!isMounted.current) return;
-      setLoading(false);
+      setSubmitting(false);
     }
-  }, [showToastMessage]);
-
-  // 关闭详情模态框
-  const handleCloseDetail = useCallback(() => {
-    setShowDetail(false);
-    setTimeout(() => {
-      setSelectedProduct(null);
-    }, 300);
-  }, []);
-
-  // 联系按钮处理
-  const handleContactClick = useCallback(() => {
-    handleCloseDetail();
-    Taro.switchTab({ url: '/pages/contact/index' });
-  }, [handleCloseDetail]);
-
-  // 加载更多处理
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !loading && !loadingMore) {
-      return fetchProducts(false);
-    }
-    return Promise.resolve();
-  }, [hasMore, loading, loadingMore, fetchProducts]);
-
-  // 骨架屏UI - 使用记忆化优化性能
-  const renderSkeletons = useMemo(() => {
+  };
+  
+  // 处理服务类型选择
+  const handleServiceTypeSelect = (typeValue: string) => {
+    const selectedType = serviceTypes.find(type => type.value === typeValue);
+    setFormData(prev => ({
+      ...prev,
+      serviceType: typeValue,
+      serviceTypeName: selectedType?.text || ''
+    }));
+  };
+  
+  // 拨打电话
+  const handlePhoneCall = () => {
+    if (!contactData) return;
+    
+    Taro.makePhoneCall({
+      phoneNumber: contactData.phone,
+      fail: (err) => {
+        // 只有当不是用户取消时才显示错误提示
+        if (err.errMsg && !err.errMsg.includes('cancel')) {
+          showMessage('拨打电话失败，请重试', 'fail');
+        }
+      }
+    });
+  };
+  
+  // 复制微信号
+  const handleCopyWechat = () => {
+    if (!contactData) return;
+    
+    Taro.setClipboardData({
+      data: contactData.wechat,
+      success: () => {
+      },
+      fail: () => {
+        showMessage('复制失败，请重试', 'fail');
+      }
+    });
+  };
+  
+  // 加载状态
+  if (loading || !contactData) {
     return (
-      <View className="product-grid__skeletons">
-        {[1, 2, 3, 4].map(i => (
-          <View key={i} className="product-skeleton">
-            <View className="product-skeleton__image"></View>
-            <View className="product-skeleton__content">
-              <View className="product-skeleton__title"></View>
-              <View className="product-skeleton__title" style={{ width: '80%' }}></View>
-              <View className="product-skeleton__price"></View>
-            </View>
-          </View>
-        ))}
+      <View className="loading-container">
+        <Loading type="spinner" color="#2563EB" />
+        <Text className="loading-text">加载中...</Text>
       </View>
     );
-  }, []);
-
+  }
+  
   return (
-    <View className="product-page">
-      {/* 产品列表内容 */}
-      <View className="product-page__container">
-        {loading && products.length === 0 ? (
-          renderSkeletons
-        ) : products.length > 0 ? (
-          <>
-            <View className="product-grid">
-              {products.map((product) => (
-                <View key={product.id} className="product-grid__item">
-                  <ProductCard
-                    image={product.images[0]}
-                    title={product.title}
-                    specifications={product.specifications}
-                    onClick={() => handleProductClick(product.id)}
-                  />
-                </View>
-              ))}
-            </View>
-            
-            {/* 无限加载 */}
-            <InfiniteLoading
-              hasMore={hasMore}
-              threshold={100}
-              loadingText="加载中..."
-              loadMoreText="已经到底啦"
-              onLoadMore={handleLoadMore}
-            />
-          </>
-        ) : (
-          <View className="product-page__empty">
-            <Empty description="暂无相关产品" image="empty" />
+    <View className="contact-page">
+      <View className="contact-container">
+        {/* 预约表单卡片 */}
+        <View className="contact-card booking-card">
+          <View className="card-header">
+            <Text className="card-title">预约服务</Text>
+            <Text className="card-subtitle">填写信息免费上门勘测</Text>
           </View>
-        )}
+          <View className="card-content">
+            <BookingForm 
+              serviceTypes={serviceTypes}
+              loading={submitting}
+              initialValues={formData}
+              onSubmit={handleFormSubmit}
+              onServiceTypeSelect={handleServiceTypeSelect}
+            />
+          </View>
+        </View>
+        
+        {/* 关于我们卡片 */}
+        <View className="contact-card about-card">
+          <View className="card-header">
+            <Text className="card-title">关于我们</Text>
+            <Text className="card-subtitle">专业防水服务十年</Text>
+          </View>
+          <View className="card-content">
+            <ContactInfoCard 
+              data={contactData}
+              onPhoneCall={handlePhoneCall}
+              onCopyWechat={handleCopyWechat}
+            />
+          </View>
+        </View>
       </View>
-
-      {/* 产品详情弹窗 */}
-      <Popup
-        visible={showDetail}
-        position="bottom"
-        round
-        style={{ height: '92%' }}
-        onClose={handleCloseDetail}
-        closeable={false}
-      >
-        {selectedProduct && (
-          <ProductDetail 
-            product={selectedProduct}
-            visible={showDetail}
-            onClose={handleCloseDetail}
-            onContactClick={handleContactClick}
-          />
-        )}
-      </Popup>
-
-      {/* Toast提示 */}
+      
+      {/* 提示信息 */}
       <Toast
-        msg={toastMsg}
         visible={showToast}
-        type={toastType}
+        content={toastInfo.content}
+        icon={toastInfo.icon as any}
         onClose={() => setShowToast(false)}
         duration={2000}
-        position="center"
       />
     </View>
   );
 }
-===== End of File: pages\product\index.tsx =====
+===== End of File: pages\contact\index.tsx =====
+
+
+===== File: services\api\contact\contactApi.ts =====
+// services/api/contact/contactApi.ts
+import http from '../../http';
+import { ServiceType, ContactData, BookingFormData, ApiResponse } from './types';
+import { serviceTypes, contactData } from './data';
+
+// API端点
+const ENDPOINTS = {
+  GET_SERVICE_TYPES: '/contact/service-types',
+  GET_CONTACT_INFO: '/contact/info',
+  SUBMIT_BOOKING: '/contact/booking'
+};
+
+/**
+ * 获取服务类型列表
+ */
+export const getServiceTypes = async (): Promise<ApiResponse<ServiceType[]>> => {
+  try {
+    // 模拟API调用延迟
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return {
+      success: true,
+      data: serviceTypes
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '获取服务类型失败'
+    };
+  }
+};
+
+/**
+ * 获取联系信息
+ */
+export const getContactData = async (): Promise<ApiResponse<ContactData>> => {
+  try {
+    // 模拟API调用延迟
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return {
+      success: true,
+      data: contactData
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '获取联系信息失败'
+    };
+  }
+};
+
+/**
+ * 提交预约信息
+ */
+export const submitBooking = async (data: BookingFormData): Promise<ApiResponse<{ bookingId: string }>> => {
+  try {
+    // 模拟API调用延迟
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    
+    // 模拟成功响应
+    return {
+      success: true,
+      data: {
+        bookingId: `BK${Date.now().toString().slice(-6)}`
+      }
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '提交预约失败'
+    };
+  }
+};
+
+/**
+ * 错误处理工具 - 重命名为handleContactError
+ */
+export const handleContactError = (err: any): string => {
+  console.error(err);
+  return err instanceof Error ? err.message : '发生未知错误';
+};
+
+// 导出类型和数据
+export * from './types';
+export * from './data';
+===== End of File: services\api\contact\contactApi.ts =====
+
+
+===== File: services\api\contact\data.ts =====
+import { ServiceType, ContactData } from './types';
+
+// 服务类型数据
+export const serviceTypes: ServiceType[] = [
+  { text: '漏水检测', value: 'detection' },
+  { text: '渗漏维修', value: 'repair' },
+  { text: '防水施工', value: 'construction' }
+];
+
+// 联系信息数据
+export const contactData: ContactData = {
+  description: '我们是一家专业从事防水工程的公司，拥有十年行业经验和专业技术团队。我们服务于各类住宅和商业建筑，提供高质量的防水解决方案。所有工程均提供质保，确保防水效果持久可靠。',
+  phone: '400-123-4567',
+  wechat: 'waterproof123',
+  businessHours: '周一至周六 9:00-18:00',
+  address: '上海市浦东新区张江高科技园区科苑路88号'
+};
+===== End of File: services\api\contact\data.ts =====
+
+
+===== File: services\api\contact\types.ts =====
+// 服务类型接口
+export interface ServiceType {
+  text: string;
+  value: string;
+}
+
+// 联系信息数据接口
+export interface ContactData {
+  description: string;
+  phone: string;
+  wechat: string;
+  businessHours: string;
+  address: string;
+}
+
+// 预约表单数据接口
+export interface BookingFormData {
+  name: string;
+  phone: string;
+  area: string;
+  serviceType: string;
+  serviceTypeName: string;
+  region: string[];
+  address: string;
+  remark: string;
+}
+
+// API响应包装器
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+===== End of File: services\api\contact\types.ts =====
+
+
+===== File: services\http\cache.ts =====
+import Taro from '@tarojs/taro';
+import type { CacheData } from './types';
+
+// 缓存键前缀
+const CACHE_PREFIX = 'http_cache_';
+
+/**
+ * 生成缓存键
+ */
+export function generateCacheKey(url: string, data?: any): string {
+  return `${CACHE_PREFIX}${url}_${JSON.stringify(data || {})}`;
+}
+
+/**
+ * 获取缓存数据
+ */
+export function getCacheData<T>(key: string): CacheData<T> | null {
+  try {
+    const cacheData = Taro.getStorageSync(key);
+    return cacheData ? JSON.parse(cacheData) : null;
+  } catch (error) {
+    console.error('获取缓存数据失败', error);
+    return null;
+  }
+}
+
+/**
+ * 设置缓存数据
+ */
+export function setCacheData<T>(key: string, data: T): void {
+    try {
+      const cacheData: CacheData<T> = {
+        data,
+        timestamp: Date.now()
+      };
+      
+      Taro.setStorageSync(key, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('设置缓存数据失败', error);
+    }
+  }
+
+/**
+ * 清除缓存数据
+ */
+export function clearCacheData(key: string): void {
+  try {
+    Taro.removeStorageSync(key);
+  } catch (error) {
+    console.error('清除缓存数据失败', error);
+  }
+}
+
+/**
+ * 清除所有HTTP缓存
+ */
+export function clearAllCache(): void {
+  try {
+    const storageInfo = Taro.getStorageInfoSync();
+    const keys = storageInfo.keys || [];
+    
+    keys.forEach(key => {
+      if (key.startsWith(CACHE_PREFIX)) {
+        Taro.removeStorageSync(key);
+      }
+    });
+  } catch (error) {
+    console.error('清除所有缓存失败', error);
+  }
+}
+
+/**
+ * 检查缓存是否有效
+ */
+export function isCacheValid<T>(cache: CacheData<T>, cacheTime: number): boolean {
+  if (!cache || !cache.timestamp) return false;
+  
+  return Date.now() - cache.timestamp < cacheTime;
+}
+===== End of File: services\http\cache.ts =====
+
+
+===== File: services\http\config.ts =====
+import type { RequestConfig } from './types';
+
+// API基础URL
+export const API_BASE_URL = {
+  // 开发环境
+  development: 'https://dev-api.example.com/v1',
+  // 生产环境
+  production: 'https://api.example.com/v1'
+};
+
+// 环境判断
+export const ENV = process.env.NODE_ENV || 'development';
+
+// HTTP状态码
+export const HTTP_STATUS = {
+  SUCCESS: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500
+};
+
+// 业务状态码
+export const BUSINESS_CODE = {
+  SUCCESS: 0,           // 成功
+  TOKEN_EXPIRED: 10001, // token过期
+  PARAM_ERROR: 10002,   // 参数错误
+  SERVER_ERROR: 50000   // 服务器错误
+};
+
+// 默认请求配置
+export const DEFAULT_CONFIG: RequestConfig = {
+  baseURL: API_BASE_URL[ENV],
+  showLoading: true,
+  loadingText: '加载中',
+  showErrorToast: true,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 10000,       // 10秒
+  useCache: false,
+  cacheTime: 5 * 60 * 1000,  // 5分钟
+  retry: 0,
+  retryDelay: 1000,
+  withToken: true
+};
+===== End of File: services\http\config.ts =====
+
+
+===== File: services\http\errorHandler.ts =====
+import Taro from '@tarojs/taro';
+import { HTTP_STATUS, BUSINESS_CODE } from './config';
+import type { RequestError, RequestOptions } from './types';
+
+/**
+ * 处理HTTP状态错误
+ */
+export function handleHttpError(statusCode: number): RequestError {
+  let message = '未知错误';
+  
+  switch (statusCode) {
+    case HTTP_STATUS.BAD_REQUEST:
+      message = '请求参数错误';
+      break;
+    case HTTP_STATUS.UNAUTHORIZED:
+      message = '未授权，请登录';
+      break;
+    case HTTP_STATUS.FORBIDDEN:
+      message = '没有权限访问';
+      break;
+    case HTTP_STATUS.NOT_FOUND:
+      message = '请求资源不存在';
+      break;
+    case HTTP_STATUS.SERVER_ERROR:
+      message = '服务器内部错误';
+      break;
+    default:
+      message = `HTTP错误 (${statusCode})`;
+  }
+  
+  return {
+    code: statusCode,
+    message
+  };
+}
+
+/**
+ * 处理业务状态错误
+ */
+export function handleBusinessError<T>(response: { code: number; message: string; data?: T }): RequestError {
+  let message = response.message || '未知错误';
+  
+  switch (response.code) {
+    case BUSINESS_CODE.TOKEN_EXPIRED:
+      message = '登录已过期，请重新登录';
+      break;
+    case BUSINESS_CODE.PARAM_ERROR:
+      message = '参数错误';
+      break;
+    case BUSINESS_CODE.SERVER_ERROR:
+      message = '服务器内部错误';
+      break;
+  }
+  
+  return {
+    code: response.code,
+    message,
+    data: response.data
+  };
+}
+
+/**
+ * 处理网络错误
+ */
+export function handleNetworkError(error: any): RequestError {
+  let message = '网络异常';
+  
+  if (error?.errMsg) {
+    if (error.errMsg.includes('timeout')) {
+      message = '请求超时，请检查网络';
+    } else if (error.errMsg.includes('fail')) {
+      message = '网络连接失败，请检查网络设置';
+    }
+  }
+  
+  return {
+    code: -1,
+    message
+  };
+}
+
+/**
+ * 综合错误处理
+ */
+export function handleRequestError(error: any, options: RequestOptions): RequestError {
+  // 已格式化的错误
+  if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: error.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return error as RequestError;
+  }
+  
+  // HTTP错误
+  if (error && typeof error === 'object' && 'statusCode' in error) {
+    const httpError = handleHttpError(error.statusCode);
+    
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: httpError.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return httpError;
+  }
+  
+  // 网络错误
+  if (error && typeof error === 'object' && 'errMsg' in error) {
+    const networkError = handleNetworkError(error);
+    
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: networkError.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return networkError;
+  }
+  
+  // 其他错误
+  const unknownError: RequestError = {
+    code: -1,
+    message: typeof error === 'string' ? error : '未知错误'
+  };
+  
+  if (options.showErrorToast) {
+    Taro.showToast({
+      title: unknownError.message,
+      icon: 'none',
+      duration: 2000
+    });
+  }
+  
+  return unknownError;
+}
+===== End of File: services\http\errorHandler.ts =====
+
+
+===== File: services\http\index.ts =====
+import { request } from './request';
+import type { RequestOptions} from './types';
+import { addRequestInterceptor, addResponseInterceptor, addErrorInterceptor } from './interceptor';
+import { clearAllCache, clearCacheData } from './cache';
+
+/**
+ * HTTP客户端
+ */
+const http = {
+  /**
+   * 发送GET请求
+   */
+  get: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'GET', data, ...options }),
+  
+  /**
+   * 发送POST请求
+   */  
+  post: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'POST', data, ...options }),
+  
+  /**
+   * 发送PUT请求
+   */
+  put: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'PUT', data, ...options }),
+  
+  /**
+   * 发送DELETE请求
+   */
+  delete: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+    request<T>({ url, method: 'DELETE', data, ...options }),
+  
+  /**
+   * 原始请求方法
+   */
+  request,
+  
+  /**
+   * 清除指定缓存
+   */
+  clearCache: clearCacheData,
+  
+  /**
+   * 清除所有缓存
+   */
+  clearAllCache,
+  
+  /**
+   * 添加请求拦截器
+   */
+  addRequestInterceptor,
+  
+  /**
+   * 添加响应拦截器
+   */
+  addResponseInterceptor,
+  
+  /**
+   * 添加错误拦截器
+   */
+  addErrorInterceptor
+};
+
+export default http;
+
+// 导出类型
+export * from './types';
+export { DEFAULT_CONFIG } from './config';
+===== End of File: services\http\index.ts =====
+
+
+===== File: services\http\interceptor.ts =====
+import Taro from '@tarojs/taro';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, RequestOptions, ResponseData } from './types';
+import { BUSINESS_CODE } from './config';
+
+// 请求拦截器数组
+const requestInterceptors: RequestInterceptor[] = [];
+
+// 响应拦截器数组
+const responseInterceptors: ResponseInterceptor[] = [];
+
+// 错误拦截器数组
+const errorInterceptors: ErrorInterceptor[] = [];
+
+/**
+ * 添加请求拦截器
+ */
+export function addRequestInterceptor(interceptor: RequestInterceptor): void {
+  requestInterceptors.push(interceptor);
+}
+
+/**
+ * 添加响应拦截器
+ */
+export function addResponseInterceptor(interceptor: ResponseInterceptor): void {
+  responseInterceptors.push(interceptor);
+}
+
+/**
+ * 添加错误拦截器
+ */
+export function addErrorInterceptor(interceptor: ErrorInterceptor): void {
+  errorInterceptors.push(interceptor);
+}
+
+/**
+ * 应用请求拦截器
+ */
+export async function applyRequestInterceptors(options: RequestOptions): Promise<RequestOptions> {
+  let config = { ...options };
+  
+  for (const interceptor of requestInterceptors) {
+    config = await interceptor(config);
+  }
+  
+  return config;
+}
+
+/**
+ * 应用响应拦截器
+ */
+export async function applyResponseInterceptors<T>(response: ResponseData<T>, options: RequestOptions): Promise<ResponseData<T>> {
+  let result = { ...response };
+  
+  for (const interceptor of responseInterceptors) {
+    result = await interceptor(result, options);
+  }
+  
+  return result;
+}
+
+/**
+ * 应用错误拦截器
+ */
+export async function applyErrorInterceptors(error: any, options: RequestOptions): Promise<any> {
+  let result = error;
+  
+  for (const interceptor of errorInterceptors) {
+    result = await interceptor(result, options);
+  }
+  
+  return result;
+}
+
+// 添加默认Token拦截器
+addRequestInterceptor(async (options) => {
+  if (options.withToken) {
+    try {
+      const token = Taro.getStorageSync('token');
+      if (token) {
+        options.headers = {
+          ...options.headers,
+          'Authorization': `Bearer ${token}`
+        };
+      }
+    } catch (error) {
+      console.error('获取Token失败', error);
+    }
+  }
+  
+  return options;
+});
+
+// 添加默认日志拦截器
+if (process.env.NODE_ENV === 'development') {
+  // 请求日志
+  addRequestInterceptor((options) => {
+    console.log(`[Request] ${options.method} ${options.url}`, options.data);
+    return options;
+  });
+  
+  // 响应日志
+  addResponseInterceptor((response, options) => {
+    console.log(`[Response] ${options.method} ${options.url}`, response);
+    return response;
+  });
+  
+  // 错误日志
+  addErrorInterceptor((error, options) => {
+    console.error(`[Error] ${options.method} ${options.url}`, error);
+    return error;
+  });
+}
+
+// 添加默认Token过期处理
+addErrorInterceptor((error) => {
+  if (error && error.code === BUSINESS_CODE.TOKEN_EXPIRED) {
+    // 清除本地Token
+    Taro.removeStorageSync('token');
+    
+    // 跳转到登录页
+    Taro.navigateTo({
+      url: '/pages/login/index'
+    });
+  }
+  
+  return error;
+});
+===== End of File: services\http\interceptor.ts =====
+
+
+===== File: services\http\request.ts =====
+import Taro from '@tarojs/taro';
+import type { RequestOptions, ResponseData } from './types';
+import { DEFAULT_CONFIG, BUSINESS_CODE } from './config';
+import { applyRequestInterceptors, applyResponseInterceptors, applyErrorInterceptors } from './interceptor';
+import { handleRequestError, handleBusinessError } from './errorHandler';
+import { generateCacheKey, getCacheData, setCacheData, isCacheValid } from './cache';
+
+// 请求计数器
+let loadingCount = 0;
+
+/**
+ * 显示加载提示
+ */
+function showLoading(text: string): void {
+  loadingCount++;
+  
+  if (loadingCount === 1) {
+    Taro.showLoading({ title: text });
+  }
+}
+
+/**
+ * 隐藏加载提示
+ */
+function hideLoading(): void {
+  loadingCount--;
+  
+  if (loadingCount === 0) {
+    Taro.hideLoading();
+  }
+}
+
+/**
+ * 延迟函数
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * 统一请求函数
+ */
+export async function request<T = any>(options: RequestOptions): Promise<T> {
+  // 合并配置
+  const config = { ...DEFAULT_CONFIG, ...options };
+  const { url, method = 'GET', data, baseURL, showLoading: shouldShowLoading, loadingText, useCache, cacheTime, retry, retryDelay } = config;
+  
+  // 完整URL
+  const fullUrl = url.startsWith('http') ? url : `${baseURL}${url.startsWith('/') ? url : `/${url}`}`;
+  
+  // 检查缓存
+  if (useCache && method === 'GET') {
+    const cacheKey = generateCacheKey(fullUrl, data);
+    const cached = getCacheData<T>(cacheKey);
+    
+    if (cached && isCacheValid(cached, cacheTime || DEFAULT_CONFIG.cacheTime || 0)) {
+      return cached.data;
+    }
+  }
+  
+  // 请求前处理
+  let requestConfig = await applyRequestInterceptors({ ...config, url: fullUrl });
+  
+  // 重试计数
+  let retryCount = retry || 0;
+  
+  // 显示加载提示
+  if (shouldShowLoading) {
+    showLoading(loadingText || '加载中');
+  }
+  
+  try {
+    // 发送请求
+    const executeRequest = async (): Promise<T> => {
+      try {
+        const response = await Taro.request({
+          url: fullUrl,
+          data: requestConfig.data,
+          method: requestConfig.method as any,
+          header: requestConfig.headers,
+          timeout: requestConfig.timeout
+        });
+        
+        // HTTP状态检查
+        if (response.statusCode !== 200) {
+          throw { statusCode: response.statusCode };
+        }
+        
+        // 业务状态检查
+        const responseData = response.data as ResponseData<T>;
+        
+        if (responseData.code !== BUSINESS_CODE.SUCCESS) {
+          throw handleBusinessError(responseData);
+        }
+        
+        // 响应拦截处理
+        const processedResponse = await applyResponseInterceptors(responseData, requestConfig);
+        
+        // 设置缓存
+        if (useCache && method === 'GET') {
+          const cacheKey = generateCacheKey(fullUrl, data);
+          setCacheData(cacheKey, processedResponse.data);
+        }
+        
+        return processedResponse.data;
+      } catch (error) {
+        // 请求失败但还有重试次数
+        if (retryCount > 0) {
+          retryCount--;
+          // 延迟后重试
+          await delay(retryDelay || DEFAULT_CONFIG.retryDelay || 1000);
+          return executeRequest();
+        }
+        
+        // 重试次数用完，向上抛出错误
+        throw error;
+      }
+    };
+    
+    return await executeRequest();
+  } catch (error) {
+    // 错误处理
+    const processedError = await applyErrorInterceptors(error, requestConfig);
+    throw handleRequestError(processedError, requestConfig);
+  } finally {
+    // 隐藏加载提示
+    if (shouldShowLoading) {
+      hideLoading();
+    }
+  }
+}
+===== End of File: services\http\request.ts =====
+
+
+===== File: services\http\types.ts =====
+// 请求方法类型
+export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+// 请求配置
+export interface RequestConfig {
+  // 基础URL
+  baseURL?: string;
+  // 是否显示加载提示
+  showLoading?: boolean;
+  // 加载提示文字
+  loadingText?: string;
+  // 是否显示错误提示
+  showErrorToast?: boolean;
+  // 请求头
+  headers?: Record<string, string>;
+  // 超时时间(ms)
+  timeout?: number;
+  // 是否使用缓存(仅GET请求)
+  useCache?: boolean;
+  // 缓存时间(ms)
+  cacheTime?: number;
+  // 重试次数
+  retry?: number;
+  // 重试延迟(ms)
+  retryDelay?: number;
+  // 是否自动携带token
+  withToken?: boolean;
+}
+
+// 请求参数
+export interface RequestOptions extends RequestConfig {
+  // 请求地址
+  url: string;
+  // 请求方法
+  method?: RequestMethod;
+  // 请求数据
+  data?: any;
+}
+
+// 响应数据结构
+export interface ResponseData<T = any> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+// 缓存数据结构
+export interface CacheData<T = any> {
+  data: T;
+  timestamp: number;
+}
+
+// 错误信息结构
+export interface RequestError {
+  code: number;
+  message: string;
+  data?: any;
+}
+
+// 请求拦截器
+export type RequestInterceptor = (options: RequestOptions) => RequestOptions | Promise<RequestOptions>;
+
+// 响应拦截器
+export type ResponseInterceptor = <T>(response: ResponseData<T>, options: RequestOptions) => ResponseData<T> | Promise<ResponseData<T>>;
+
+// 错误拦截器
+export type ErrorInterceptor = (error: any, options: RequestOptions) => any;
+===== End of File: services\http\types.ts =====
+
+
+===== File: styles\theme.css =====
+:root,
+page{
+  /* 主品牌色系 - 蓝色系列，从浅到深 */
+  --nutui-brand-1: #EFF6FF; /* 最浅蓝色 - 适合背景、高亮区域 */
+  --nutui-brand-2: #DBEAFE; /* 浅蓝色 - 用于轻量强调和背景 */
+  --nutui-brand-3: #BFDBFE; /* 中浅蓝色 - 禁用状态 */
+  --nutui-brand-4: #93C5FD; /* 渐变起始色 */
+  --nutui-brand-5: #60A5FA; /* 中间过渡色 */
+  --nutui-brand-6: #3B82F6; /* 主色调 - 亮蓝色 */
+  --nutui-brand-7: #2563EB; /* 按压状态色 - 与TabBar选中色相同 */
+  --nutui-brand-8: #1D4ED8; /* 深蓝色 - 渐变结束色 */
+  --nutui-brand-9: #1E40AF; /* 很深蓝色 */
+  --nutui-brand-10: #1E3A8A; /* 最深蓝色 */
+  
+  /* 渐变色设置 */
+  --nutui-brand-stop-1: #60A5FA; /* 渐变起始色 - 对应brand-5 */
+  --nutui-brand-stop-2: #2563EB; /* 渐变结束色 - 对应brand-7，与TabBar一致 */
+  
+  /* 强调色 - 用于特殊元素，防水主题可以用蓝绿色 */
+  --nutui-secondary-1: #0EA5E9; /* 蓝绿色强调色 - 与水相关 */
+  
+  /* 主色调映射 */
+  --nutui-color-primary: #2563EB; /* 与TabBar选中色保持一致 */
+  --nutui-color-primary-stop-1: var(--nutui-brand-stop-1);
+  --nutui-color-primary-stop-2: var(--nutui-brand-stop-2);
+  --nutui-color-primary-pressed: var(--nutui-brand-8);
+  --nutui-color-primary-disabled: var(--nutui-brand-3);
+  --nutui-color-primary-text: #FFFFFF;
+  --nutui-color-primary-light: var(--nutui-brand-2);
+  
+  /* 文本系统 */
+  --nutui-gray-7: #1F2937; /* 主要文本 */
+  --nutui-gray-6: #4B5563; /* 重要次要文本 */
+  --nutui-gray-5: #6B7280; /* 次要文本 */
+  --nutui-gray-4: #9CA3AF; /* 分割线/禁用文本 */
+  
+  /* 背景系统 */
+  --nutui-gray-1: #FFFFFF; /* 白色背景 - 与navigationBar背景一致 */
+  --nutui-gray-2: #F9FAFB; /* 浅灰背景 - 卡片内嵌背景 */
+  --nutui-gray-3: #F3F4F6; /* 灰色背景 - 页面基底色 */
+  
+  /* 功能色设置 - 与防水服务主题相协调 */
+  --nutui-color-success: #10B981; /* 成功色 - 绿色，代表安全可靠 */
+  --nutui-color-success-disabled: #D1FAE5;
+  --nutui-color-danger: #EF4444; /* 危险色 - 红色，代表警示 */
+  --nutui-color-danger-disabled: #FEE2E2;
+  --nutui-color-warning: #F59E0B; /* 警告色 - 橙色 */
+  --nutui-color-warning-disabled: #FEF3C7;
+  --nutui-color-info: #3B82F6; /* 信息色 - 蓝色，与水相关 */
+  --nutui-color-info-disabled: #BFDBFE;
+  --nutui-color-info-background: linear-gradient(315deg, #60A5FA 0%, #2563EB 100%);
+  
+  /* TabBar颜色设置 - 保持一致性 */
+  --nutui-tabbar-active-color: #2563EB; /* 与TabBar选中色保持一致 */
+  --nutui-tabbar-inactive-color: #999999; /* 与TabBar未选中色保持一致 */
+
+  --nutui-picker-title-ok-font-size: 16px;/*picker面板确认字号*/
+  --nutui-picker-item-height: 40px; /*picker面板每一条数据高度*/
+  --nutui-picker-list-height: 180px;
+  --nutui-picker-title-cancel-font-size: 16px;
+}
+===== End of File: styles\theme.css =====
 
