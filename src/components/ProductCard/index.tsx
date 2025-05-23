@@ -17,8 +17,8 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
   title,
   specifications,
   onClick,
-  aspectRatio = "1/1", // 默认正方形宽高比
-  imageFit = "aspectFill"   // 默认填充模式
+  aspectRatio = "1/1",     // 默认正方形宽高比
+  imageFit = "aspectFit"   // 修改：默认填充模式改为 aspectFit
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);

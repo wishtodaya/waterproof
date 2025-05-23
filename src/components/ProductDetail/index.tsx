@@ -69,7 +69,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                 <Image 
                   src={image} 
                   className="detail__gallery-image" 
-                  mode="aspectFill"
+                  mode="aspectFit" // 修改：确保完整图片显示并居中
                   lazyLoad
                 />
               </View>

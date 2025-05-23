@@ -14,17 +14,19 @@
   
   &__image-wrap {
     width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     position: relative;
     overflow: hidden;
-    aspect-ratio: 1 / 1; /* 默认宽高比，可以通过内联样式覆盖 */
-    min-height: 120px; /* 最小高度防止图片太小 */
-    max-height: 300px; /* 可选：防止图片过高 */
+    aspect-ratio: 1 / 1;
+    min-height: 120px;
+    max-height: 300px;
   }
   
   &__image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 默认填充模式，可以通过属性覆盖 */
+    object-fit: contain;
     transition: opacity 0.3s ease;
   }
   
