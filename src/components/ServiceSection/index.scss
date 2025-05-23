@@ -1,58 +1,57 @@
-.service-section {
-  margin: 10px 10px 15px; /* 减少顶部外边距 */
-  border-radius: 10px;
-  overflow: hidden;
-  background-color: #fff;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+.service-section-container {
+  margin: 20px 15px;
+  padding: 18px;
+}
 
-  &__header {
-    padding: 10px 15px; /* 进一步减少头部内边距 */
-    border-bottom: 1px solid #f0f0f0;
-  }
+.section-header {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-  &__title {
-    display: block;
-    font-size: 17px; /* 略微减小标题字体 */
-    font-weight: bold;
-    color: #2563EB;
-    margin-bottom: 0px; /* 去除标题下方间距 */
-  }
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  position: relative;
+  padding-left: 12px;
 
-  &__subtitle {
-    font-size: 13px; /* 略微减小副标题字体 */
-    color: #6B7280;
-  }
-
-  &__swiper {
-    height: 170px;
-    width: 100%;
-    padding-top: 5px; /* 减少顶部内边距 */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 18px;
+    background: linear-gradient(to bottom, #3B82F6, #2563EB);
+    border-radius: 4px;
   }
 }
 
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
 .service-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
-  margin-top: -20px; /* 增加负边距，进一步向上移动内容 */
-  
-  &__title {
-    font-size: 30px;
-    font-weight: bold;
-    color: #2563EB;
-    margin-bottom: 18px;
-    text-align: center;
+  background-color: var(--nutui-gray-2);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: left;
+
+  .service-item-title {
+    font-size: 15px;
+    color: var(--nutui-gray-7);
+    margin-bottom: 6px;
+    display: block;
   }
 
-  &__description {
-    font-size: 16px;
-    color: #4B5563;
-    line-height: 1.5;
-    text-align: center;
-    max-width: 85%;
+  .service-item-description {
+    font-size: 13px;
+    color: var(--nutui-gray-5);
+    line-height: 1.4;
   }
 }

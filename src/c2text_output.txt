@@ -3,32 +3,25 @@
   📄 app.scss
   📄 app.ts
   📁 components
-    📁 PageHeader
-      📄 index.scss
-      📄 index.tsx
-    📁 QuickContact
-      📄 index.scss
-      📄 index.tsx
-    📁 ServiceCardCarousel
-      📄 index.scss
-      📄 index.tsx
-    📁 ServiceSection
+    📁 BannerCarousel
       📄 index.scss
       📄 index.tsx
     📁 ShowcaseSection
       📄 index.scss
       📄 index.tsx
   📄 index.html
+  📁 packageA
+    📁 pages
   📁 pages
-    📁 cases
+    📁 index
       📄 index.config.ts
       📄 index.scss
       📄 index.tsx
   📁 services
     📁 api
-      📁 cases
-        📄 casesApi.ts
+      📁 index
         📄 data.ts
+        📄 indexApi.ts
         📄 types.ts
     📁 http
       📄 cache.ts
@@ -205,846 +198,101 @@ export default App
 ===== End of File: app.ts =====
 
 
-===== File: components\PageHeader\index.scss =====
-/* components/PageHeader/index.scss */
-
-.unified-header {
-  background-color: #fff;
+===== File: components\BannerCarousel\index.scss =====
+.banner-carousel {
   width: 100%;
-  
-  /* 搜索区域 */
-  .header-search {
-    padding: 8px 16px 8px;
-  }
-  
-  /* 自定义搜索栏样式 */
-  .custom-searchbar {
-    background-color: #f2f2f2;
-    height: 34px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-    transition: all 0.3s ease;
-    
-    &:focus-within {
-      background-color: #e9e9e9;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-    }
-  }
-  
-  .search-icon {
-    color: #999;
-    font-size: 16px;
-    margin-right: 8px;
-  }
-  
-  .search-input {
-    flex: 1;
-    height: 34px;
-    font-size: 14px;
-    color: #333;
-    border: none;
-    background: transparent;
-  }
-  
-  .search-clear {
-    color: #999;
-    font-size: 16px;
-    padding: 4px;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    
-    &:active {
-      background-color: #e0e0e0;
-    }
-  }
-  
-  /* 标签区域 */
-  .header-tabs-container {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .tabs-container {
-    white-space: nowrap;
-    
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-  
-  .tabs-list {
-    height: 40px;
-    padding: 0 8px;
-    display: inline-flex;
-    position: relative;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 1px;
-      background-color: #f0f0f0;
-    }
-  }
-  
-  .tab-item {
-    font-size: 14px;
-    color: #666;
-    padding: 0 12px;
-    height: 40px;
-    line-height: 40px;
-    position: relative;
-    white-space: nowrap;
-    
-    &.active {
-      color: #333;
-      font-weight: 500;
-      
-      .tab-line {
-        opacity: 1;
-      }
-    }
-    
-    .tab-line {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 2px;
-      width: 20px;
-      background-color: #2563eb;
-      border-radius: 1px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-  }
-}
-===== End of File: components\PageHeader\index.scss =====
-
-
-===== File: components\PageHeader\index.tsx =====
-import { useState, useCallback } from 'react';
-import { View, Text, Input, ScrollView } from '@tarojs/components';
-import './index.scss';
-
-export interface TabItem {
-  title: string;
-  value: string;
-}
-
-interface PageHeaderProps {
-  keyword: string;
-  onSearch: (value: string) => void;
-  searchPlaceholder?: string;
-  currentType: string;
-  onTypeChange: (value: string) => void;
-  tabs: TabItem[];
-  debounceTime?: number;
-}
-
-export default function PageHeader({
-  keyword,
-  onSearch,
-  searchPlaceholder = '搜索',
-  currentType,
-  onTypeChange,
-  tabs,
-  debounceTime = 500
-}: PageHeaderProps) {
-  const [searchValue, setSearchValue] = useState(keyword);
-  const [searchTimer, setSearchTimer] = useState<any>(null);
-
-  // 处理搜索输入变化
-  const handleSearch = useCallback(
-    (value: string) => {
-      setSearchValue(value);
-      if (searchTimer) {
-        clearTimeout(searchTimer);
-      }
-      
-      const timer = setTimeout(() => {
-        onSearch(value);
-      }, debounceTime);
-      
-      setSearchTimer(timer);
-    },
-    [onSearch, debounceTime, searchTimer]
-  );
-  
-  // 清空搜索
-  const handleClear = () => {
-    setSearchValue('');
-    onSearch('');
-  };
-  
-  // 处理标签切换
-  const handleTabChange = (value: string) => {
-    onTypeChange(value);
-  };
-
-  return (
-    <View className="unified-header">
-      {/* 搜索区域 */}
-      <View className="header-search">
-        <View className="custom-searchbar">
-          <Text className="search-icon">🔍</Text>
-          <Input
-            className="search-input"
-            value={searchValue}
-            placeholder={searchPlaceholder}
-            onInput={(e) => handleSearch(e.detail.value)}
-            confirmType="search"
-            onConfirm={(e) => onSearch(e.detail.value)}
-          />
-          {searchValue && (
-            <Text className="search-clear" onClick={handleClear}>×</Text>
-          )}
-        </View>
-      </View>
-      
-      {/* 标签区域 - 使用ScrollView但不尝试手动控制滚动 */}
-      <View className="header-tabs-container">
-        <ScrollView 
-          scrollX 
-          scrollWithAnimation
-          className="tabs-container"
-          showScrollbar={false}
-        >
-          <View className="tabs-list">
-            {tabs.map((tab) => (
-              <View
-                key={tab.value}
-                className={`tab-item ${currentType === tab.value ? 'active' : ''}`}
-                onClick={() => handleTabChange(tab.value)}
-              >
-                <Text>{tab.title}</Text>
-                <View className="tab-line" />
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
-    </View>
-  );
-}
-===== End of File: components\PageHeader\index.tsx =====
-
-
-===== File: components\QuickContact\index.scss =====
-// src/components/QuickContact/index.scss
-
-// 快速联系 - 修改后的样式（更大更醒目的按钮）
-.quick-contact {
-    display: flex;
-    margin: 15px 15px 20px;
-    background: #fff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    position: relative;
-    z-index: 10;
-    
-    .contact-btn {
-      flex: 1;
-      margin: 0 8px;
-      height: 54px;
-      font-weight: 600;
-      font-size: 16px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      
-      &:active {
-        transform: scale(0.98);
-        opacity: 0.9;
-      }
-      
-      .btn-icon {
-        margin-right: 6px;
-        font-size: 20px;
-      }
-    }
-    
-    .call-btn {
-      background: #1155cc;
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(17, 85, 204, 0.3);
-    }
-    
-    .wechat-btn {
-      background: #09BB07;
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(9, 187, 7, 0.3);
-      
-      &.disabled {
-        opacity: 0.7;
-        background: #71c371;
-        box-shadow: none;
-      }
-    }
-  }
-  
-  // 响应式适配
-  @media screen and (max-width: 375px) {
-    .quick-contact {
-      padding: 12px;
-      
-      .contact-btn {
-        height: 48px;
-        font-size: 14px;
-      }
-    }
-  }
-===== End of File: components\QuickContact\index.scss =====
-
-
-===== File: components\QuickContact\index.tsx =====
-import { useState } from 'react'
-import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
-import './index.scss'
-
-interface ContactInfo {
-  phone: string[];
-  wechat: string;
-}
-
-interface QuickContactProps {
-  contactInfo: ContactInfo;
-  onShowToast?: (message: string, type: 'success' | 'fail' | 'warn') => void;
-}
-
-const QuickContact: React.FC<QuickContactProps> = ({ 
-  contactInfo,
-  onShowToast
-}) => {
-  const [isProcessingWechat, setIsProcessingWechat] = useState(false);
-
-  // 电话咨询 - 优先拨打第一个号码
-  const handleCall = () => {
-    if (!contactInfo?.phone?.length) return;
-    
-    // 如果有多个号码，可以弹出选择框，这里简化为直接拨打第一个
-    const primaryPhone = contactInfo.phone[0];
-    
-    Taro.makePhoneCall({
-      phoneNumber: primaryPhone
-    }).catch(err => {
-      if (err.errMsg && !err.errMsg.includes('cancel')) {
-        onShowToast?.('拨号失败', 'fail');
-      }
-    });
-  };
-
-  // 微信咨询
-  const handleWechat = () => {
-    if (!contactInfo?.wechat || isProcessingWechat) return;
-    
-    setIsProcessingWechat(true);
-    
-    Taro.setClipboardData({
-      data: contactInfo.wechat,
-      success: function () {
-        // 使用系统默认提示
-      },
-      fail: (err) => {
-        if (!err.errMsg?.includes('cancel')) {
-          onShowToast?.('复制失败', 'fail');
-        }
-      },
-      complete: () => {
-        setTimeout(() => {
-          setIsProcessingWechat(false);
-        }, 1600);
-      }
-    });
-  };
-
-  return (
-    <View className='quick-contact'>
-      <View 
-        className='contact-btn call-btn'
-        onClick={handleCall}
-      >
-        <Text className='btn-icon'>📞</Text> 电话咨询
-      </View>
-      <View 
-        className={`contact-btn wechat-btn ${isProcessingWechat ? 'disabled' : ''}`}
-        onClick={(e) => {
-          if (isProcessingWechat) return;
-          e?.stopPropagation && e.stopPropagation();
-          handleWechat();
-        }}
-      >
-        <Text className='btn-icon'>💬</Text> 微信咨询
-      </View>
-    </View>
-  );
-};
-
-export default QuickContact;
-===== End of File: components\QuickContact\index.tsx =====
-
-
-===== File: components\ServiceCardCarousel\index.scss =====
-/* 现代风格服务卡片轮播 */
-.service-carousel {
-  width: 100%;
-  margin: 16px 0 24px;
-  position: relative;
+  height: 180px;
   overflow: hidden;
-  
-  // 空状态样式
-  &-empty {
-    width: 100%;
-    height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9CA3AF;
-    font-size: 14px;
-    background-color: #F9FAFB;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(17, 24, 39, 0.06);
-  }
-}
-
-/* 轮播样式 */
-.service-swiper {
-  width: 100%;
-  background-color: transparent;
-  overflow: visible;
-  padding: 16px 0 30px;
-  
-  &-item {
-    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-/* 服务卡片样式 */
-.service-card {
-  background-color: #FFFFFF;
-  border-radius: 12px;
-  padding: 12px 10px;
-  box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08);
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  min-height: 140px;
-  width: 100%;
-  margin: 0 auto;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
-  
-  /* 非激活遮罩层 */
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.5);
-    opacity: 0;
-    transition: opacity 0.35s ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  /* 激活样式 */
-  &-active {
-    transform: scale(1.03);
-    box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
-    
-    &::after {
-      opacity: 0;
-    }
-  }
-  
-  /* 非激活样式 */
-  &:not(.service-card-active)::after {
-    opacity: 1;
-  }
-  
-  /* 卡片主体 */
-  &-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 0;
-    text-align: center;
-    padding: 0 5px;
-  }
 }
 
-/* 服务标题 */
-.service-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1F2937;
-  margin-bottom: 6px;
-  margin-top: 2px;
-  display: block;
-  text-align: center;
-  position: relative;
-  
-  &::after {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, #60A5FA, #2563EB);
-    margin: 6px auto 0;
-    border-radius: 2px;
-  }
-}
-
-/* 服务描述 */
-.service-description {
-  font-size: 14px;
-  color: #6B7280;
-  line-height: 1.4;
-  margin-bottom: 8px;
-  text-align: center;
-  padding: 0 5px;
-  max-width: 95%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 服务特点 */
-.service-features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 0;
-  flex-grow: 1;
-  justify-content: center;
-  align-items: center;
-  padding-top: 3px;
-  width: 98%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 特点标签 */
-.feature-tag {
-  font-size: 12px;
-  color: #2563EB;
-  background-color: #EFF6FF;
-  padding: 3px 8px;
-  border-radius: 6px;
-  display: inline-block;
-  font-weight: 500;
-  margin: 2px;
-}
-
-/* 指示器容器 */
-.swiper-indicators {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 6px 0;
-}
-
-/* 指示器点 */
-.swiper-indicator {
-  width: 8px;
-  height: 8px;
-  background: #F3F4F6;
-  border-radius: 50%;
-  margin: 0 4px;
-  transition: all 0.3s ease;
-  
-  /* 激活指示器 */
-  &-active {
-    width: 20px;
-    border-radius: 10px;
-    background: #3B82F6;
-  }
-}
-
-/* 响应式适配 */
-@media screen and (max-width: 375px) {
-  .service-card {
-    padding: 12px 10px;
-    min-height: 150px;
-  }
-  
-  .service-title {
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-  
-  .service-description {
-    font-size: 13px;
-    margin-bottom: 8px;
-    line-height: 1.4;
-  }
-  
-  .feature-tag {
-    font-size: 11px;
-    padding: 3px 8px;
-    margin: 2px;
-  }
-  
-  .service-features {
-    gap: 4px;
-  }
-}
-===== End of File: components\ServiceCardCarousel\index.scss =====
-
-
-===== File: components\ServiceCardCarousel\index.tsx =====
-import { View, Text, Swiper, SwiperItem } from '@tarojs/components'
-import { useState, useRef, useEffect } from 'react'
-import './index.scss'
-
-// 服务项接口
-export interface ServiceItem {
-  id: number | string;
-  title: string;
-  description: string;
-  features: string[];
-}
-
-interface ServiceCarouselProps {
-  services: ServiceItem[];
-  onServiceClick?: (service: ServiceItem) => void;
-  autoPlay?: boolean;
-  interval?: number;
-  initialIndex?: number;
-  className?: string;
-}
-
-const ServiceCarousel: React.FC<ServiceCarouselProps> = ({ 
-  services = [],
-  onServiceClick, 
-  autoPlay = true, 
-  interval = 4000,
-  initialIndex = 0,
-  className = ''
-}) => {
-  // 当前轮播索引
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  
-  // 容器引用
-  const containerRef = useRef<any>(null);
-  
-  // 边距状态
-  const [sideMargin, setSideMargin] = useState('40px');
-  
-  // 缓存有效的服务列表
-  const validServices = services?.filter(item => 
-    item && (typeof item.id === 'number' || typeof item.id === 'string')
-  ) || [];
-  
-  // 计算边距 - 基于父容器而非屏幕
-  useEffect(() => {
-    if (containerRef.current) {
-      try {
-        // 获取容器宽度
-        const containerWidth = containerRef.current.clientWidth;
-        // 卡片宽度为容器的85%
-        const cardWidth = containerWidth * 0.85;
-        // 两侧边距等分剩余空间
-        const margin = Math.floor((containerWidth - cardWidth) / 2);
-        setSideMargin(`${margin}px`);
-      } catch (error) {
-        // 异常处理
-        console.error('计算边距出错', error);
-      }
-    }
-  }, []);
-  
-  // 处理轮播切换
-  const handleSwipeChange = (e: any) => {
-    if (e?.detail?.current != null) {
-      setCurrentIndex(e.detail.current);
-    }
-  };
-  
-  // 处理服务点击
-  const handleServiceClick = (service: ServiceItem) => {
-    onServiceClick?.(service);
-  };
-
-  // 空数据处理
-  if (!validServices.length) {
-    return <View className='service-carousel-empty'>暂无服务数据</View>;
-  }
-
-  // 计算是否应显示指示器
-  const shouldShowIndicator = validServices.length > 1;
-  
-  // 计算初始索引，确保在有效范围内
-  const safeInitialIndex = Math.max(0, Math.min(initialIndex, validServices.length - 1));
-
-  return (
-    <View className={`service-carousel ${className}`} ref={containerRef}>
-      <Swiper
-        className='service-swiper'
-        circular={validServices.length > 2}
-        autoplay={autoPlay && validServices.length > 1}
-        interval={interval}
-        previousMargin={sideMargin}
-        nextMargin={sideMargin}
-        onChange={handleSwipeChange}
-        indicatorDots={false}
-        current={safeInitialIndex}
-      >
-        {validServices.map((service, index) => (
-          <SwiperItem key={`service-${service.id}`} className='service-swiper-item'>
-            <View 
-              className={`service-card ${index === currentIndex ? 'service-card-active' : ''}`}
-              onClick={() => handleServiceClick(service)}
-            >
-              <View className='service-card-main'>
-                <Text className='service-title'>{service.title || ''}</Text>
-                <Text className='service-description'>{service.description || ''}</Text>
-                
-                <View className='service-features'>
-                  {(service.features || []).map((feature, idx) => (
-                    <Text key={`feature-${idx}`} className='feature-tag'>{feature}</Text>
-                  ))}
-                </View>
-              </View>
-            </View>
-          </SwiperItem>
-        ))}
-      </Swiper>
-      
-      {/* 自定义指示器 */}
-      {shouldShowIndicator && (
-        <View className="swiper-indicators">
-          {validServices.map((_, index) => (
-            <View 
-              key={`indicator-${index}`} 
-              className={`swiper-indicator ${index === currentIndex ? 'swiper-indicator-active' : ''}`}
-            />
-          ))}
-        </View>
-      )}
-    </View>
-  );
-};
-
-export default ServiceCarousel;
-===== End of File: components\ServiceCardCarousel\index.tsx =====
-
-
-===== File: components\ServiceSection\index.scss =====
-.service-section {
-  margin: 10px 10px 15px; /* 减少顶部外边距 */
-  border-radius: 10px;
-  overflow: hidden;
-  background-color: #fff;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
-
-  &__header {
-    padding: 10px 15px; /* 进一步减少头部内边距 */
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  &__title {
-    display: block;
-    font-size: 17px; /* 略微减小标题字体 */
-    font-weight: bold;
-    color: #2563EB;
-    margin-bottom: 0px; /* 去除标题下方间距 */
-  }
-
-  &__subtitle {
-    font-size: 13px; /* 略微减小副标题字体 */
-    color: #6B7280;
-  }
-
-  &__swiper {
-    height: 170px;
-    width: 100%;
-    padding-top: 5px; /* 减少顶部内边距 */
-  }
-}
-
-.service-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.banner-swiper {
+  width: 100%;
   height: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
-  margin-top: -20px; /* 增加负边距，进一步向上移动内容 */
-  
-  &__title {
-    font-size: 30px;
-    font-weight: bold;
-    color: #2563EB;
-    margin-bottom: 18px;
-    text-align: center;
-  }
-
-  &__description {
-    font-size: 16px;
-    color: #4B5563;
-    line-height: 1.5;
-    text-align: center;
-    max-width: 85%;
-  }
 }
-===== End of File: components\ServiceSection\index.scss =====
+
+.banner-item {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.banner-content {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  text-align: left;
+}
+
+.banner-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 4px;
+  display: block;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.banner-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+===== End of File: components\BannerCarousel\index.scss =====
 
 
-===== File: components\ServiceSection\index.tsx =====
-import { View, Text, Swiper, SwiperItem } from '@tarojs/components'
-import { Service } from 'src/services/api/index/types'
+===== File: components\BannerCarousel\index.tsx =====
+import { View, Text, Image, Swiper, SwiperItem } from '@tarojs/components'
+import { Banner } from 'src/services/api/index/types'
 import './index.scss'
 
-interface ServiceSectionProps {
-  services: Service[]
+interface BannerCarouselProps {
+  banners: Banner[];
 }
 
-export default function ServiceSection({ services }: ServiceSectionProps) {
+export default function BannerCarousel({ banners }: BannerCarouselProps) {
   return (
-    <View className='service-section card'>
-      <View className='service-section__header'>
-        <Text className='service-section__title'>我们的服务</Text>
-        <Text className='service-section__subtitle'>专业团队，优质服务</Text>
-      </View>
-      
+    <View className='banner-carousel'>
       <Swiper
-        className='service-section__swiper'
+        className='banner-swiper'
         indicatorColor='#ddd'
         indicatorActiveColor='#2563EB'
         circular
         indicatorDots
         autoplay
-        interval={5000} // 增加间隔时间，让用户有更多时间阅读
+        interval={3500}
       >
-        {services.map(service => (
-          <SwiperItem key={service.id}>
-            <View className='service-item'>
-              <Text className='service-item__title'>{service.title}</Text>
-              <Text className='service-item__description'>{service.description}</Text>
+        {banners.map(banner => (
+          <SwiperItem key={banner.id}>
+            <View className='banner-item'>
+              <Image 
+                className='banner-image' 
+                src={banner.imageUrl} 
+                mode='aspectFill'
+              />
+              <View className='banner-content'>
+                {banner.title && (
+                  <Text className='banner-title'>{banner.title}</Text>
+                )}
+                
+                {banner.subtitle && (
+                  <Text className='banner-subtitle'>{banner.subtitle}</Text>
+                )}
+              </View>
             </View>
           </SwiperItem>
         ))}
@@ -1052,7 +300,7 @@ export default function ServiceSection({ services }: ServiceSectionProps) {
     </View>
   )
 }
-===== End of File: components\ServiceSection\index.tsx =====
+===== End of File: components\BannerCarousel\index.tsx =====
 
 
 ===== File: components\ShowcaseSection\index.scss =====
@@ -1484,817 +732,168 @@ export default ShowcaseSection;
 ===== End of File: index.html =====
 
 
-===== File: pages\cases\index.config.ts =====
-export default definePageConfig({
-  navigationBarTitleText: '案例'
-})
-===== End of File: pages\cases\index.config.ts =====
+===== File: pages\index\index.config.ts =====
+export default {
+  navigationBarTitleText: '郑式修缮',
+  enablePullDownRefresh: true,
+  backgroundColor: '#f5f5f5',
+  backgroundTextStyle: 'dark',
+  navigationBarBackgroundColor: '#ffffff',
+  navigationBarTextStyle: 'black'
+}
+===== End of File: pages\index\index.config.ts =====
 
 
-===== File: pages\cases\index.scss =====
-/* 案例页面样式 */
-.cases-page {
+===== File: pages\index\index.scss =====
+/* 防水服务小程序样式 */
+
+// 页面整体样式
+.page {
+  background-color: #f5f7fa;
   min-height: 100vh;
-  background-color: #f7f9fc;
-  padding-bottom: env(safe-area-inset-bottom);
-  
-  /* PageHeader容器 */
-  &-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    margin-top: -1px;
-  }
-
-  /* 内容区域 */
-  &-content {
-    padding: 12px;
-    /* 精确计算顶部距离 - 根据搜索框和标签页的实际高度 */
-    padding-top: 98px;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  /* 案例列表 */
-  &-list {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 16px;
-  }
-
-  /* 案例卡片 */
-  &-card {
-    background-color: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-    
-    &:active {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
-    }
-    
-    &-images {
-      width: 100%;
-      height: 200px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    &-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-      
-      &:hover {
-        transform: scale(1.05);
-      }
-    }
-    
-    &-content {
-      padding: 16px 18px;
-    }
-    
-    &-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1F2937;
-      margin-bottom: 10px;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    &-type {
-      display: inline-block;
-      font-size: 12px;
-      color: #2563EB;
-      background-color: rgba(37, 99, 235, 0.08);
-      padding: 4px 10px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-    
-    &-description {
-      font-size: 14px;
-      color: #4B5563;
-      margin-bottom: 14px;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      height: 42px;
-    }
-    
-    &-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      
-      &-item {
-        font-size: 13px;
-        color: #6B7280;
-      }
-    }
-  }
-
-  /* 骨架屏样式 */
-  &-skeletons {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 16px;
-  }
-
-  &-skeleton {
-    background-color: #fff;
-    padding: 0;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    
-    &-image {
-      width: 100%;
-      height: 200px;
-      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 0;
-      margin-bottom: 0;
-    }
-    
-    &-content {
-      padding: 16px 18px;
-    }
-    
-    &-title {
-      width: 80%;
-      height: 24px;
-      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 4px;
-      margin-bottom: 12px;
-    }
-    
-    &-tag {
-      width: 90px;
-      height: 24px;
-      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 12px;
-      margin-bottom: 14px;
-    }
-    
-    &-desc {
-      width: 100%;
-      height: 36px;
-      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 4px;
-      margin-bottom: 14px;
-    }
-    
-    &-meta {
-      display: flex;
-      gap: 12px;
-      
-      &-item {
-        width: 80px;
-        height: 18px;
-        background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
-        background-size: 400% 100%;
-        animation: shimmer 1.5s infinite linear;
-        border-radius: 4px;
-      }
-    }
-  }
-  
-  /* 加载更多样式 */
-  .loading-more {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px 0;
-    
-    .loading-text {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #999;
-    }
-  }
-  
-  @keyframes shimmer {
-    0% {
-      background-position: 100% 0;
-    }
-    100% {
-      background-position: -100% 0;
-    }
-  }
-
-  /* 案例详情弹窗样式 */
-  &-detail {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    
-    &-header {
-      padding: 16px 18px;
-      border-bottom: 1px solid #f2f2f2;
-      flex-shrink: 0; // 防止头部被压缩
-    }
-    
-    &-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #1F2937;
-    }
-    
-    &-scroll {
-      flex: 1;
-      height: 0 !important; // 关键: 强制ScrollView计算高度
-      -webkit-overflow-scrolling: touch; // iOS滚动优化
-    }
-    
-    &-content {
-      padding: 18px;
-    }
-    
-    &-images {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    
-    &-image {
-      width: 100%;
-      height: 130px;
-      border-radius: 10px;
-      object-fit: cover;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    &-info {
-      padding-bottom: 24px;
-    }
-    
-    &-type {
-      display: inline-block;
-      font-size: 14px;
-      color: #2563EB;
-      background-color: rgba(37, 99, 235, 0.08);
-      padding: 5px 12px;
-      border-radius: 18px;
-      margin-bottom: 18px;
-      font-weight: 500;
-    }
-    
-    &-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 18px;
-      
-      &-item {
-        font-size: 14px;
-        color: #4B5563;
-        font-weight: 500;
-        padding: 4px 12px;
-        background-color: #f5f7fc;
-        border-radius: 6px;
-        margin-right: 5px;
-      }
-    }
-    
-    &-description {
-      font-size: 17px;
-      font-weight: 600;
-      color: #1F2937;
-      margin-bottom: 12px;
-    }
-    
-    &-text {
-      font-size: 15px;
-      color: #4B5563;
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
-    
-    &-button {
-      margin-top: 20px;
-    }
-  }
-
-  /* 动画效果 */
-  &-item {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.4s ease-out forwards;
-    
-    @for $i from 1 through 10 {
-      &-#{$i} {
-        animation-delay: $i * 0.05s;
-      }
-    }
-  }
-
-  /* 空状态样式 */
-  &-empty {
-    padding-top: 60px;
-    text-align: center;
-    height: 60vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* 响应式布局 */
-  @media screen and (min-width: 576px) {
-    &-list {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
-    &-skeletons {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media screen and (min-width: 768px) {
-    &-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      padding-top: 108px;
-    }
-    
-    &-list {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    
-    &-skeletons {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    
-    &-card {
-      &-images {
-        height: 220px;
-      }
-    }
-  }
-
-  /* 设备适配 */
-  @supports (padding-top: constant(safe-area-inset-top)) {
-    &-header {
-      padding-top: constant(safe-area-inset-top);
-    }
-    
-    &-content {
-      padding-top: calc(98px + constant(safe-area-inset-top));
-    }
-  }
-
-  @supports (padding-top: env(safe-area-inset-top)) {
-    &-header {
-      padding-top: env(safe-area-inset-top);
-    }
-    
-    &-content {
-      padding-top: calc(98px + env(safe-area-inset-top));
-    }
-  }
-
-  /* 减少动画 */
-  @media (prefers-reduced-motion: reduce) {
-    &-item {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
-    
-    .cases-page-skeleton-image,
-    .cases-page-skeleton-title,
-    .cases-page-skeleton-tag,
-    .cases-page-skeleton-desc,
-    .cases-page-skeleton-meta-item {
-      animation: none;
-      background: #f2f2f2;
-    }
-  }
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
-/* 动画关键帧 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+// 加载状态
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  
+  .loading-text {
+    margin-top: 12px;
+    color: #666;
+    font-size: 14px;
   }
 }
-===== End of File: pages\cases\index.scss =====
+===== End of File: pages\index\index.scss =====
 
 
-===== File: pages\cases\index.tsx =====
-// pages/cases/index.tsx
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, Image,ScrollView} from '@tarojs/components'
-import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
-import { 
-  Button,
-  Empty, 
-  InfiniteLoading,
-  Popup,
-  Toast,
-  Loading
-} from '@nutui/nutui-react-taro'
+===== File: pages\index\index.tsx =====
+// pages/index/index.tsx
+import { useEffect, useState } from 'react'
+import { View, Text } from '@tarojs/components'
+import { Toast, Loading } from '@nutui/nutui-react-taro'
+import Taro from '@tarojs/taro'
 import './index.scss'
 
-// Import PageHeader component
-import PageHeader from 'src/components/PageHeader';
+// 导入组件
+import BannerCarousel from 'src/components/BannerCarousel'
+import QuickContact from 'src/components/QuickContact'
+import ServiceSection from 'src/components/ServiceSection'
+import ShowcaseSection from 'src/components/ShowcaseSection'
 
-// Import API and types
-import { 
-  CaseData, 
-  CaseQueryParams 
-} from 'src/services/api/cases/types'
-import {
-  getCases,
-  getCaseDetail,
-  handleCasesError,
-  CASES_TYPES,
-  PAGE_SIZE
-} from 'src/services/api/cases/casesApi'
+// 直接导入API和类型
+import { IndexData } from 'src/services/api/index/types'
+import { getIndexData, handleIndexError } from 'src/services/api/index/indexApi'
 
-export default function CasesPage() {
+export default function IndexPage() {
   // 状态管理
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [cases, setCases] = useState<CaseData[]>([]);
-  const [currentType, setCurrentType] = useState<string>('all');
-  const [keyword, setKeyword] = useState('');
-  const [selectedCase, setSelectedCase] = useState<CaseData | null>(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('fail');
-
-  // Component mount state tracking
-  const isMounted = useRef(true);
+  const [loading, setLoading] = useState(true)
+  const [indexData, setIndexData] = useState<IndexData | null>(null)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMsg, setToastMsg] = useState('')
+  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('success')
   
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  // 分享功能
-  useShareAppMessage(() => ({
-    title: '防水工程案例展示',
-    path: '/pages/cases/index',
-    imageUrl: cases.length > 0 ? cases[0].images[0] : undefined,
-  }));
-
   // 显示提示消息
-  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'fail') => {
-    if (!isMounted.current) return;
-    setToastMsg(message);
-    setToastType(type);
-    setShowToast(true);
-  }, []);
-
-  // 加载案例数据 - with TypeScript fix
-  const loadCases = useCallback(
-    async (isRefresh = false) => {
-      try {
-        const currentPage = isRefresh ? 1 : page;
-        
-        if (isRefresh) {
-          setLoading(true);
-        } else {
-          setLoadingMore(true);
-        }
-
-        const res = await getCases({
-          type: currentType,
-          keyword,
-          page: currentPage,
-          pageSize: PAGE_SIZE,
-        });
-
-        if (!isMounted.current) return;
-
-        if (res.success) {
-          // Use default empty array to avoid TypeScript error
-          const responseData = res.data || [];
-          
-          // Update cases based on refresh flag
-          if (isRefresh) {
-            setCases(responseData);
-          } else {
-            setCases(prev => [...prev, ...responseData]);
-          }
-          
-          setHasMore(res.hasMore || false);
-          
-          if (isRefresh) {
-            setPage(1);
-          } else {
-            setPage(prev => prev + 1);
-          }
-        } else {
-          showToastMessage(res.error || '获取案例列表失败');
-        }
-      } catch (err) {
-        if (!isMounted.current) return;
-        showToastMessage(handleCasesError(err));
-      } finally {
-        if (!isMounted.current) return;
-        setLoading(false);
-        setLoadingMore(false);
-        setRefreshing(false);
-      }
-    },
-    [currentType, keyword, page, showToastMessage]
-  );
-
-  // 类型或关键词变化时加载案例
-  useEffect(() => {
-    loadCases(true);
-  }, [currentType, keyword, loadCases]);
-
-  // 页面显示时重新加载案例
-  useDidShow(() => {
-    if (cases.length === 0 && !loading) {
-      loadCases(true);
+  const showToastMessage = (message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
+    if (showToast) {
+      setShowToast(false)
+      setTimeout(() => {
+        setToastMsg(message)
+        setToastType(type)
+        setShowToast(true)
+      }, 100)
+    } else {
+      setToastMsg(message)
+      setToastType(type)
+      setShowToast(true)
     }
-  });
-
-  // 处理搜索输入变化
-  const handleSearch = useCallback((value: string) => {
-    setKeyword(value);
-  }, []);
-
-  // 处理类型变化
-  const handleTypeChange = useCallback((value: string) => {
-    setCurrentType(value);
-  }, []);
-
-  // 处理下拉刷新
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadCases(true);
-    Taro.stopPullDownRefresh();
-  }, [loadCases]);
+  }
   
-  // 注册下拉刷新
+  // 获取数据
   useEffect(() => {
-    Taro.eventCenter.on('pullDownRefresh', handleRefresh);
+    const fetchData = async () => {
+      setLoading(true)
+      
+      try {
+        // 获取所有首页数据
+        const result = await getIndexData()
+        
+        if (result.success && result.data) {
+          setIndexData(result.data)
+        } else {
+          showToastMessage(result.error || '获取首页数据失败', 'fail')
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        showToastMessage(handleIndexError(error), 'fail')
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [])
+  
+  // 下拉刷新处理
+  useEffect(() => {
+    Taro.eventCenter.on('pullDownRefresh', async () => {
+      try {
+        // 刷新首页数据
+        const result = await getIndexData()
+        
+        if (result.success && result.data) {
+          setIndexData(result.data)
+          showToastMessage('刷新成功', 'success')
+        } else {
+          showToastMessage(result.error || '刷新数据失败', 'fail')
+        }
+      } catch (error) {
+        showToastMessage(handleIndexError(error), 'fail')
+      } finally {
+        Taro.stopPullDownRefresh()
+      }
+    })
     
     return () => {
-      Taro.eventCenter.off('pullDownRefresh');
-    };
-  }, [handleRefresh]);
-
-  // 处理加载更多
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !loading && !loadingMore) {
-      return loadCases(false);
+      Taro.eventCenter.off('pullDownRefresh')
     }
-    return Promise.resolve();
-  }, [hasMore, loading, loadingMore, loadCases]);
-
-  // 处理案例点击
-  const handleCaseClick = useCallback(async (id: number) => {
-    try {
-      setLoading(true);
-      const res = await getCaseDetail(id);
-      
-      if (!isMounted.current) return;
-      
-      if (res.success && res.data) {
-        setSelectedCase(res.data);
-        setShowDetail(true);
-      } else {
-        showToastMessage(res.error || '获取案例详情失败');
-      }
-    } catch (err) {
-      if (!isMounted.current) return;
-      showToastMessage(handleCasesError(err));
-    } finally {
-      if (!isMounted.current) return;
-      setLoading(false);
-    }
-  }, [showToastMessage]);
-
-  // 处理预约服务
-  const handleBook = useCallback(async (data: CaseData) => {
-    try {
-      await Taro.setStorage({
-        key: 'selected_case',
-        data,
-      });
-      showToastMessage('已添加到咨询列表', 'success');
-      setTimeout(() => {
-        if (isMounted.current) {
-          Taro.switchTab({
-            url: '/pages/contact/index',
-          });
-        }
-      }, 1500);
-    } catch (err) {
-      if (!isMounted.current) return;
-      showToastMessage(handleCasesError(err));
-    }
-  }, [showToastMessage]);
-
-  // 关闭详情弹窗
-  const handleCloseDetail = useCallback(() => {
-    setShowDetail(false);
-  }, []);
-
-  // 骨架屏UI - 使用useMemo优化性能
-  const renderSkeletons = useMemo(() => {
+  }, [])
+  
+  // 加载状态
+  if (loading || !indexData) {
     return (
-      <View className="cases-page-skeletons">
-        {[1, 2, 3].map((i) => (
-          <View key={i} className="cases-page-skeleton">
-            <View className="cases-page-skeleton-image"></View>
-            <View className="cases-page-skeleton-content">
-              <View className="cases-page-skeleton-title"></View>
-              <View className="cases-page-skeleton-tag"></View>
-              <View className="cases-page-skeleton-desc"></View>
-              <View className="cases-page-skeleton-meta">
-                <View className="cases-page-skeleton-meta-item"></View>
-                <View className="cases-page-skeleton-meta-item"></View>
-              </View>
-            </View>
-          </View>
-        ))}
+      <View className='loading-container'>
+        <Loading type='spinner' />
+        <Text className='loading-text'>加载中...</Text>
       </View>
-    );
-  }, []);
-
-  // 格式化日期字符串
-  const formatDate = useCallback((dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  }, []);
-
+    )
+  }
+  
   return (
-    <View className="cases-page">
-      {/* 使用容器包裹PageHeader，处理定位 */}
-      <View className="cases-page-header">
-        <PageHeader
-          keyword={keyword}
-          onSearch={handleSearch}
-          searchPlaceholder="搜索工程案例"
-          currentType={currentType}
-          onTypeChange={handleTypeChange}
-          tabs={CASES_TYPES}
-        />
-      </View>
-
-      {/* 内容 */}
-      <View className="cases-page-content">
-        {/* 加载骨架屏 */}
-        {loading && cases.length === 0 ? (
-          renderSkeletons
-        ) : cases.length > 0 ? (
-          <View className="cases-page-list">
-            {cases.map((item, index) => (
-              <View key={item.id} className={`cases-page-item cases-page-item-${index + 1}`}>
-                <View className="cases-page-card" onClick={() => handleCaseClick(item.id)}>
-                  <View className="cases-page-card-images">
-                    <Image 
-                      src={item.images[0]} 
-                      className="cases-page-card-image"
-                      mode="aspectFill"
-                      lazyLoad
-                    />
-                  </View>
-                  <View className="cases-page-card-content">
-                    <View className="cases-page-card-title">{item.title}</View>
-                    <View className="cases-page-card-type">{item.type}</View>
-                    <View className="cases-page-card-description">{item.description}</View>
-                    <View className="cases-page-card-meta">
-                      <Text className="cases-page-card-meta-item">面积: {item.area}</Text>
-                      <Text className="cases-page-card-meta-item">工期: {item.duration}</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View className="cases-page-empty">
-            <Empty description="暂无相关案例" image="empty" />
-          </View>
-        )}
-
-        {/* 无限加载 */}
-        {cases.length > 0 && (
-          loadingMore ? (
-            <View className="loading-more">
-              <Loading/>
-              <View className="loading-text">加载中...</View>
-            </View>
-          ) : (
-            <InfiniteLoading
-              hasMore={hasMore}
-              threshold={200}
-              loadingText="加载中..."
-              loadMoreText="已经到底啦"
-              onLoadMore={handleLoadMore}
-            />
-          )
-        )}
-      </View>
-
-      {/* 案例详情弹窗 */}
-      <Popup
-  visible={showDetail}
-  position="bottom"
-  round
-  style={{ height: '80%' }}
-  onClose={handleCloseDetail}
->
-  {selectedCase && (
-    <View className="cases-page-detail">
-      {/* 固定高度的头部 */}
-      <View className="cases-page-detail-header">
-        <View className="cases-page-detail-title">{selectedCase.title}</View>
-      </View>
+    <View className='page'>
+      {/* Banner区域 */}
+      <BannerCarousel banners={indexData.banners} />
       
-      {/* 滚动内容区域 */}
-      <ScrollView 
-        scrollY
-        className="cases-page-detail-scroll"
-        enhanced={false}
-        showScrollbar={false}
-      >
-        <View className="cases-page-detail-content">
-          <View className="cases-page-detail-images">
-            {selectedCase.images.map((img, idx) => (
-              <Image 
-                key={idx} 
-                src={img} 
-                className="cases-page-detail-image"
-                mode="aspectFill"
-                lazyLoad
-                onClick={() => {
-                  Taro.previewImage({
-                    current: img,
-                    urls: selectedCase.images
-                  });
-                }}
-              />
-            ))}
-          </View>
-          <View className="cases-page-detail-info">
-            <View className="cases-page-detail-type">{selectedCase.type}</View>
-            <View className="cases-page-detail-meta">
-              <Text className="cases-page-detail-meta-item">面积: {selectedCase.area}</Text>
-              <Text className="cases-page-detail-meta-item">工期: {selectedCase.duration}</Text>
-              <Text className="cases-page-detail-meta-item">完成日期: {formatDate(selectedCase.date)}</Text>
-            </View>
-            <View className="cases-page-detail-description">项目概述</View>
-            <View className="cases-page-detail-text">{selectedCase.content}</View>
-            <Button 
-              type="primary" 
-              block
-              shape="round"
-              className="cases-page-detail-button"
-              onClick={() => handleBook(selectedCase)}
-            >
-              咨询类似方案
-            </Button>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
-  )}
-</Popup>
-
+      {/* 快速联系 */}
+      <QuickContact 
+        contactInfo={indexData.contactInfo}
+        onShowToast={showToastMessage}
+      />
+      
+      {/* 服务分类 */}
+      <ServiceSection services={indexData.services} />
+      
+      {/* 精选案例 */}
+      <ShowcaseSection 
+        showcases={indexData.showcases}
+        contactPhone={indexData.contactInfo.phone}
+        onShowToast={showToastMessage}
+      />
+      
       {/* Toast组件 */}
       <Toast
         msg={toastMsg}
@@ -2302,262 +901,198 @@ export default function CasesPage() {
         type={toastType}
         onClose={() => setShowToast(false)}
         duration={2000}
-        position="center"
+        position='center'
         closeOnOverlayClick
       />
     </View>
-  );
+  )
 }
-===== End of File: pages\cases\index.tsx =====
+===== End of File: pages\index\index.tsx =====
 
 
-===== File: services\api\cases\casesApi.ts =====
-// services/api/cases/casesApi.ts
+===== File: services\api\index\data.ts =====
+// services/api/index/data.ts
+import { IndexData } from './types';
+
+// 首页模拟数据
+export const indexData: IndexData = {
+  // 服务数据 - 修改为新的四项服务
+  services: [
+    {
+      id: 1,
+      title: '漏水检测',
+      description: '专业检测技术，精准定位漏水点'
+    },
+    {
+      id: 2,
+      title: '防水施工',
+      description: '高标准防水工程，杜绝后顾之忧'
+    },
+    {
+      id: 3,
+      title: '渗漏维修',
+      description: '快速应对各类渗漏问题，及时修复'
+    },
+    {
+      id: 4,
+      title: '材料销售',
+      description: '优质防水材料，专业技术支持'
+    }
+  ],
+  
+  // 精选案例数据
+  showcases: [
+    {
+      id: '1',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
+      title: '城市花园小区屋顶防水工程',
+      description: '解决屋顶长期渗水问题，采用最新防水材料，5年质保',
+      content: '城市花园小区建于2010年，屋顶长期存在渗水问题，影响居民正常生活。我们使用高分子防水卷材对屋顶进行全面防水处理，并增加了排水系统改造，彻底解决了漏水问题。该工程覆盖面积达2000平方米，工期15天，提供5年质保服务。'
+    },
+    {
+      id: '2',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
+      title: '滨江豪庭别墅防水工程',
+      description: '别墅地下室、游泳池、卫生间整体防水，确保万无一失',
+      content: '滨江豪庭别墅是高端住宅项目，业主要求对地下室、游泳池及卫生间进行高标准防水处理。我们采用了双层防水技术，内层使用柔性防水涂料，外层使用自粘防水卷材，并在关键部位增加了防水附加层。整个工程历时25天，防水面积达800平方米，通过了72小时蓄水测试，确保万无一失。'
+    },
+    {
+      id: '3',
+      imageUrl: 'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
+      title: '阳光商城外墙防水翻新',
+      description: '大型商业综合体外墙防水，美观与实用并重',
+      content: '阳光商城是市中心大型商业综合体，建成已有8年，外墙出现多处渗水和墙面脱落现象。我们对整个外墙进行了清洁、修复和防水处理，采用了新型纳米防水涂料，具有优异的防水性能和耐候性。工程面积达5000平方米，不仅解决了渗水问题，还恢复了建筑外观，使商城焕然一新。'
+    }
+  ],
+  
+  // 联系信息
+  contactInfo: {
+    phone: '400-123-4567',
+    wechat: 'waterproof123'
+  },
+  
+  // Banner数据 - 修改标题
+  banners: [
+    {
+      id: '1',
+      imageUrl: 'https://img.picui.cn/free/2025/05/21/682d7803ab8ad.png',
+      title: '郑式修缮',
+      subtitle: '专业修缮 · 品质保障'
+    },
+    {
+      id: '2',
+      imageUrl: 'https://img.picui.cn/free/2025/05/21/682d7803ab8ad.png',
+      title: '郑式修缮',
+      subtitle: '专业修缮 · 品质保障'
+    },
+    {
+      id: '3',
+      imageUrl: 'https://img.picui.cn/free/2025/05/21/682d7803ab8ad.png',
+      title: '郑式修缮',
+      subtitle: '专业修缮 · 品质保障'
+    }
+  ]
+};
+===== End of File: services\api\index\data.ts =====
+
+
+===== File: services\api\index\indexApi.ts =====
+// services/api/index/indexApi.ts
 import http from '../../http';
-import { CaseData, CaseQueryParams, CaseApiResponse, CasesApiResponse } from './types';
-import { mockCases, PAGE_SIZE, CASES_TYPES } from './data';
+import { IndexData, ApiResponse } from './types';
+import { indexData } from './data';
 
 // API端点
 const ENDPOINTS = {
-  GET_CASES: '/cases',
-  GET_CASE_DETAIL: '/cases/:id',
+  GET_INDEX_DATA: '/index',
 };
 
 /**
- * 获取案例列表
+ * 获取首页所有数据
  */
-export const getCases = async ({
-  type,
-  keyword,
-  page,
-  pageSize
-}: CaseQueryParams): Promise<CasesApiResponse> => {
+export const getIndexData = async (): Promise<ApiResponse<IndexData>> => {
   try {
     // 替换为实际API调用当后端准备好时
-    // const data = await http.get(ENDPOINTS.GET_CASES, { type, keyword, page, pageSize });
+    // const data = await http.get<IndexData>(ENDPOINTS.GET_INDEX_DATA);
     
     // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    // 过滤模拟数据
-    let filteredData = mockCases.filter(item => {
-      if (type !== 'all' && item.type !== type) return false;
-      if (keyword && !item.title.includes(keyword) && !item.description.includes(keyword)) return false;
-      return true;
-    });
-    
-    // 分页
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedData = filteredData.slice(startIndex, endIndex);
-    
-    // 判断是否还有更多数据
-    const hasMore = endIndex < filteredData.length;
-    
+    // 返回模拟数据
     return {
       success: true,
-      data: paginatedData,
-      hasMore
+      data: indexData
     };
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || '获取案例列表失败',
-      data: []
+      error: error.message || '获取首页数据失败'
     };
   }
 };
 
 /**
- * 根据ID获取案例详情
+ * 首页模块错误处理工具
  */
-export const getCaseDetail = async (id: number): Promise<CaseApiResponse<CaseData>> => {
-  try {
-    // 替换为实际API调用当后端准备好时
-    // const url = ENDPOINTS.GET_CASE_DETAIL.replace(':id', id.toString());
-    // const data = await http.get(url);
-    
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // 查找案例
-    const caseItem = mockCases.find(item => item.id === id);
-    
-    if (caseItem) {
-      return {
-        success: true,
-        data: caseItem
-      };
-    } else {
-      throw new Error('案例不存在');
-    }
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || '获取案例详情失败'
-    };
-  }
+export const handleIndexError = (err: any): string => {
+  console.error('Index API Error:', err);
+  return err instanceof Error ? err.message : '获取首页数据时发生未知错误';
 };
 
-/**
- * 错误处理工具 - 重命名为handleCasesError
- */
-export const handleCasesError = (err: any): string => {
-  console.error(err);
-  return err instanceof Error ? err.message : '发生未知错误';
-};
-
-// 直接导出常量
-export { mockCases, PAGE_SIZE, CASES_TYPES };
-
-// 导出类型
+// 导出类型和数据
 export * from './types';
 export * from './data';
-===== End of File: services\api\cases\casesApi.ts =====
+===== End of File: services\api\index\indexApi.ts =====
 
 
-===== File: services\api\cases\data.ts =====
-// services/api/cases/data.ts
+===== File: services\api\index\types.ts =====
+// services/index/api/types.ts
 
-import { CaseData } from './types';
-
-// 案例类型常量
-export const CASES_TYPES = [
-  { title: '全部', value: 'all' },
-  { title: '地下防水', value: '地下防水' },
-  { title: '外墙防水', value: '外墙防水' },
-  { title: '屋面防水', value: '屋面防水' },
-];
-
-// 分页大小常量
-export const PAGE_SIZE = 10;
-
-// 模拟数据
-export const mockCases: CaseData[] = [
-  {
-    id: 1,
-    title: '某小区地下车库防水工程',
-    type: '地下防水',
-    description: '为某小区地下车库进行全面防水处理，解决了长期渗水问题。',
-    area: '2000平方米',
-    duration: '30天',
-    date: '2024-08-15',
-    images: [
-      'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
-      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg'
-    ],
-    content: '该小区地下车库建于2010年，由于防水层老化，导致雨季经常出现渗水现象，影响车辆停放和居民出行。我们采用了双层防水解决方案，使用高弹性防水涂料结合防水卷材，完全解决了渗漏问题。同时，我们也优化了排水系统，提高了排水效率。本项目覆盖面积达2000平方米，工期30天，业主反馈非常满意。'
-  },
-  {
-    id: 2,
-    title: '高层建筑外墙防水项目',
-    type: '外墙防水',
-    description: '为某高层建筑外墙进行防水处理，有效解决了雨天渗水问题。',
-    area: '3500平方米',
-    duration: '45天',
-    date: '2024-07-20',
-    images: [
-      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
-      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg'
-    ],
-    content: '该高层建筑外墙在强降雨天气条件下，多处出现渗漏，影响室内使用及建筑寿命。我们对整个外墙进行了全面检测，找出所有渗漏点，采用纳米防水材料进行修复和防护。工程历时45天，面积达3500平方米，目前已度过多次暴雨考验，防水效果良好。'
-  },
-  {
-    id: 3,
-    title: '别墅屋顶防水工程',
-    type: '屋面防水',
-    description: '为某高档别墅区进行屋顶防水施工，确保防水效果长达15年以上。',
-    area: '300平方米',
-    duration: '15天',
-    date: '2024-09-05',
-    images: [
-      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
-      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg'
-    ],
-    content: '别墅区共有5栋独栋别墅，均为坡屋顶设计，原有防水层使用期已超过10年，多处出现老化和破损。我们采用了进口防水材料，对屋顶进行全面翻新，并优化了屋顶排水系统。本工程工期15天，覆盖总面积300平方米，防水质保15年，彻底解决了屋顶漏水的困扰。'
-  },
-  {
-    id: 4,
-    title: '商场卫生间防水整体解决方案',
-    type: '地下防水',
-    description: '为大型商场提供卫生间防水整体解决方案，从根源解决漏水问题。',
-    area: '500平方米',
-    duration: '20天',
-    date: '2024-06-10',
-    images: [
-      'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
-      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg'
-    ],
-    content: '该商场卫生间长期存在渗漏问题，影响了下层商铺的正常经营。我们采用了防水整体解决方案，包括拆除原有地砖和墙砖，铺设高品质防水材料，重新安装管道和洁具，确保防水效果。整个工程历时20天，所有卫生间恢复使用后再无渗漏现象发生。'
-  },
-  {
-    id: 5,
-    title: '学校操场看台防水工程',
-    type: '外墙防水',
-    description: '为学校操场看台进行防水处理，确保学生活动安全。',
-    area: '1200平方米',
-    duration: '25天',
-    date: '2024-05-18',
-    images: [
-      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
-      'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg'
-    ],
-    content: '学校操场看台下方空间被用作器材室，原有防水措施老化导致雨水渗漏，影响器材存放。我们对看台表面进行了全面防水处理，采用耐磨防水材料，确保防水效果的同时增加了防滑功能，提高学生活动安全性。工程面积1200平方米，历时25天完成，目前已经过多次雨季考验，效果良好。'
-  },
-  {
-    id: 6,
-    title: '医院地下室防水工程',
-    type: '地下防水',
-    description: '为医院地下室提供专业防水解决方案，保障医疗设备安全运行。',
-    area: '1800平方米',
-    duration: '35天',
-    date: '2024-04-30',
-    images: [
-      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
-      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg'
-    ],
-    content: '医院地下室存放了大量重要医疗设备和药品，对防水要求极高。我们采用了最先进的防水技术和材料，对整个地下室进行了全面防水处理。工程覆盖面积1800平方米，历时35天，采用了三层防护措施，确保即使在极端天气条件下也不会出现渗漏现象。'
-  }
-];
-===== End of File: services\api\cases\data.ts =====
-
-
-===== File: services\api\cases\types.ts =====
-// services/api/cases/types.ts
-
-// 案例数据接口
-export interface CaseData {
-    id: number;
+// 服务项接口 - 删除features属性
+export interface Service {
+    id: number | string;
     title: string;
-    type: string;
     description: string;
-    area: string;
-    duration: string;
-    date: string;
-    images: string[];
+}
+  
+// 精选案例接口
+export interface Showcase {
+    id: string;
+    imageUrl: string;
+    title: string;
+    description: string;
     content: string;
-  }
+}
   
-  // 案例查询参数
-  export interface CaseQueryParams {
-    type: string;
-    keyword: string;
-    page: number;
-    pageSize: number;
-  }
+// 联系信息接口
+export interface ContactInfo {
+    phone: string;
+    wechat: string;
+}
   
-  // 案例API响应基础接口 - 重命名为更具体的名称
-  export interface CaseApiResponse<T> {
+// Banner接口
+export interface Banner {
+    id: string;
+    imageUrl: string;
+    title?: string;
+    subtitle?: string;
+}
+  
+// 首页数据接口
+export interface IndexData {
+    services: Service[];
+    showcases: Showcase[];
+    contactInfo: ContactInfo;
+    banners: Banner[];
+}
+  
+// API响应包装器
+export interface ApiResponse<T> {
     success: boolean;
     data?: T;
     error?: string;
-  }
-  
-  // 案例列表API响应
-  export interface CasesApiResponse extends CaseApiResponse<CaseData[]> {
-    hasMore?: boolean; // 是否还有更多数据
-  }
-===== End of File: services\api\cases\types.ts =====
+}
+===== End of File: services\api\index\types.ts =====
 
 
 ===== File: services\http\cache.ts =====
