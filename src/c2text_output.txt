@@ -3,27 +3,31 @@
   📄 app.scss
   📄 app.ts
   📁 components
-    📁 BookingForm
-      📄 index.scss
-      📄 index.tsx
-    📁 ContactInfoCard
+    📁 PageHeader
       📄 index.scss
       📄 index.tsx
     📁 QuickContact
       📄 index.scss
       📄 index.tsx
+    📁 ServiceCardCarousel
+      📄 index.scss
+      📄 index.tsx
+    📁 ServiceSection
+      📄 index.scss
+      📄 index.tsx
+    📁 ShowcaseSection
+      📄 index.scss
+      📄 index.tsx
   📄 index.html
-  📁 packageA
-    📁 pages
   📁 pages
-    📁 contact
+    📁 cases
       📄 index.config.ts
       📄 index.scss
       📄 index.tsx
   📁 services
     📁 api
-      📁 contact
-        📄 contactApi.ts
+      📁 cases
+        📄 casesApi.ts
         📄 data.ts
         📄 types.ts
     📁 http
@@ -201,765 +205,237 @@ export default App
 ===== End of File: app.ts =====
 
 
-===== File: components\BookingForm\index.scss =====
-/* 预约表单样式 */
-.booking-form {
-  position: relative;
-  padding: 0 4px;
+===== File: components\PageHeader\index.scss =====
+/* components/PageHeader/index.scss */
+
+.unified-header {
+  background-color: #fff;
+  width: 100%;
   
-  /* ===== 基础表单项样式 ===== */
-  .form-item {
-    margin-bottom: 20px;
+  /* 搜索区域 */
+  .header-search {
+    padding: 8px 16px 8px;
   }
   
-  /* 表单标签 */
-  .form-item-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: #1e293b;
-    margin-bottom: 8px;
-    
-    /* 必填项标记 */
-    &.required::before {
-      content: '*';
-      color: #ef4444;
-      font-size: 16px;
-      margin-right: 4px;
-    }
-  }
-  
-  /* 错误提示 */
-  .form-error-tip {
-    font-size: 12px;
-    color: #ef4444;
-    margin-top: 4px;
-    padding-left: 16px;
-    position: relative;
-    
-    &::before {
-      content: "!";
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: bold;
-    }
-  }
-  
-  /* ===== 表单控件通用样式 ===== */
-  .form-input,
-  .form-select,
-  .form-textarea {
-    width: 100%;
-    background: #ffffff;
-    border: 1px solid #dce0e4;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #1e293b;
-    box-sizing: border-box;
-    margin-top: 8px;
-    transition: border-color 0.2s ease;
-    
-    &:focus, 
-    &:active {
-      border-color: #3b82f6;
-      outline: none;
-    }
-    
-    &::placeholder {
-      color: #9ca3af;
-    }
-  }
-  
-  /* 输入框 */
-  .form-input {
-    display: block;
-    height: 44px;
-    padding: 0 14px;
-  }
-  
-  /* 选择器 */
-  .form-select {
+  /* 自定义搜索栏样式 */
+  .custom-searchbar {
+    background-color: #f2f2f2;
+    height: 34px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 44px;
-    padding: 0 14px;
-    position: relative;
+    padding: 0 12px;
+    transition: all 0.3s ease;
     
-    .select-placeholder {
-      color: #9ca3af;
-    }
-    
-    .select-value {
-      color: #1e293b;
-    }
-    
-    /* 箭头图标 */
-    .select-arrow {
-      width: 8px;
-      height: 8px;
-      border-top: 2px solid #94a3b8;
-      border-right: 2px solid #94a3b8;
-      transform: rotate(45deg);
-      margin-left: 4px;
-      flex-shrink: 0;
+    &:focus-within {
+      background-color: #e9e9e9;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
     }
   }
   
-  /* 文本域 */
-  .form-textarea {
-    display: block;
-    min-height: 100px;
-    padding: 12px 14px;
-    resize: none;
-  }
-  
-  /* ===== 提交按钮 ===== */
-  .submit-container {
-    margin-top: 24px;
-    margin-bottom: 10px;
-    width: 100%;
-  }
-  
-  .submit-button {
-    display: block;
-    width: 100%;
-    height: 46px;
+  .search-icon {
+    color: #999;
     font-size: 16px;
-    font-weight: 500;
-    color: #ffffff;
-    background: #2563EB;
-    border-radius: 8px;
+    margin-right: 8px;
+  }
+  
+  .search-input {
+    flex: 1;
+    height: 34px;
+    font-size: 14px;
+    color: #333;
     border: none;
-    outline: none;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
+    background: transparent;
+  }
+  
+  .search-clear {
+    color: #999;
+    font-size: 16px;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     
     &:active {
-      opacity: 0.9;
-    }
-    
-    &.loading {
-      opacity: 0.8;
+      background-color: #e0e0e0;
     }
   }
-}
-===== End of File: components\BookingForm\index.scss =====
-
-
-===== File: components\BookingForm\index.tsx =====
-import { useState} from 'react'
-import { View, Text, Picker as TaroPicker, Input, Textarea, Button } from '@tarojs/components'
-import Taro from '@tarojs/taro'
-import { Toast, Picker } from '@nutui/nutui-react-taro'
-import './index.scss'
-
-export interface BookingFormData {
-  name: string;
-  phone: string;
-  serviceType: string;
-  serviceTypeName: string;
-  region: string[];
-  address: string;
-  remark: string;
-}
-
-interface BookingFormProps {
-  serviceTypes: { text: string; value: string }[];
-  loading: boolean;
-  initialValues?: Partial<BookingFormData>;
-  onSubmit: (data: BookingFormData) => void;
-  onServiceTypeSelect: (type: string) => void;
-}
-
-const BookingForm: React.FC<BookingFormProps> = ({ 
-  serviceTypes, 
-  loading,
-  initialValues = {},
-  onSubmit, 
-  onServiceTypeSelect
-}) => {
-  // 表单状态
-  const [formData, setFormData] = useState<Partial<BookingFormData>>(initialValues);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showToast, setShowToast] = useState(false);
-  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
   
-  // Picker状态
-  const [showServicePicker, setShowServicePicker] = useState(false);
+  /* 标签区域 */
+  .header-tabs-container {
+    position: relative;
+    overflow: hidden;
+  }
   
-  // 直接使用serviceTypes，不做映射转换
-  const pickerServiceOptions = [serviceTypes];
-  
-  // 显示提示消息
-  const showMessage = (content, icon = 'success') => {
-    setToastInfo({ content, icon });
-    setShowToast(true);
-  };
-  
-  // 更新表单字段
-  const updateField = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  .tabs-container {
+    white-space: nowrap;
     
-    // 清除错误
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
+    &::-webkit-scrollbar {
+      display: none;
     }
-  };
+  }
   
-  // 处理服务类型确认
-  const handleServiceConfirm = (selectedOptions) => {
-    if (selectedOptions && selectedOptions[0]) {
-      updateField('serviceType', selectedOptions[0].value);
-      updateField('serviceTypeName', selectedOptions[0].text);
-      onServiceTypeSelect(selectedOptions[0].value);
-      
-      // 添加震动反馈
-      Taro.vibrateShort();
-    }
-  };
-  
-  // 处理地区选择
-  const handleRegionChange = (e) => {
-    updateField('region', e.detail.value);
-  };
-  
-  // 表单验证
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  .tabs-list {
+    height: 40px;
+    padding: 0 8px;
+    display: inline-flex;
+    position: relative;
     
-    // 验证姓名
-    if (!formData.name || formData.name.trim().length < 2) {
-      newErrors.name = '请输入联系人姓名(至少2个字符)';
-    }
-    
-    // 验证手机号
-    if (!formData.phone || !/^1[3-9]\d{9}$/.test(formData.phone)) {
-      newErrors.phone = '请输入正确的手机号';
-    }
-    
-    // 验证服务类型
-    if (!formData.serviceType) {
-      newErrors.serviceType = '请选择服务类型';
-    }
-    
-    // 验证所在地区
-    if (!formData.region || !formData.region.length) {
-      newErrors.region = '请选择所在地区';
-    }
-    
-    // 验证详细地址
-    if (!formData.address || formData.address.trim().length < 5) {
-      newErrors.address = '请输入详细地址(至少5个字符)';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  // 提交表单
-  const handleSubmit = () => {
-    if (validateForm()) {
-      // 添加震动反馈
-      Taro.vibrateShort();
-      onSubmit(formData as BookingFormData);
-    } else {
-      // 提交失败震动
-      Taro.vibrateShort();
-      showMessage('请完善必填信息', 'fail');
-    }
-  };
-  
-  // 根据表单值获取显示文本
-  const getServiceTypeText = () => {
-    if (formData.serviceType) {
-      const selectedType = serviceTypes.find(item => item.value === formData.serviceType);
-      return selectedType?.text || '请选择服务类型';
-    }
-    return '请选择服务类型';
-  };
-  
-  const getRegionText = () => {
-    if (formData.region && formData.region.length > 0) {
-      return formData.region.join(' ');
-    }
-    return '请选择所在地区';
-  };
-  
-  return (
-    <View className="booking-form">
-      {/* 联系人姓名 */}
-      <View className="form-item">
-        <Text className="form-item-label required">联系人姓名</Text>
-        <Input 
-          className="form-input"
-          placeholder="请输入姓名"
-          value={formData.name}
-          onInput={e => updateField('name', e.detail.value)}
-        />
-        {errors.name && <Text className="form-error-tip">{errors.name}</Text>}
-      </View>
-      
-      {/* 联系电话 */}
-      <View className="form-item">
-        <Text className="form-item-label required">联系电话</Text>
-        <Input
-          className="form-input"
-          placeholder="请输入手机号码"
-          type="number"
-          value={formData.phone}
-          onInput={e => updateField('phone', e.detail.value)}
-        />
-        {errors.phone && <Text className="form-error-tip">{errors.phone}</Text>}
-      </View>
-      
-      {/* 服务类型 */}
-      <View className="form-item">
-        <Text className="form-item-label required">服务类型</Text>
-        <View 
-          className="form-select"
-          onClick={() => setShowServicePicker(true)}
-        >
-          <Text className={formData.serviceType ? 'select-value' : 'select-placeholder'}>
-            {getServiceTypeText()}
-          </Text>
-          <View className="select-arrow" />
-        </View>
-        {errors.serviceType && <Text className="form-error-tip">{errors.serviceType}</Text>}
-      </View>
-      
-      {/* 所在地区 */}
-      <View className="form-item">
-        <Text className="form-item-label required">所在地区</Text>
-        <TaroPicker
-          mode="region"
-          onChange={handleRegionChange}
-        >
-          <View className="form-select">
-            <Text className={formData.region?.length ? 'select-value' : 'select-placeholder'}>
-              {getRegionText()}
-            </Text>
-            <View className="select-arrow" />
-          </View>
-        </TaroPicker>
-        {errors.region && <Text className="form-error-tip">{errors.region}</Text>}
-      </View>
-      
-      {/* 详细地址 */}
-      <View className="form-item">
-        <Text className="form-item-label required">详细地址</Text>
-        <Input
-          className="form-input"
-          placeholder="请输入详细地址"
-          value={formData.address}
-          onInput={e => updateField('address', e.detail.value)}
-        />
-        {errors.address && <Text className="form-error-tip">{errors.address}</Text>}
-      </View>
-      
-      {/* 补充说明 */}
-      <View className="form-item">
-        <Text className="form-item-label">补充说明</Text>
-        <Textarea
-          className="form-textarea"
-          placeholder="请输入您的具体需求或其他说明（选填）"
-          maxlength={200}
-          value={formData.remark}
-          onInput={e => updateField('remark', e.detail.value)}
-        />
-      </View>
-      
-      {/* 提交按钮 */}
-      <View className="submit-container">
-        <Button
-          className={`submit-button ${loading ? 'loading' : ''}`}
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? '提交中...' : '立即预约'}
-        </Button>
-      </View>
-      
-      {/* NutUI Picker 服务类型选择器 */}
-      <Picker
-        title="选择服务类型"
-        visible={showServicePicker}
-        options={pickerServiceOptions}
-        defaultValue={formData.serviceType ? [formData.serviceType] : []}
-        onClose={() => setShowServicePicker(false)}
-        onConfirm={handleServiceConfirm}
-      />
-      
-      {/* 提示信息 */}
-      <Toast
-        visible={showToast}
-        content={toastInfo.content}
-        icon={toastInfo.icon}
-        onClose={() => setShowToast(false)}
-      />
-    </View>
-  );
-};
-
-export default BookingForm;
-===== End of File: components\BookingForm\index.tsx =====
-
-
-===== File: components\ContactInfoCard\index.scss =====
-/* components/ContactInfoCard/index.scss */
-.contact-info {
-    /* 关于我们描述样式 */
-    .about-description {
-      font-size: 14px;
-      line-height: 1.6;
-      color: #475569;
-      margin-bottom: 20px;
-      text-align: justify;
-      padding: 0 2px;
-    }
-    
-    .info-divider {
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
       height: 1px;
-      background-color: rgba(0, 0, 0, 0.06);
-      margin: 10px 0 18px;
-    }
-    
-    .info-cells {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    /* 联系信息单元格样式 */
-    .info-cell {
-      margin-bottom: 0;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.8);
-      transition: all 0.2s;
-      overflow: visible; /* 确保内容不被截断 */
-      
-      &:active {
-        background: #ffffff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      }
-    }
-    
-    /* 联系信息内容布局 */
-    .info-cell-content {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    
-    /* 联系信息图标基础样式 */
-    .info-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      flex-shrink: 0;
-    }
-    
-    /* 电话图标样式 */
-    .phone-icon {
-      background-color: rgba(14, 165, 233, 0.12);
-      
-      &::before {
-        content: '';
-        width: 15px;
-        height: 15px;
-        border: 2px solid #0ea5e9;
-        border-radius: 50%;
-        position: absolute;
-        left: 11px;
-        top: 10px;
-      }
-      
-      &::after {
-        content: '';
-        width: 6px;
-        height: 8px;
-        border-bottom: 2px solid #0ea5e9;
-        border-left: 2px solid #0ea5e9;
-        position: absolute;
-        right: 12px;
-        bottom: 12px;
-        transform: rotate(-45deg);
-      }
-    }
-    
-    /* 微信图标样式 */
-    .wechat-icon {
-      background-color: rgba(16, 185, 129, 0.12);
-      
-      &::before {
-        content: '';
-        width: 20px;
-        height: 18px;
-        border: 2px solid #10b981;
-        border-radius: 4px;
-        position: absolute;
-      }
-    }
-    
-    /* 时间图标样式 */
-    .time-icon {
-      background-color: rgba(168, 85, 247, 0.12);
-      
-      &::before {
-        content: '';
-        width: 18px;
-        height: 18px;
-        border: 2px solid #a855f7;
-        border-radius: 50%;
-        position: absolute;
-      }
-      
-      &::after {
-        content: '';
-        width: 8px;
-        height: 8px;
-        border-top: 2px solid #a855f7;
-        border-right: 2px solid #a855f7;
-        position: absolute;
-        left: 15px;
-        top: 12px;
-        transform: rotate(45deg);
-      }
-    }
-    
-    /* 地址图标样式 */
-    .address-icon {
-      background-color: rgba(239, 68, 68, 0.12);
-      
-      &::before {
-        content: '';
-        width: 12px;
-        height: 12px;
-        background-color: #ef4444;
-        border-radius: 50%;
-        position: absolute;
-        top: 10px;
-      }
-      
-      &::after {
-        content: '';
-        width: 0;
-        height: 12px;
-        border-left: 2px solid #ef4444;
-        position: absolute;
-        top: 18px;
-      }
-    }
-    
-    /* 联系信息文本样式 */
-    .info-text {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      width: calc(100% - 55px); /* 确保有足够的宽度，减去图标宽度和间距 */
-      overflow: visible; /* 确保不会被截断 */
-    }
-    
-    .info-label {
-      font-size: 12px;
-      color: #64748b;
-      margin-bottom: 4px;
-    }
-    
-    .info-value {
-      font-size: 14px;
-      color: #1e293b;
-      font-weight: 500;
-      word-break: break-all; /* 允许在任何字符间断行 */
-      white-space: normal; /* 允许正常换行 */
-      line-height: 1.4;
-      overflow: visible; /* 确保不会被截断 */
-      width: 100%; /* 利用所有可用空间 */
-    }
-    
-    /* 地址特殊处理 */
-    .info-cell-address {
-      .info-cell-content {
-        align-items: flex-start; /* 改为顶部对齐 */
-        padding-bottom: 16px; /* 增加底部间距 */
-      }
-      
-      .info-icon {
-        margin-top: 2px; /* 微调图标位置 */
-      }
-      
-      .info-value {
-        min-height: 40px; /* 确保有足够的高度 */
-        width: 100%; /* 确保文本有足够的宽度 */
-        white-space: pre-wrap; /* 保留空格并换行 */
-        line-height: 1.5; /* 增加行高使多行文本更易读 */
-        padding-right: 4px; /* 右侧留出空间，避免文本靠近边缘 */
-      }
-    }
-    
-    /* 电话和微信的点击提示 */
-    .info-cell-clickable {
-      position: relative;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        width: 6px;
-        height: 6px;
-        border-top: 1px solid #94a3b8;
-        border-right: 1px solid #94a3b8;
-        transform: translateY(-50%) rotate(45deg);
-      }
+      background-color: #f0f0f0;
     }
   }
-===== End of File: components\ContactInfoCard\index.scss =====
+  
+  .tab-item {
+    font-size: 14px;
+    color: #666;
+    padding: 0 12px;
+    height: 40px;
+    line-height: 40px;
+    position: relative;
+    white-space: nowrap;
+    
+    &.active {
+      color: #333;
+      font-weight: 500;
+      
+      .tab-line {
+        opacity: 1;
+      }
+    }
+    
+    .tab-line {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 2px;
+      width: 20px;
+      background-color: #2563eb;
+      border-radius: 1px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+  }
+}
+===== End of File: components\PageHeader\index.scss =====
 
 
-===== File: components\ContactInfoCard\index.tsx =====
-// components/ContactInfoCard/index.tsx
-import { useState } from 'react'
-import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
-import { Toast } from '@nutui/nutui-react-taro'
-// 直接导入类型
-import { ContactData } from 'src/services/api/contact/types'
-import './index.scss'
+===== File: components\PageHeader\index.tsx =====
+import { useState, useCallback } from 'react';
+import { View, Text, Input, ScrollView } from '@tarojs/components';
+import './index.scss';
 
-interface ContactInfoCardProps {
-  data: ContactData;
-  onCopyWechat?: () => void;
-  onPhoneCall?: () => void;
+export interface TabItem {
+  title: string;
+  value: string;
 }
 
-const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ 
-  data,
-  onCopyWechat,
-  onPhoneCall
-}) => {
-  const [showToast, setShowToast] = useState(false);
-  const [toastContent, setToastContent] = useState('');
-  const [toastIcon, setToastIcon] = useState<'success' | 'fail' | 'loading'>('success');
+interface PageHeaderProps {
+  keyword: string;
+  onSearch: (value: string) => void;
+  searchPlaceholder?: string;
+  currentType: string;
+  onTypeChange: (value: string) => void;
+  tabs: TabItem[];
+  debounceTime?: number;
+}
+
+export default function PageHeader({
+  keyword,
+  onSearch,
+  searchPlaceholder = '搜索',
+  currentType,
+  onTypeChange,
+  tabs,
+  debounceTime = 500
+}: PageHeaderProps) {
+  const [searchValue, setSearchValue] = useState(keyword);
+  const [searchTimer, setSearchTimer] = useState<any>(null);
+
+  // 处理搜索输入变化
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchValue(value);
+      if (searchTimer) {
+        clearTimeout(searchTimer);
+      }
+      
+      const timer = setTimeout(() => {
+        onSearch(value);
+      }, debounceTime);
+      
+      setSearchTimer(timer);
+    },
+    [onSearch, debounceTime, searchTimer]
+  );
   
-  // 显示提示消息
-  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
-    setToastContent(content);
-    setToastIcon(icon);
-    setShowToast(true);
+  // 清空搜索
+  const handleClear = () => {
+    setSearchValue('');
+    onSearch('');
   };
   
-  // 拨打电话
-  const makePhoneCall = () => {
-    // 添加震动反馈
-    Taro.vibrateShort({ type: 'medium' });
-    
-    if (onPhoneCall) {
-      onPhoneCall();
-    } else {
-      Taro.makePhoneCall({
-        phoneNumber: data.phone,
-        fail: () => {
-          showMessage('拨打电话失败，请重试', 'fail');
-        }
-      });
-    }
+  // 处理标签切换
+  const handleTabChange = (value: string) => {
+    onTypeChange(value);
   };
-  
-  // 复制微信号
-  const copyWechat = () => {
-    // 添加震动反馈
-    Taro.vibrateShort({ type: 'medium' });
-    
-    if (onCopyWechat) {
-      onCopyWechat();
-    } else {
-      Taro.setClipboardData({
-        data: data.wechat,
-        success: () => {
-          showMessage('微信号已复制，快去添加吧');
-        },
-        fail: () => {
-          showMessage('复制失败，请重试', 'fail');
-        }
-      });
-    }
-  };
-  
-  // 渲染联系信息单元格
-  const renderInfoCell = (type: 'phone' | 'wechat' | 'time' | 'address', label: string, value: string, onClick?: () => void) => {
-    const isAddress = type === 'address';
-    const isClickable = Boolean(onClick);
-    
-    return (
-      <View 
-        className={`info-cell ${isAddress ? 'info-cell-address' : ''} ${isClickable ? 'info-cell-clickable' : ''}`} 
-        onClick={onClick}
-      >
-        <View className="info-cell-content">
-          <View className={`info-icon ${type}-icon`}></View>
-          <View className="info-text">
-            <Text className="info-label">{label}</Text>
-            <Text className="info-value">{value}</Text>
-          </View>
+
+  return (
+    <View className="unified-header">
+      {/* 搜索区域 */}
+      <View className="header-search">
+        <View className="custom-searchbar">
+          <Text className="search-icon">🔍</Text>
+          <Input
+            className="search-input"
+            value={searchValue}
+            placeholder={searchPlaceholder}
+            onInput={(e) => handleSearch(e.detail.value)}
+            confirmType="search"
+            onConfirm={(e) => onSearch(e.detail.value)}
+          />
+          {searchValue && (
+            <Text className="search-clear" onClick={handleClear}>×</Text>
+          )}
         </View>
       </View>
-    );
-  };
-  
-  return (
-    <View className="contact-info">
-      <View className="about-description">
-        <Text>{data.description}</Text>
+      
+      {/* 标签区域 - 使用ScrollView但不尝试手动控制滚动 */}
+      <View className="header-tabs-container">
+        <ScrollView 
+          scrollX 
+          scrollWithAnimation
+          className="tabs-container"
+          showScrollbar={false}
+        >
+          <View className="tabs-list">
+            {tabs.map((tab) => (
+              <View
+                key={tab.value}
+                className={`tab-item ${currentType === tab.value ? 'active' : ''}`}
+                onClick={() => handleTabChange(tab.value)}
+              >
+                <Text>{tab.title}</Text>
+                <View className="tab-line" />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
-      
-      <View className="info-divider"></View>
-      
-      <View className="info-cells">
-        {renderInfoCell('phone', '电话咨询', data.phone, makePhoneCall)}
-        {renderInfoCell('wechat', '微信咨询', data.wechat, copyWechat)}
-        {renderInfoCell('time', '营业时间', data.businessHours)}
-        {renderInfoCell('address', '公司地址', data.address)}
-      </View>
-      
-      {/* 提示信息 */}
-      <Toast
-        visible={showToast}
-        content={toastContent}
-        icon={toastIcon}
-        onClose={() => setShowToast(false)}
-        duration={2000}
-      />
     </View>
   );
-};
-
-export default ContactInfoCard;
-===== End of File: components\ContactInfoCard\index.tsx =====
+}
+===== End of File: components\PageHeader\index.tsx =====
 
 
 ===== File: components\QuickContact\index.scss =====
@@ -1033,14 +509,13 @@ export default ContactInfoCard;
 
 
 ===== File: components\QuickContact\index.tsx =====
-// src/components/QuickContact/index.tsx
 import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
 interface ContactInfo {
-  phone: string;
+  phone: string[];
   wechat: string;
 }
 
@@ -1053,15 +528,17 @@ const QuickContact: React.FC<QuickContactProps> = ({
   contactInfo,
   onShowToast
 }) => {
-  // 微信复制状态
   const [isProcessingWechat, setIsProcessingWechat] = useState(false);
 
-  // 电话咨询
+  // 电话咨询 - 优先拨打第一个号码
   const handleCall = () => {
-    if (!contactInfo?.phone) return;
+    if (!contactInfo?.phone?.length) return;
+    
+    // 如果有多个号码，可以弹出选择框，这里简化为直接拨打第一个
+    const primaryPhone = contactInfo.phone[0];
     
     Taro.makePhoneCall({
-      phoneNumber: contactInfo.phone
+      phoneNumber: primaryPhone
     }).catch(err => {
       if (err.errMsg && !err.errMsg.includes('cancel')) {
         onShowToast?.('拨号失败', 'fail');
@@ -1069,7 +546,7 @@ const QuickContact: React.FC<QuickContactProps> = ({
     });
   };
 
-  // 微信咨询 - 使用系统默认提示
+  // 微信咨询
   const handleWechat = () => {
     if (!contactInfo?.wechat || isProcessingWechat) return;
     
@@ -1077,8 +554,8 @@ const QuickContact: React.FC<QuickContactProps> = ({
     
     Taro.setClipboardData({
       data: contactInfo.wechat,
-      success: function (res) {
-        // 使用系统默认提示，不添加自定义Toast
+      success: function () {
+        // 使用系统默认提示
       },
       fail: (err) => {
         if (!err.errMsg?.includes('cancel')) {
@@ -1088,7 +565,7 @@ const QuickContact: React.FC<QuickContactProps> = ({
       complete: () => {
         setTimeout(() => {
           setIsProcessingWechat(false);
-        }, 1600); // 系统提示1.5秒，稍微多等一点时间
+        }, 1600);
       }
     });
   };
@@ -1119,6 +596,873 @@ export default QuickContact;
 ===== End of File: components\QuickContact\index.tsx =====
 
 
+===== File: components\ServiceCardCarousel\index.scss =====
+/* 现代风格服务卡片轮播 */
+.service-carousel {
+  width: 100%;
+  margin: 16px 0 24px;
+  position: relative;
+  overflow: hidden;
+  
+  // 空状态样式
+  &-empty {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9CA3AF;
+    font-size: 14px;
+    background-color: #F9FAFB;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(17, 24, 39, 0.06);
+  }
+}
+
+/* 轮播样式 */
+.service-swiper {
+  width: 100%;
+  background-color: transparent;
+  overflow: visible;
+  padding: 16px 0 30px;
+  
+  &-item {
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* 服务卡片样式 */
+.service-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 12px 10px;
+  box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 140px;
+  width: 100%;
+  margin: 0 auto;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  
+  /* 非激活遮罩层 */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* 激活样式 */
+  &-active {
+    transform: scale(1.03);
+    box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
+    
+    &::after {
+      opacity: 0;
+    }
+  }
+  
+  /* 非激活样式 */
+  &:not(.service-card-active)::after {
+    opacity: 1;
+  }
+  
+  /* 卡片主体 */
+  &-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 0;
+    text-align: center;
+    padding: 0 5px;
+  }
+}
+
+/* 服务标题 */
+.service-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 6px;
+  margin-top: 2px;
+  display: block;
+  text-align: center;
+  position: relative;
+  
+  &::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #60A5FA, #2563EB);
+    margin: 6px auto 0;
+    border-radius: 2px;
+  }
+}
+
+/* 服务描述 */
+.service-description {
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  text-align: center;
+  padding: 0 5px;
+  max-width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 服务特点 */
+.service-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+  padding-top: 3px;
+  width: 98%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 特点标签 */
+.feature-tag {
+  font-size: 12px;
+  color: #2563EB;
+  background-color: #EFF6FF;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  font-weight: 500;
+  margin: 2px;
+}
+
+/* 指示器容器 */
+.swiper-indicators {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 0;
+}
+
+/* 指示器点 */
+.swiper-indicator {
+  width: 8px;
+  height: 8px;
+  background: #F3F4F6;
+  border-radius: 50%;
+  margin: 0 4px;
+  transition: all 0.3s ease;
+  
+  /* 激活指示器 */
+  &-active {
+    width: 20px;
+    border-radius: 10px;
+    background: #3B82F6;
+  }
+}
+
+/* 响应式适配 */
+@media screen and (max-width: 375px) {
+  .service-card {
+    padding: 12px 10px;
+    min-height: 150px;
+  }
+  
+  .service-title {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .service-description {
+    font-size: 13px;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  
+  .feature-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    margin: 2px;
+  }
+  
+  .service-features {
+    gap: 4px;
+  }
+}
+===== End of File: components\ServiceCardCarousel\index.scss =====
+
+
+===== File: components\ServiceCardCarousel\index.tsx =====
+import { View, Text, Swiper, SwiperItem } from '@tarojs/components'
+import { useState, useRef, useEffect } from 'react'
+import './index.scss'
+
+// 服务项接口
+export interface ServiceItem {
+  id: number | string;
+  title: string;
+  description: string;
+  features: string[];
+}
+
+interface ServiceCarouselProps {
+  services: ServiceItem[];
+  onServiceClick?: (service: ServiceItem) => void;
+  autoPlay?: boolean;
+  interval?: number;
+  initialIndex?: number;
+  className?: string;
+}
+
+const ServiceCarousel: React.FC<ServiceCarouselProps> = ({ 
+  services = [],
+  onServiceClick, 
+  autoPlay = true, 
+  interval = 4000,
+  initialIndex = 0,
+  className = ''
+}) => {
+  // 当前轮播索引
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  
+  // 容器引用
+  const containerRef = useRef<any>(null);
+  
+  // 边距状态
+  const [sideMargin, setSideMargin] = useState('40px');
+  
+  // 缓存有效的服务列表
+  const validServices = services?.filter(item => 
+    item && (typeof item.id === 'number' || typeof item.id === 'string')
+  ) || [];
+  
+  // 计算边距 - 基于父容器而非屏幕
+  useEffect(() => {
+    if (containerRef.current) {
+      try {
+        // 获取容器宽度
+        const containerWidth = containerRef.current.clientWidth;
+        // 卡片宽度为容器的85%
+        const cardWidth = containerWidth * 0.85;
+        // 两侧边距等分剩余空间
+        const margin = Math.floor((containerWidth - cardWidth) / 2);
+        setSideMargin(`${margin}px`);
+      } catch (error) {
+        // 异常处理
+        console.error('计算边距出错', error);
+      }
+    }
+  }, []);
+  
+  // 处理轮播切换
+  const handleSwipeChange = (e: any) => {
+    if (e?.detail?.current != null) {
+      setCurrentIndex(e.detail.current);
+    }
+  };
+  
+  // 处理服务点击
+  const handleServiceClick = (service: ServiceItem) => {
+    onServiceClick?.(service);
+  };
+
+  // 空数据处理
+  if (!validServices.length) {
+    return <View className='service-carousel-empty'>暂无服务数据</View>;
+  }
+
+  // 计算是否应显示指示器
+  const shouldShowIndicator = validServices.length > 1;
+  
+  // 计算初始索引，确保在有效范围内
+  const safeInitialIndex = Math.max(0, Math.min(initialIndex, validServices.length - 1));
+
+  return (
+    <View className={`service-carousel ${className}`} ref={containerRef}>
+      <Swiper
+        className='service-swiper'
+        circular={validServices.length > 2}
+        autoplay={autoPlay && validServices.length > 1}
+        interval={interval}
+        previousMargin={sideMargin}
+        nextMargin={sideMargin}
+        onChange={handleSwipeChange}
+        indicatorDots={false}
+        current={safeInitialIndex}
+      >
+        {validServices.map((service, index) => (
+          <SwiperItem key={`service-${service.id}`} className='service-swiper-item'>
+            <View 
+              className={`service-card ${index === currentIndex ? 'service-card-active' : ''}`}
+              onClick={() => handleServiceClick(service)}
+            >
+              <View className='service-card-main'>
+                <Text className='service-title'>{service.title || ''}</Text>
+                <Text className='service-description'>{service.description || ''}</Text>
+                
+                <View className='service-features'>
+                  {(service.features || []).map((feature, idx) => (
+                    <Text key={`feature-${idx}`} className='feature-tag'>{feature}</Text>
+                  ))}
+                </View>
+              </View>
+            </View>
+          </SwiperItem>
+        ))}
+      </Swiper>
+      
+      {/* 自定义指示器 */}
+      {shouldShowIndicator && (
+        <View className="swiper-indicators">
+          {validServices.map((_, index) => (
+            <View 
+              key={`indicator-${index}`} 
+              className={`swiper-indicator ${index === currentIndex ? 'swiper-indicator-active' : ''}`}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+};
+
+export default ServiceCarousel;
+===== End of File: components\ServiceCardCarousel\index.tsx =====
+
+
+===== File: components\ServiceSection\index.scss =====
+.service-section {
+  margin: 10px 10px 15px; /* 减少顶部外边距 */
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+
+  &__header {
+    padding: 10px 15px; /* 进一步减少头部内边距 */
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  &__title {
+    display: block;
+    font-size: 17px; /* 略微减小标题字体 */
+    font-weight: bold;
+    color: #2563EB;
+    margin-bottom: 0px; /* 去除标题下方间距 */
+  }
+
+  &__subtitle {
+    font-size: 13px; /* 略微减小副标题字体 */
+    color: #6B7280;
+  }
+
+  &__swiper {
+    height: 170px;
+    width: 100%;
+    padding-top: 5px; /* 减少顶部内边距 */
+  }
+}
+
+.service-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  margin-top: -20px; /* 增加负边距，进一步向上移动内容 */
+  
+  &__title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #2563EB;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  &__description {
+    font-size: 16px;
+    color: #4B5563;
+    line-height: 1.5;
+    text-align: center;
+    max-width: 85%;
+  }
+}
+===== End of File: components\ServiceSection\index.scss =====
+
+
+===== File: components\ServiceSection\index.tsx =====
+import { View, Text, Swiper, SwiperItem } from '@tarojs/components'
+import { Service } from 'src/services/api/index/types'
+import './index.scss'
+
+interface ServiceSectionProps {
+  services: Service[]
+}
+
+export default function ServiceSection({ services }: ServiceSectionProps) {
+  return (
+    <View className='service-section card'>
+      <View className='service-section__header'>
+        <Text className='service-section__title'>我们的服务</Text>
+        <Text className='service-section__subtitle'>专业团队，优质服务</Text>
+      </View>
+      
+      <Swiper
+        className='service-section__swiper'
+        indicatorColor='#ddd'
+        indicatorActiveColor='#2563EB'
+        circular
+        indicatorDots
+        autoplay
+        interval={5000} // 增加间隔时间，让用户有更多时间阅读
+      >
+        {services.map(service => (
+          <SwiperItem key={service.id}>
+            <View className='service-item'>
+              <Text className='service-item__title'>{service.title}</Text>
+              <Text className='service-item__description'>{service.description}</Text>
+            </View>
+          </SwiperItem>
+        ))}
+      </Swiper>
+    </View>
+  )
+}
+===== End of File: components\ServiceSection\index.tsx =====
+
+
+===== File: components\ShowcaseSection\index.scss =====
+// src/components/ShowcaseSection/index.scss
+
+// 通用板块样式
+.section {
+    margin: 0 15px 20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  }
+  
+  .section-header {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    position: relative;
+    padding-left: 12px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 18px;
+      background: linear-gradient(to bottom, #3B82F6, #2563EB);
+      border-radius: 4px;
+    }
+  }
+  
+  // 图片加载和错误状态
+  .case-image-loading,
+  .case-image-error {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    color: #999;
+    font-size: 14px;
+  }
+  
+  .case-image-error {
+    background-color: #fafafa;
+  }
+  
+  // 案例展示
+  .case-container {
+    margin-top: 5px;
+  }
+  
+  .case-feature {
+    margin-bottom: 15px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    
+    &:active {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .case-image {
+      width: 100%;
+      height: 160px;
+      border-radius: 0;
+      
+      :global(.nut-image-img) {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    
+    .case-content {
+      padding: 12px;
+      background: #fff;
+    }
+    
+    .case-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+      display: block;
+    }
+    
+    .case-description {
+      font-size: 13px;
+      color: #666;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5;
+    }
+  }
+  
+  .case-grid {
+    display: flex;
+    justify-content: space-between;
+    
+    .case-item {
+      width: calc(50% - 5px);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      
+      &:active {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+      }
+      
+      .case-image {
+        width: 100%;
+        height: 90px;
+        border-radius: 0;
+        
+        :global(.nut-image-img) {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+      
+      .case-content {
+        padding: 10px;
+        background: #fff;
+      }
+      
+      .case-title {
+        font-size: 13px;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        font-weight: 500;
+      }
+    }
+  }
+  
+  // 弹窗样式
+  .case-detail-popup {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .popup-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .popup-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    padding-right: 10px;
+  }
+  
+  .popup-close {
+    width: 28px;
+    height: 28px;
+    font-size: 24px;
+    line-height: 24px;
+    text-align: center;
+    color: #999;
+    border-radius: 50%;
+    background-color: #f5f5f5;
+    
+    &:active {
+      background-color: #eee;
+      color: #666;
+    }
+  }
+  
+  .popup-content {
+    flex: 1;
+    padding: 10px 16px 16px 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .case-detail-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    
+    :global(.nut-image-img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+  }
+  
+  .case-detail-description {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2563EB;
+    margin-bottom: 12px;
+    display: block;
+  }
+  
+  .case-detail-content {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    display: block;
+    text-align: justify;
+  }
+  
+  .detail-button {
+    margin-top: 20px;
+    height: 44px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2);
+    background: #2563EB;
+    color: #fff;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+      background: #1d4ed8;
+    }
+  }
+===== End of File: components\ShowcaseSection\index.scss =====
+
+
+===== File: components\ShowcaseSection\index.tsx =====
+// src/components/ShowcaseSection/index.tsx
+import { useState } from 'react'
+import { View, Text } from '@tarojs/components'
+import { Image, Popup } from '@nutui/nutui-react-taro'
+import Taro from '@tarojs/taro'
+import { Showcase } from 'src/services/api/index/indexApi'
+import './index.scss'
+
+interface ShowcaseSectionProps {
+  showcases: Showcase[];
+  title?: string;
+  contactPhone?: string;
+  onShowToast?: (message: string, type: 'success' | 'fail' | 'warn') => void;
+}
+
+const ShowcaseSection: React.FC<ShowcaseSectionProps> = ({
+  showcases,
+  title = '精选案例',
+  contactPhone,
+  onShowToast
+}) => {
+  // 状态管理
+  const [showShowcaseDetail, setShowShowcaseDetail] = useState(false);
+  const [selectedShowcase, setSelectedShowcase] = useState<Showcase | null>(null);
+
+  // 查看案例详情
+  const handleShowcaseClick = (showcase: Showcase) => {
+    setSelectedShowcase(showcase);
+    setShowShowcaseDetail(true);
+  };
+
+  // 电话咨询
+  const handleCall = () => {
+    if (!contactPhone) return;
+    
+    Taro.makePhoneCall({
+      phoneNumber: contactPhone
+    }).catch(err => {
+      if (err.errMsg && !err.errMsg.includes('cancel')) {
+        onShowToast?.('拨号失败', 'fail');
+      }
+    });
+  };
+
+  if (!showcases?.length) {
+    return null;
+  }
+
+  return (
+    <View className='section showcase-section'>
+      <View className='section-header'>
+        <Text className='section-title'>{title}</Text>
+      </View>
+      
+      <View className='case-container'>
+        {/* 主案例 */}
+        <View 
+          className='case-feature'
+          onClick={() => handleShowcaseClick(showcases[0])}
+        >
+          <Image 
+            src={showcases[0].imageUrl}
+            width="100%"
+            height="160px"
+            className='case-image'
+            loading={<View className="case-image-loading"></View>}
+            error={<View className="case-image-error"></View>}
+          />
+          <View className='case-content'>
+            <Text className='case-title'>{showcases[0].title}</Text>
+            <Text className='case-description'>{showcases[0].description}</Text>
+          </View>
+        </View>
+        
+        {/* 次要案例网格 */}
+        {showcases.length > 1 && (
+          <View className='case-grid'>
+            {showcases.slice(1).map(item => (
+              <View 
+                key={item.id} 
+                className='case-item'
+                onClick={() => handleShowcaseClick(item)}
+              >
+                <Image 
+                  src={item.imageUrl}
+                  width="100%"
+                  height="90px"
+                  className='case-image'
+                  loading={<View className="case-image-loading"></View>}
+                  error={<View className="case-image-error"></View>}
+                />
+                <View className='case-content'>
+                  <Text className='case-title'>{item.title}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* 案例详情弹窗 */}
+      {selectedShowcase && (
+        <Popup
+          visible={showShowcaseDetail}
+          position="bottom"
+          round
+          onClose={() => setShowShowcaseDetail(false)}
+          style={{ height: '70%' }}
+        >
+          <View className='case-detail-popup'>
+            <View className='popup-header'>
+              <Text className='popup-title'>{selectedShowcase.title}</Text>
+              <View 
+                className='popup-close'
+                onClick={() => setShowShowcaseDetail(false)}
+              >
+                ×
+              </View>
+            </View>
+            <View className='popup-content'>
+              <Image 
+                src={selectedShowcase.imageUrl}
+                width="100%"
+                height="160px"
+                className='case-detail-image'
+                loading={<View className="case-image-loading"></View>}
+                error={<View className="case-image-error"></View>}
+              />
+              <Text className='case-detail-description'>{selectedShowcase.description}</Text>
+              <Text className='case-detail-content'>{selectedShowcase.content}</Text>
+              {contactPhone && (
+                <View 
+                  className='detail-button'
+                  onClick={handleCall}
+                >
+                  咨询此方案
+                </View>
+              )}
+            </View>
+          </View>
+        </Popup>
+      )}
+    </View>
+  );
+};
+
+export default ShowcaseSection;
+===== End of File: components\ShowcaseSection\index.tsx =====
+
+
 ===== File: index.html =====
 <!DOCTYPE html>
 <html>
@@ -1140,498 +1484,1080 @@ export default QuickContact;
 ===== End of File: index.html =====
 
 
-===== File: pages\contact\index.config.ts =====
+===== File: pages\cases\index.config.ts =====
 export default definePageConfig({
-    navigationBarTitleText: '联系我们'
-  })
-===== End of File: pages\contact\index.config.ts =====
+  navigationBarTitleText: '案例'
+})
+===== End of File: pages\cases\index.config.ts =====
 
 
-===== File: pages\contact\index.scss =====
-// pages/contact/index.scss
-// 页面整体样式优化
-.contact-page {
+===== File: pages\cases\index.scss =====
+/* 案例页面样式 */
+.cases-page {
   min-height: 100vh;
-  background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
-  padding: 16px 12px;
-  box-sizing: border-box;
-}
-
-// 加载容器优化
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  background-color: #f7f9fc;
+  padding-bottom: env(safe-area-inset-bottom);
   
-  .loading-text {
-    margin-top: 16px;
-    font-size: 14px;
-    color: #64748b;
+  /* PageHeader容器 */
+  &-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-top: -1px;
   }
-}
 
-// 内容容器优化
-.contact-container {
-  max-width: 600px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-// 卡片通用样式优化
-.contact-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: visible; /* 确保内容不被截断 */
-  margin-bottom: 16px;
-  
-  // 预约卡片特殊样式优化
-  &.booking-card {
-    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid rgba(203, 213, 225, 0.5);
+  /* 内容区域 */
+  &-content {
+    padding: 12px;
+    /* 精确计算顶部距离 - 根据搜索框和标签页的实际高度 */
+    padding-top: 98px;
+    padding-bottom: env(safe-area-inset-bottom);
   }
-  
-  // 关于我们卡片特殊样式优化
-  &.about-card {
-    background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
-    border: 1px solid rgba(186, 230, 253, 0.5);
-  }
-}
 
-// 卡片头部样式优化
-.card-header {
-  padding: 16px 16px 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.card-title {
-  display: block;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 4px;
-}
-
-.card-subtitle {
-  display: block;
-  font-size: 13px;
-  color: #64748b;
-}
-
-// 卡片内容区域优化
-.card-content {
-  padding: 16px;
-  overflow: visible; /* 确保内容不被截断 */
-}
-
-// 响应式样式优化
-@media screen and (min-width: 768px) {
-  .contact-page {
-    padding: 24px;
-  }
-  
-  .contact-container {
-    max-width: 720px;
+  /* 案例列表 */
+  &-list {
     display: grid;
-    grid-template-columns: 6fr 5fr;
-    gap: 20px;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 16px;
+  }
+
+  /* 案例卡片 */
+  &-card {
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    
+    &:active {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+    }
+    
+    &-images {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    &-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+    
+    &-content {
+      padding: 16px 18px;
+    }
+    
+    &-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    &-type {
+      display: inline-block;
+      font-size: 12px;
+      color: #2563EB;
+      background-color: rgba(37, 99, 235, 0.08);
+      padding: 4px 10px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    
+    &-description {
+      font-size: 14px;
+      color: #4B5563;
+      margin-bottom: 14px;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 42px;
+    }
+    
+    &-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      
+      &-item {
+        font-size: 13px;
+        color: #6B7280;
+      }
+    }
+  }
+
+  /* 骨架屏样式 */
+  &-skeletons {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 16px;
+  }
+
+  &-skeleton {
+    background-color: #fff;
+    padding: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    
+    &-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+    
+    &-content {
+      padding: 16px 18px;
+    }
+    
+    &-title {
+      width: 80%;
+      height: 24px;
+      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    
+    &-tag {
+      width: 90px;
+      height: 24px;
+      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+    
+    &-desc {
+      width: 100%;
+      height: 36px;
+      background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
+      background-size: 400% 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+    
+    &-meta {
+      display: flex;
+      gap: 12px;
+      
+      &-item {
+        width: 80px;
+        height: 18px;
+        background: linear-gradient(90deg, #f2f5fc 25%, #e6ebf5 50%, #f2f5fc 75%);
+        background-size: 400% 100%;
+        animation: shimmer 1.5s infinite linear;
+        border-radius: 4px;
+      }
+    }
   }
   
-  .contact-card {
-    margin-bottom: 0;
-    height: fit-content;
+  /* 加载更多样式 */
+  .loading-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    
+    .loading-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #999;
+    }
   }
   
-  .about-card {
-    position: sticky;
-    top: 24px;
+  @keyframes shimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
+    }
+  }
+
+  /* 案例详情弹窗样式 */
+  &-detail {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    &-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid #f2f2f2;
+      flex-shrink: 0; // 防止头部被压缩
+    }
+    
+    &-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1F2937;
+    }
+    
+    &-scroll {
+      flex: 1;
+      height: 0 !important; // 关键: 强制ScrollView计算高度
+      -webkit-overflow-scrolling: touch; // iOS滚动优化
+    }
+    
+    &-content {
+      padding: 18px;
+    }
+    
+    &-images {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    &-image {
+      width: 100%;
+      height: 130px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    &-info {
+      padding-bottom: 24px;
+    }
+    
+    &-type {
+      display: inline-block;
+      font-size: 14px;
+      color: #2563EB;
+      background-color: rgba(37, 99, 235, 0.08);
+      padding: 5px 12px;
+      border-radius: 18px;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+    
+    &-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 18px;
+      
+      &-item {
+        font-size: 14px;
+        color: #4B5563;
+        font-weight: 500;
+        padding: 4px 12px;
+        background-color: #f5f7fc;
+        border-radius: 6px;
+        margin-right: 5px;
+      }
+    }
+    
+    &-description {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1F2937;
+      margin-bottom: 12px;
+    }
+    
+    &-text {
+      font-size: 15px;
+      color: #4B5563;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    
+    &-button {
+      margin-top: 20px;
+    }
+  }
+
+  /* 动画效果 */
+  &-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.4s ease-out forwards;
+    
+    @for $i from 1 through 10 {
+      &-#{$i} {
+        animation-delay: $i * 0.05s;
+      }
+    }
+  }
+
+  /* 空状态样式 */
+  &-empty {
+    padding-top: 60px;
+    text-align: center;
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 响应式布局 */
+  @media screen and (min-width: 576px) {
+    &-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    &-skeletons {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    &-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-top: 108px;
+    }
+    
+    &-list {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    &-skeletons {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    &-card {
+      &-images {
+        height: 220px;
+      }
+    }
+  }
+
+  /* 设备适配 */
+  @supports (padding-top: constant(safe-area-inset-top)) {
+    &-header {
+      padding-top: constant(safe-area-inset-top);
+    }
+    
+    &-content {
+      padding-top: calc(98px + constant(safe-area-inset-top));
+    }
+  }
+
+  @supports (padding-top: env(safe-area-inset-top)) {
+    &-header {
+      padding-top: env(safe-area-inset-top);
+    }
+    
+    &-content {
+      padding-top: calc(98px + env(safe-area-inset-top));
+    }
+  }
+
+  /* 减少动画 */
+  @media (prefers-reduced-motion: reduce) {
+    &-item {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    
+    .cases-page-skeleton-image,
+    .cases-page-skeleton-title,
+    .cases-page-skeleton-tag,
+    .cases-page-skeleton-desc,
+    .cases-page-skeleton-meta-item {
+      animation: none;
+      background: #f2f2f2;
+    }
   }
 }
 
-@media screen and (max-width: 375px) {
-  .contact-page {
-    padding: 12px 10px;
+/* 动画关键帧 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .card-header {
-    padding: 14px 12px 12px;
-  }
-  
-  .card-content {
-    padding: 14px 12px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-===== End of File: pages\contact\index.scss =====
+===== End of File: pages\cases\index.scss =====
 
 
-===== File: pages\contact\index.tsx =====
-// pages/contact/index.tsx
-import { useState, useEffect } from 'react'
-import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
-import { Loading, Toast } from '@nutui/nutui-react-taro'
-import BookingForm from '../../components/BookingForm'
-import ContactInfoCard from '../../components/ContactInfoCard'
+===== File: pages\cases\index.tsx =====
+// pages/cases/index.tsx
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { View, Text, Image,ScrollView} from '@tarojs/components'
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
+import { 
+  Button,
+  Empty, 
+  InfiniteLoading,
+  Popup,
+  Toast,
+  Loading
+} from '@nutui/nutui-react-taro'
 import './index.scss'
 
-// 直接导入所需类型和函数
-import { 
-  ServiceType, 
-  ContactData, 
-  BookingFormData 
-} from 'src/services/api/contact/types'
-import { 
-  getServiceTypes, 
-  getContactData, 
-  submitBooking, 
-  handleContactError 
-} from 'src/services/api/contact/contactApi'
+// Import PageHeader component
+import PageHeader from 'src/components/PageHeader';
 
-export default function ContactPage() {
-  // 页面状态
+// Import API and types
+import { 
+  CaseData, 
+  CaseQueryParams 
+} from 'src/services/api/cases/types'
+import {
+  getCases,
+  getCaseDetail,
+  handleCasesError,
+  CASES_TYPES,
+  PAGE_SIZE
+} from 'src/services/api/cases/casesApi'
+
+export default function CasesPage() {
+  // 状态管理
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [cases, setCases] = useState<CaseData[]>([]);
+  const [currentType, setCurrentType] = useState<string>('all');
+  const [keyword, setKeyword] = useState('');
+  const [selectedCase, setSelectedCase] = useState<CaseData | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [showToast, setShowToast] = useState(false);
-  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('fail');
+
+  // Component mount state tracking
+  const isMounted = useRef(true);
   
-  // 数据状态
-  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
-  const [contactData, setContactData] = useState<ContactData | null>(null);
-  
-  // 表单数据
-  const [formData, setFormData] = useState<Partial<BookingFormData>>({
-    name: '',
-    phone: '',
-    serviceType: '',
-    serviceTypeName: '',
-    region: [],
-    address: '',
-    remark: ''
-  });
-  
-  // 加载数据
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // 并行加载所有数据
-        const [serviceTypesRes, contactDataRes] = await Promise.all([
-          getServiceTypes(),
-          getContactData()
-        ]);
-        
-        // 处理服务类型数据
-        if (serviceTypesRes.success && serviceTypesRes.data) {
-          setServiceTypes(serviceTypesRes.data);
-        } else {
-          showMessage(serviceTypesRes.error || '获取服务类型失败', 'fail');
-        }
-        
-        // 处理联系信息数据
-        if (contactDataRes.success && contactDataRes.data) {
-          setContactData(contactDataRes.data);
-        } else {
-          showMessage(contactDataRes.error || '获取联系信息失败', 'fail');
-        }
-      } catch (error) {
-        console.error('加载数据失败:', error);
-        showMessage('加载数据失败，请稍后重试', 'fail');
-      } finally {
-        setLoading(false);
-      }
+    return () => {
+      isMounted.current = false;
     };
-    
-    fetchData();
   }, []);
-  
+
+  // 分享功能
+  useShareAppMessage(() => ({
+    title: '防水工程案例展示',
+    path: '/pages/cases/index',
+    imageUrl: cases.length > 0 ? cases[0].images[0] : undefined,
+  }));
+
   // 显示提示消息
-  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
-    setToastInfo({ content, icon });
+  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'fail') => {
+    if (!isMounted.current) return;
+    setToastMsg(message);
+    setToastType(type);
     setShowToast(true);
-  };
-  
-  // 处理表单提交
-  const handleFormSubmit = async (data: BookingFormData) => {
-    setSubmitting(true);
-    
-    try {
-      const res = await submitBooking(data);
-      
-      if (res.success) {
-        Taro.vibrateShort({ type: 'medium' });
-        showMessage('预约成功，我们将尽快与您联系！');
+  }, []);
+
+  // 加载案例数据 - with TypeScript fix
+  const loadCases = useCallback(
+    async (isRefresh = false) => {
+      try {
+        const currentPage = isRefresh ? 1 : page;
         
-        // 重置表单
-        setFormData({
-          name: '',
-          phone: '',
-          serviceType: '',
-          serviceTypeName: '',
-          region: [],
-          address: '',
-          remark: ''
-        });
-      } else {
-        showMessage(res.error || '提交失败，请重试', 'fail');
-      }
-    } catch (error) {
-      showMessage(handleContactError(error), 'fail');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  
-  // 处理服务类型选择
-  const handleServiceTypeSelect = (typeValue: string) => {
-    const selectedType = serviceTypes.find(type => type.value === typeValue);
-    setFormData(prev => ({
-      ...prev,
-      serviceType: typeValue,
-      serviceTypeName: selectedType?.text || ''
-    }));
-  };
-  
-  // 拨打电话
-  const handlePhoneCall = () => {
-    if (!contactData) return;
-    
-    Taro.makePhoneCall({
-      phoneNumber: contactData.phone,
-      fail: (err) => {
-        // 只有当不是用户取消时才显示错误提示
-        if (err.errMsg && !err.errMsg.includes('cancel')) {
-          showMessage('拨打电话失败，请重试', 'fail');
+        if (isRefresh) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
         }
+
+        const res = await getCases({
+          type: currentType,
+          keyword,
+          page: currentPage,
+          pageSize: PAGE_SIZE,
+        });
+
+        if (!isMounted.current) return;
+
+        if (res.success) {
+          // Use default empty array to avoid TypeScript error
+          const responseData = res.data || [];
+          
+          // Update cases based on refresh flag
+          if (isRefresh) {
+            setCases(responseData);
+          } else {
+            setCases(prev => [...prev, ...responseData]);
+          }
+          
+          setHasMore(res.hasMore || false);
+          
+          if (isRefresh) {
+            setPage(1);
+          } else {
+            setPage(prev => prev + 1);
+          }
+        } else {
+          showToastMessage(res.error || '获取案例列表失败');
+        }
+      } catch (err) {
+        if (!isMounted.current) return;
+        showToastMessage(handleCasesError(err));
+      } finally {
+        if (!isMounted.current) return;
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
       }
-    });
-  };
+    },
+    [currentType, keyword, page, showToastMessage]
+  );
+
+  // 类型或关键词变化时加载案例
+  useEffect(() => {
+    loadCases(true);
+  }, [currentType, keyword, loadCases]);
+
+  // 页面显示时重新加载案例
+  useDidShow(() => {
+    if (cases.length === 0 && !loading) {
+      loadCases(true);
+    }
+  });
+
+  // 处理搜索输入变化
+  const handleSearch = useCallback((value: string) => {
+    setKeyword(value);
+  }, []);
+
+  // 处理类型变化
+  const handleTypeChange = useCallback((value: string) => {
+    setCurrentType(value);
+  }, []);
+
+  // 处理下拉刷新
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadCases(true);
+    Taro.stopPullDownRefresh();
+  }, [loadCases]);
   
-  // 复制微信号
-  const handleCopyWechat = () => {
-    if (!contactData) return;
+  // 注册下拉刷新
+  useEffect(() => {
+    Taro.eventCenter.on('pullDownRefresh', handleRefresh);
     
-    Taro.setClipboardData({
-      data: contactData.wechat,
-      success: () => {
-      },
-      fail: () => {
-        showMessage('复制失败，请重试', 'fail');
+    return () => {
+      Taro.eventCenter.off('pullDownRefresh');
+    };
+  }, [handleRefresh]);
+
+  // 处理加载更多
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !loading && !loadingMore) {
+      return loadCases(false);
+    }
+    return Promise.resolve();
+  }, [hasMore, loading, loadingMore, loadCases]);
+
+  // 处理案例点击
+  const handleCaseClick = useCallback(async (id: number) => {
+    try {
+      setLoading(true);
+      const res = await getCaseDetail(id);
+      
+      if (!isMounted.current) return;
+      
+      if (res.success && res.data) {
+        setSelectedCase(res.data);
+        setShowDetail(true);
+      } else {
+        showToastMessage(res.error || '获取案例详情失败');
       }
-    });
-  };
-  
-  // 加载状态
-  if (loading || !contactData) {
+    } catch (err) {
+      if (!isMounted.current) return;
+      showToastMessage(handleCasesError(err));
+    } finally {
+      if (!isMounted.current) return;
+      setLoading(false);
+    }
+  }, [showToastMessage]);
+
+  // 处理预约服务
+  const handleBook = useCallback(async (data: CaseData) => {
+    try {
+      await Taro.setStorage({
+        key: 'selected_case',
+        data,
+      });
+      showToastMessage('已添加到咨询列表', 'success');
+      setTimeout(() => {
+        if (isMounted.current) {
+          Taro.switchTab({
+            url: '/pages/contact/index',
+          });
+        }
+      }, 1500);
+    } catch (err) {
+      if (!isMounted.current) return;
+      showToastMessage(handleCasesError(err));
+    }
+  }, [showToastMessage]);
+
+  // 关闭详情弹窗
+  const handleCloseDetail = useCallback(() => {
+    setShowDetail(false);
+  }, []);
+
+  // 骨架屏UI - 使用useMemo优化性能
+  const renderSkeletons = useMemo(() => {
     return (
-      <View className="loading-container">
-        <Loading type="spinner" color="#2563EB" />
-        <Text className="loading-text">加载中...</Text>
+      <View className="cases-page-skeletons">
+        {[1, 2, 3].map((i) => (
+          <View key={i} className="cases-page-skeleton">
+            <View className="cases-page-skeleton-image"></View>
+            <View className="cases-page-skeleton-content">
+              <View className="cases-page-skeleton-title"></View>
+              <View className="cases-page-skeleton-tag"></View>
+              <View className="cases-page-skeleton-desc"></View>
+              <View className="cases-page-skeleton-meta">
+                <View className="cases-page-skeleton-meta-item"></View>
+                <View className="cases-page-skeleton-meta-item"></View>
+              </View>
+            </View>
+          </View>
+        ))}
       </View>
     );
-  }
-  
+  }, []);
+
+  // 格式化日期字符串
+  const formatDate = useCallback((dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  }, []);
+
   return (
-    <View className="contact-page">
-      <View className="contact-container">
-        {/* 预约表单卡片 */}
-        <View className="contact-card booking-card">
-          <View className="card-header">
-            <Text className="card-title">预约服务</Text>
-            <Text className="card-subtitle">填写信息免费上门勘测</Text>
+    <View className="cases-page">
+      {/* 使用容器包裹PageHeader，处理定位 */}
+      <View className="cases-page-header">
+        <PageHeader
+          keyword={keyword}
+          onSearch={handleSearch}
+          searchPlaceholder="搜索工程案例"
+          currentType={currentType}
+          onTypeChange={handleTypeChange}
+          tabs={CASES_TYPES}
+        />
+      </View>
+
+      {/* 内容 */}
+      <View className="cases-page-content">
+        {/* 加载骨架屏 */}
+        {loading && cases.length === 0 ? (
+          renderSkeletons
+        ) : cases.length > 0 ? (
+          <View className="cases-page-list">
+            {cases.map((item, index) => (
+              <View key={item.id} className={`cases-page-item cases-page-item-${index + 1}`}>
+                <View className="cases-page-card" onClick={() => handleCaseClick(item.id)}>
+                  <View className="cases-page-card-images">
+                    <Image 
+                      src={item.images[0]} 
+                      className="cases-page-card-image"
+                      mode="aspectFill"
+                      lazyLoad
+                    />
+                  </View>
+                  <View className="cases-page-card-content">
+                    <View className="cases-page-card-title">{item.title}</View>
+                    <View className="cases-page-card-type">{item.type}</View>
+                    <View className="cases-page-card-description">{item.description}</View>
+                    <View className="cases-page-card-meta">
+                      <Text className="cases-page-card-meta-item">面积: {item.area}</Text>
+                      <Text className="cases-page-card-meta-item">工期: {item.duration}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))}
           </View>
-          <View className="card-content">
-            <BookingForm 
-              serviceTypes={serviceTypes}
-              loading={submitting}
-              initialValues={formData}
-              onSubmit={handleFormSubmit}
-              onServiceTypeSelect={handleServiceTypeSelect}
+        ) : (
+          <View className="cases-page-empty">
+            <Empty description="暂无相关案例" image="empty" />
+          </View>
+        )}
+
+        {/* 无限加载 */}
+        {cases.length > 0 && (
+          loadingMore ? (
+            <View className="loading-more">
+              <Loading/>
+              <View className="loading-text">加载中...</View>
+            </View>
+          ) : (
+            <InfiniteLoading
+              hasMore={hasMore}
+              threshold={200}
+              loadingText="加载中..."
+              loadMoreText="已经到底啦"
+              onLoadMore={handleLoadMore}
             />
-          </View>
-        </View>
-        
-        {/* 关于我们卡片 */}
-        <View className="contact-card about-card">
-          <View className="card-header">
-            <Text className="card-title">关于我们</Text>
-            <Text className="card-subtitle">专业防水服务十年</Text>
-          </View>
-          <View className="card-content">
-            <ContactInfoCard 
-              data={contactData}
-              onPhoneCall={handlePhoneCall}
-              onCopyWechat={handleCopyWechat}
-            />
-          </View>
-        </View>
+          )
+        )}
+      </View>
+
+      {/* 案例详情弹窗 */}
+      <Popup
+  visible={showDetail}
+  position="bottom"
+  round
+  style={{ height: '80%' }}
+  onClose={handleCloseDetail}
+>
+  {selectedCase && (
+    <View className="cases-page-detail">
+      {/* 固定高度的头部 */}
+      <View className="cases-page-detail-header">
+        <View className="cases-page-detail-title">{selectedCase.title}</View>
       </View>
       
-      {/* 提示信息 */}
+      {/* 滚动内容区域 */}
+      <ScrollView 
+        scrollY
+        className="cases-page-detail-scroll"
+        enhanced={false}
+        showScrollbar={false}
+      >
+        <View className="cases-page-detail-content">
+          <View className="cases-page-detail-images">
+            {selectedCase.images.map((img, idx) => (
+              <Image 
+                key={idx} 
+                src={img} 
+                className="cases-page-detail-image"
+                mode="aspectFill"
+                lazyLoad
+                onClick={() => {
+                  Taro.previewImage({
+                    current: img,
+                    urls: selectedCase.images
+                  });
+                }}
+              />
+            ))}
+          </View>
+          <View className="cases-page-detail-info">
+            <View className="cases-page-detail-type">{selectedCase.type}</View>
+            <View className="cases-page-detail-meta">
+              <Text className="cases-page-detail-meta-item">面积: {selectedCase.area}</Text>
+              <Text className="cases-page-detail-meta-item">工期: {selectedCase.duration}</Text>
+              <Text className="cases-page-detail-meta-item">完成日期: {formatDate(selectedCase.date)}</Text>
+            </View>
+            <View className="cases-page-detail-description">项目概述</View>
+            <View className="cases-page-detail-text">{selectedCase.content}</View>
+            <Button 
+              type="primary" 
+              block
+              shape="round"
+              className="cases-page-detail-button"
+              onClick={() => handleBook(selectedCase)}
+            >
+              咨询类似方案
+            </Button>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  )}
+</Popup>
+
+      {/* Toast组件 */}
       <Toast
+        msg={toastMsg}
         visible={showToast}
-        content={toastInfo.content}
-        icon={toastInfo.icon as any}
+        type={toastType}
         onClose={() => setShowToast(false)}
         duration={2000}
+        position="center"
+        closeOnOverlayClick
       />
     </View>
   );
 }
-===== End of File: pages\contact\index.tsx =====
+===== End of File: pages\cases\index.tsx =====
 
 
-===== File: services\api\contact\contactApi.ts =====
-// services/api/contact/contactApi.ts
+===== File: services\api\cases\casesApi.ts =====
+// services/api/cases/casesApi.ts
 import http from '../../http';
-import { ServiceType, ContactData, BookingFormData, ApiResponse } from './types';
-import { serviceTypes, contactData } from './data';
+import { CaseData, CaseQueryParams, CaseApiResponse, CasesApiResponse } from './types';
+import { mockCases, PAGE_SIZE, CASES_TYPES } from './data';
 
 // API端点
 const ENDPOINTS = {
-  GET_SERVICE_TYPES: '/contact/service-types',
-  GET_CONTACT_INFO: '/contact/info',
-  SUBMIT_BOOKING: '/contact/booking'
+  GET_CASES: '/cases',
+  GET_CASE_DETAIL: '/cases/:id',
 };
 
 /**
- * 获取服务类型列表
+ * 获取案例列表
  */
-export const getServiceTypes = async (): Promise<ApiResponse<ServiceType[]>> => {
+export const getCases = async ({
+  type,
+  keyword,
+  page,
+  pageSize
+}: CaseQueryParams): Promise<CasesApiResponse> => {
   try {
+    // 替换为实际API调用当后端准备好时
+    // const data = await http.get(ENDPOINTS.GET_CASES, { type, keyword, page, pageSize });
+    
     // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // 过滤模拟数据
+    let filteredData = mockCases.filter(item => {
+      if (type !== 'all' && item.type !== type) return false;
+      if (keyword && !item.title.includes(keyword) && !item.description.includes(keyword)) return false;
+      return true;
+    });
+    
+    // 分页
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    
+    // 判断是否还有更多数据
+    const hasMore = endIndex < filteredData.length;
     
     return {
       success: true,
-      data: serviceTypes
+      data: paginatedData,
+      hasMore
     };
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || '获取服务类型失败'
+      error: error.message || '获取案例列表失败',
+      data: []
     };
   }
 };
 
 /**
- * 获取联系信息
+ * 根据ID获取案例详情
  */
-export const getContactData = async (): Promise<ApiResponse<ContactData>> => {
+export const getCaseDetail = async (id: number): Promise<CaseApiResponse<CaseData>> => {
   try {
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // 替换为实际API调用当后端准备好时
+    // const url = ENDPOINTS.GET_CASE_DETAIL.replace(':id', id.toString());
+    // const data = await http.get(url);
     
-    return {
-      success: true,
-      data: contactData
-    };
+    // 模拟API调用延迟
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // 查找案例
+    const caseItem = mockCases.find(item => item.id === id);
+    
+    if (caseItem) {
+      return {
+        success: true,
+        data: caseItem
+      };
+    } else {
+      throw new Error('案例不存在');
+    }
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || '获取联系信息失败'
+      error: error.message || '获取案例详情失败'
     };
   }
 };
 
 /**
- * 提交预约信息
+ * 错误处理工具 - 重命名为handleCasesError
  */
-export const submitBooking = async (data: BookingFormData): Promise<ApiResponse<{ bookingId: string }>> => {
-  try {
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    
-    // 模拟成功响应
-    return {
-      success: true,
-      data: {
-        bookingId: `BK${Date.now().toString().slice(-6)}`
-      }
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || '提交预约失败'
-    };
-  }
-};
-
-/**
- * 错误处理工具 - 重命名为handleContactError
- */
-export const handleContactError = (err: any): string => {
+export const handleCasesError = (err: any): string => {
   console.error(err);
   return err instanceof Error ? err.message : '发生未知错误';
 };
 
-// 导出类型和数据
+// 直接导出常量
+export { mockCases, PAGE_SIZE, CASES_TYPES };
+
+// 导出类型
 export * from './types';
 export * from './data';
-===== End of File: services\api\contact\contactApi.ts =====
+===== End of File: services\api\cases\casesApi.ts =====
 
 
-===== File: services\api\contact\data.ts =====
-import { ServiceType, ContactData } from './types';
+===== File: services\api\cases\data.ts =====
+// services/api/cases/data.ts
 
-// 服务类型数据
-export const serviceTypes: ServiceType[] = [
-  { text: '漏水检测', value: 'detection' },
-  { text: '渗漏维修', value: 'repair' },
-  { text: '防水施工', value: 'construction' }
+import { CaseData } from './types';
+
+// 案例类型常量
+export const CASES_TYPES = [
+  { title: '全部', value: 'all' },
+  { title: '地下防水', value: '地下防水' },
+  { title: '外墙防水', value: '外墙防水' },
+  { title: '屋面防水', value: '屋面防水' },
 ];
 
-// 联系信息数据
-export const contactData: ContactData = {
-  description: '我们是一家专业从事防水工程的公司，拥有十年行业经验和专业技术团队。我们服务于各类住宅和商业建筑，提供高质量的防水解决方案。所有工程均提供质保，确保防水效果持久可靠。',
-  phone: '400-123-4567',
-  wechat: 'waterproof123',
-  businessHours: '周一至周六 9:00-18:00',
-  address: '上海市浦东新区张江高科技园区科苑路88号'
-};
-===== End of File: services\api\contact\data.ts =====
+// 分页大小常量
+export const PAGE_SIZE = 10;
+
+// 模拟数据
+export const mockCases: CaseData[] = [
+  {
+    id: 1,
+    title: '某小区地下车库防水工程',
+    type: '地下防水',
+    description: '为某小区地下车库进行全面防水处理，解决了长期渗水问题。',
+    area: '2000平方米',
+    duration: '30天',
+    date: '2024-08-15',
+    images: [
+      'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
+      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg'
+    ],
+    content: '该小区地下车库建于2010年，由于防水层老化，导致雨季经常出现渗水现象，影响车辆停放和居民出行。我们采用了双层防水解决方案，使用高弹性防水涂料结合防水卷材，完全解决了渗漏问题。同时，我们也优化了排水系统，提高了排水效率。本项目覆盖面积达2000平方米，工期30天，业主反馈非常满意。'
+  },
+  {
+    id: 2,
+    title: '高层建筑外墙防水项目',
+    type: '外墙防水',
+    description: '为某高层建筑外墙进行防水处理，有效解决了雨天渗水问题。',
+    area: '3500平方米',
+    duration: '45天',
+    date: '2024-07-20',
+    images: [
+      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
+      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg'
+    ],
+    content: '该高层建筑外墙在强降雨天气条件下，多处出现渗漏，影响室内使用及建筑寿命。我们对整个外墙进行了全面检测，找出所有渗漏点，采用纳米防水材料进行修复和防护。工程历时45天，面积达3500平方米，目前已度过多次暴雨考验，防水效果良好。'
+  },
+  {
+    id: 3,
+    title: '别墅屋顶防水工程',
+    type: '屋面防水',
+    description: '为某高档别墅区进行屋顶防水施工，确保防水效果长达15年以上。',
+    area: '300平方米',
+    duration: '15天',
+    date: '2024-09-05',
+    images: [
+      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
+      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg'
+    ],
+    content: '别墅区共有5栋独栋别墅，均为坡屋顶设计，原有防水层使用期已超过10年，多处出现老化和破损。我们采用了进口防水材料，对屋顶进行全面翻新，并优化了屋顶排水系统。本工程工期15天，覆盖总面积300平方米，防水质保15年，彻底解决了屋顶漏水的困扰。'
+  },
+  {
+    id: 4,
+    title: '商场卫生间防水整体解决方案',
+    type: '地下防水',
+    description: '为大型商场提供卫生间防水整体解决方案，从根源解决漏水问题。',
+    area: '500平方米',
+    duration: '20天',
+    date: '2024-06-10',
+    images: [
+      'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg',
+      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg'
+    ],
+    content: '该商场卫生间长期存在渗漏问题，影响了下层商铺的正常经营。我们采用了防水整体解决方案，包括拆除原有地砖和墙砖，铺设高品质防水材料，重新安装管道和洁具，确保防水效果。整个工程历时20天，所有卫生间恢复使用后再无渗漏现象发生。'
+  },
+  {
+    id: 5,
+    title: '学校操场看台防水工程',
+    type: '外墙防水',
+    description: '为学校操场看台进行防水处理，确保学生活动安全。',
+    area: '1200平方米',
+    duration: '25天',
+    date: '2024-05-18',
+    images: [
+      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg',
+      'https://storage.360buyimg.com/jdc-article/NutUItaro34.jpg'
+    ],
+    content: '学校操场看台下方空间被用作器材室，原有防水措施老化导致雨水渗漏，影响器材存放。我们对看台表面进行了全面防水处理，采用耐磨防水材料，确保防水效果的同时增加了防滑功能，提高学生活动安全性。工程面积1200平方米，历时25天完成，目前已经过多次雨季考验，效果良好。'
+  },
+  {
+    id: 6,
+    title: '医院地下室防水工程',
+    type: '地下防水',
+    description: '为医院地下室提供专业防水解决方案，保障医疗设备安全运行。',
+    area: '1800平方米',
+    duration: '35天',
+    date: '2024-04-30',
+    images: [
+      'https://storage.360buyimg.com/jdc-article/NutUItaro2.jpg',
+      'https://storage.360buyimg.com/jdc-article/welcomenutui.jpg'
+    ],
+    content: '医院地下室存放了大量重要医疗设备和药品，对防水要求极高。我们采用了最先进的防水技术和材料，对整个地下室进行了全面防水处理。工程覆盖面积1800平方米，历时35天，采用了三层防护措施，确保即使在极端天气条件下也不会出现渗漏现象。'
+  }
+];
+===== End of File: services\api\cases\data.ts =====
 
 
-===== File: services\api\contact\types.ts =====
-// 服务类型接口
-export interface ServiceType {
-  text: string;
-  value: string;
-}
+===== File: services\api\cases\types.ts =====
+// services/api/cases/types.ts
 
-// 联系信息数据接口
-export interface ContactData {
-  description: string;
-  phone: string;
-  wechat: string;
-  businessHours: string;
-  address: string;
-}
-
-// 预约表单数据接口
-export interface BookingFormData {
-  name: string;
-  phone: string;
-  area: string;
-  serviceType: string;
-  serviceTypeName: string;
-  region: string[];
-  address: string;
-  remark: string;
-}
-
-// API响应包装器
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-===== End of File: services\api\contact\types.ts =====
+// 案例数据接口
+export interface CaseData {
+    id: number;
+    title: string;
+    type: string;
+    description: string;
+    area: string;
+    duration: string;
+    date: string;
+    images: string[];
+    content: string;
+  }
+  
+  // 案例查询参数
+  export interface CaseQueryParams {
+    type: string;
+    keyword: string;
+    page: number;
+    pageSize: number;
+  }
+  
+  // 案例API响应基础接口 - 重命名为更具体的名称
+  export interface CaseApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+  }
+  
+  // 案例列表API响应
+  export interface CasesApiResponse extends CaseApiResponse<CaseData[]> {
+    hasMore?: boolean; // 是否还有更多数据
+  }
+===== End of File: services\api\cases\types.ts =====
 
 
 ===== File: services\http\cache.ts =====

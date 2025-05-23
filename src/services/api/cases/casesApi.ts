@@ -1,7 +1,6 @@
 // services/api/cases/casesApi.ts
-import http from '../../http';
 import { CaseData, CaseQueryParams, CaseApiResponse, CasesApiResponse } from './types';
-import { mockCases, PAGE_SIZE, CASES_TYPES } from './data';
+import { mockCases, PAGE_SIZE, CITY_TYPES } from './data';
 
 // API端点
 const ENDPOINTS = {
@@ -13,22 +12,19 @@ const ENDPOINTS = {
  * 获取案例列表
  */
 export const getCases = async ({
-  type,
+  city,
   keyword,
   page,
   pageSize
 }: CaseQueryParams): Promise<CasesApiResponse> => {
   try {
-    // 替换为实际API调用当后端准备好时
-    // const data = await http.get(ENDPOINTS.GET_CASES, { type, keyword, page, pageSize });
-    
     // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     
     // 过滤模拟数据
     let filteredData = mockCases.filter(item => {
-      if (type !== 'all' && item.type !== type) return false;
-      if (keyword && !item.title.includes(keyword) && !item.description.includes(keyword)) return false;
+      if (city !== 'all' && item.city !== city) return false;
+      if (keyword && !item.title.includes(keyword) && !item.description.includes(keyword) && !item.city.includes(keyword)) return false;
       return true;
     });
     
@@ -59,12 +55,8 @@ export const getCases = async ({
  */
 export const getCaseDetail = async (id: number): Promise<CaseApiResponse<CaseData>> => {
   try {
-    // 替换为实际API调用当后端准备好时
-    // const url = ENDPOINTS.GET_CASE_DETAIL.replace(':id', id.toString());
-    // const data = await http.get(url);
-    
     // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // 查找案例
     const caseItem = mockCases.find(item => item.id === id);
@@ -86,7 +78,7 @@ export const getCaseDetail = async (id: number): Promise<CaseApiResponse<CaseDat
 };
 
 /**
- * 错误处理工具 - 重命名为handleCasesError
+ * 错误处理工具
  */
 export const handleCasesError = (err: any): string => {
   console.error(err);
@@ -94,7 +86,7 @@ export const handleCasesError = (err: any): string => {
 };
 
 // 直接导出常量
-export { mockCases, PAGE_SIZE, CASES_TYPES };
+export { mockCases, PAGE_SIZE, CITY_TYPES };
 
 // 导出类型
 export * from './types';
