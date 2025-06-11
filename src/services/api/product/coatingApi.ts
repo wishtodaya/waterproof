@@ -1,39 +1,30 @@
-// 防水涂料产品API服务
-
+import http from '../../http';
 import { 
   WaterproofCoating, 
   CoatingQueryParams, 
-  ApiResponse, 
   CoatingListResponse, 
   CoatingDetailResponse 
 } from './types';
-import { mockCoatings, PAGE_SIZE } from './data';
+
+const ENDPOINTS = {
+  GET_PRODUCTS: '/api/products/list',
+  GET_PRODUCT_DETAIL: '/api/products',
+};
 
 /**
  * 获取防水涂料产品列表
- * @param params 查询参数
- * @returns 产品列表响应
  */
 export const getCoatingList = async ({
-  page,
-  pageSize = PAGE_SIZE
+  page = 1,
+  pageSize = 10
 }: CoatingQueryParams): Promise<CoatingListResponse> => {
   try {
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // 分页处理
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedData = mockCoatings.slice(startIndex, endIndex);
-    
-    // 判断是否还有更多数据
-    const hasMore = endIndex < mockCoatings.length;
+    const response = await http.get(ENDPOINTS.GET_PRODUCTS, { page, pageSize });
     
     return {
-      success: true,
-      data: paginatedData,
-      hasMore
+      success: response.success || true,
+      data: response.data || [],
+      hasMore: response.hasMore || false
     };
   } catch (error: any) {
     return {
@@ -46,25 +37,15 @@ export const getCoatingList = async ({
 
 /**
  * 获取防水涂料产品详情
- * @param id 产品ID
- * @returns 产品详情响应
  */
 export const getCoatingDetail = async (id: number): Promise<CoatingDetailResponse> => {
   try {
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const response = await http.get(`${ENDPOINTS.GET_PRODUCT_DETAIL}/${id}`);
     
-    // 查找产品
-    const product = mockCoatings.find(item => item.id === id);
-    
-    if (product) {
-      return {
-        success: true,
-        data: product
-      };
-    } else {
-      throw new Error('产品不存在');
-    }
+    return {
+      success: true,
+      data: response
+    };
   } catch (error: any) {
     return {
       success: false,
@@ -72,9 +53,3 @@ export const getCoatingDetail = async (id: number): Promise<CoatingDetailRespons
     };
   }
 };
-
-// 导出常量
-export { PAGE_SIZE } from './data';
-
-// 导出类型
-export * from './types';

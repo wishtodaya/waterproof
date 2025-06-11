@@ -1,5 +1,5 @@
 import { request } from './request';
-import type { RequestOptions} from './types';
+import type { HttpRequestOptions } from './types';
 import { addRequestInterceptor, addResponseInterceptor, addErrorInterceptor } from './interceptor';
 import { clearAllCache, clearCacheData } from './cache';
 
@@ -10,25 +10,25 @@ const http = {
   /**
    * 发送GET请求
    */
-  get: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+  get: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
     request<T>({ url, method: 'GET', data, ...options }),
   
   /**
    * 发送POST请求
    */  
-  post: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+  post: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
     request<T>({ url, method: 'POST', data, ...options }),
   
   /**
    * 发送PUT请求
    */
-  put: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+  put: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
     request<T>({ url, method: 'PUT', data, ...options }),
   
   /**
    * 发送DELETE请求
    */
-  delete: <T = any>(url: string, data?: any, options?: Partial<RequestOptions>) => 
+  delete: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
     request<T>({ url, method: 'DELETE', data, ...options }),
   
   /**

@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, RequestOptions, ResponseData } from './types';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, HttpRequestOptions, ResponseData } from './types';
 import { BUSINESS_CODE } from './config';
 
 // 请求拦截器数组
@@ -35,7 +35,7 @@ export function addErrorInterceptor(interceptor: ErrorInterceptor): void {
 /**
  * 应用请求拦截器
  */
-export async function applyRequestInterceptors(options: RequestOptions): Promise<RequestOptions> {
+export async function applyRequestInterceptors(options: HttpRequestOptions): Promise<HttpRequestOptions> {
   let config = { ...options };
   
   for (const interceptor of requestInterceptors) {
@@ -48,7 +48,7 @@ export async function applyRequestInterceptors(options: RequestOptions): Promise
 /**
  * 应用响应拦截器
  */
-export async function applyResponseInterceptors<T>(response: ResponseData<T>, options: RequestOptions): Promise<ResponseData<T>> {
+export async function applyResponseInterceptors<T>(response: ResponseData<T>, options: HttpRequestOptions): Promise<ResponseData<T>> {
   let result = { ...response };
   
   for (const interceptor of responseInterceptors) {
@@ -61,7 +61,7 @@ export async function applyResponseInterceptors<T>(response: ResponseData<T>, op
 /**
  * 应用错误拦截器
  */
-export async function applyErrorInterceptors(error: any, options: RequestOptions): Promise<any> {
+export async function applyErrorInterceptors(error: any, options: HttpRequestOptions): Promise<any> {
   let result = error;
   
   for (const interceptor of errorInterceptors) {
@@ -71,15 +71,22 @@ export async function applyErrorInterceptors(error: any, options: RequestOptions
   return result;
 }
 
-// 添加默认Token拦截器
+// 添加微信Token拦截器
 addRequestInterceptor(async (options) => {
   if (options.withToken) {
     try {
-      const token = Taro.getStorageSync('token');
+      // 优先使用微信token
+      let token = Taro.getStorageSync('wx_token');
+      
+      // 如果没有微信token，尝试使用普通token
+      if (!token) {
+        token = Taro.getStorageSync('token');
+      }
+      
       if (token) {
         options.headers = {
           ...options.headers,
-          'Authorization': `Bearer ${token}`
+          'X-Access-Token': token  // jeecg-boot使用X-Access-Token
         };
       }
     } catch (error) {
@@ -112,13 +119,15 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // 添加默认Token过期处理
-addErrorInterceptor((error) => {
-  if (error && error.code === BUSINESS_CODE.TOKEN_EXPIRED) {
+addErrorInterceptor((error, options) => {
+  if (error && (error.code === 401 || error.code === BUSINESS_CODE.TOKEN_EXPIRED)) {
     // 清除本地Token
+    Taro.removeStorageSync('wx_token');
     Taro.removeStorageSync('token');
+    Taro.removeStorageSync('wx_user_info');
     
     // 跳转到登录页
-    Taro.navigateTo({
+    Taro.reLaunch({
       url: '/pages/login/index'
     });
   }

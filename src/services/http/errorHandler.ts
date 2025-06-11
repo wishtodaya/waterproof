@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro';
 import { HTTP_STATUS, BUSINESS_CODE } from './config';
-import type { RequestError, RequestOptions } from './types';
+import type { RequestError, HttpRequestOptions } from './types';
 
 /**
  * 处理HTTP状态错误
@@ -35,12 +35,23 @@ export function handleHttpError(statusCode: number): RequestError {
 }
 
 /**
- * 处理业务状态错误
+ * 处理jeecg-boot业务状态错误
  */
-export function handleBusinessError<T>(response: { code: number; message: string; data?: T }): RequestError {
+export function handleBusinessError<T>(response: { success?: boolean; code?: number; message?: string; data?: T }): RequestError {
   let message = response.message || '未知错误';
+  let code = response.code || -1;
   
-  switch (response.code) {
+  // jeecg-boot返回格式处理
+  if (response.success === false) {
+    return {
+      code: code,
+      message: message,
+      data: response.data
+    };
+  }
+  
+  // 传统code处理
+  switch (code) {
     case BUSINESS_CODE.TOKEN_EXPIRED:
       message = '登录已过期，请重新登录';
       break;
@@ -53,7 +64,7 @@ export function handleBusinessError<T>(response: { code: number; message: string
   }
   
   return {
-    code: response.code,
+    code: code,
     message,
     data: response.data
   };
@@ -82,7 +93,7 @@ export function handleNetworkError(error: any): RequestError {
 /**
  * 综合错误处理
  */
-export function handleRequestError(error: any, options: RequestOptions): RequestError {
+export function handleRequestError(error: any, options: HttpRequestOptions): RequestError {
   // 已格式化的错误
   if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
     if (options.showErrorToast) {

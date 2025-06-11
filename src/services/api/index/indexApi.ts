@@ -1,11 +1,12 @@
-// services/api/index/indexApi.ts
 import http from '../../http';
-import { IndexData, ApiResponse } from './types';
-import { indexData } from './data';
+import { IndexData, ApiResponse, Banner, Showcase, Service, ContactInfo } from './types';
 
 // API端点
 const ENDPOINTS = {
-  GET_INDEX_DATA: '/index',
+  GET_BANNERS: '/api/banners/list',
+  GET_SHOWCASES: '/api/cases/showcases',
+  GET_CONTACT_INFO: '/api/contact/info',
+  GET_SERVICES: '/api/contact/services',
 };
 
 /**
@@ -13,13 +14,22 @@ const ENDPOINTS = {
  */
 export const getIndexData = async (): Promise<ApiResponse<IndexData>> => {
   try {
-    // 替换为实际API调用当后端准备好时
-    // const data = await http.get<IndexData>(ENDPOINTS.GET_INDEX_DATA);
-    
-    // 模拟API调用延迟
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 返回模拟数据
+    // 并行请求所有数据
+    const [bannersRes, showcasesRes, contactRes, servicesRes] = await Promise.all([
+      http.get<Banner[]>(ENDPOINTS.GET_BANNERS),
+      http.get<Showcase[]>(ENDPOINTS.GET_SHOWCASES),
+      http.get<ContactInfo>(ENDPOINTS.GET_CONTACT_INFO),
+      http.get<Service[]>(ENDPOINTS.GET_SERVICES)
+    ]);
+
+    // 组装首页数据
+    const indexData: IndexData = {
+      banners: bannersRes || [],
+      showcases: showcasesRes || [],
+      contactInfo: contactRes || { phone: [], wechat: '' },
+      services: servicesRes || []
+    };
+
     return {
       success: true,
       data: indexData
@@ -31,15 +41,3 @@ export const getIndexData = async (): Promise<ApiResponse<IndexData>> => {
     };
   }
 };
-
-/**
- * 首页模块错误处理工具
- */
-export const handleIndexError = (err: any): string => {
-  console.error('Index API Error:', err);
-  return err instanceof Error ? err.message : '获取首页数据时发生未知错误';
-};
-
-// 导出类型和数据
-export * from './types';
-export * from './data';

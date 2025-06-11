@@ -1,13 +1,9 @@
-// services/api/index/types.ts
-
-// 服务项接口
 export interface Service {
-    id: number | string;
-    title: string;
-    description: string;
+    text: string;      // 对应数据库 services.text
+    value: string;     // 对应数据库 services.vlaue 转换为字符串
 }
 
-// 基础案例数据接口
+// 案例数据接口 
 export interface CaseData {
     id: number;
     title: string;
@@ -17,26 +13,28 @@ export interface CaseData {
     images: string[];
     videos?: string[];
     content: string;
+    coverImage?: string; 
 }
 
-// 精选案例接口 - 继承CaseData并添加封面图
+// 精选案例接口
 export interface Showcase extends CaseData {
-    coverImage: string; // 精选案例的封面图
+    coverImage: string; // 精选案例必须有封面图
 }
 
-// 联系信息接口 - 修改为支持多个电话号码
+// 联系信息接口
 export interface ContactInfo {
-    phone: string[]; // 改为数组支持多个号码
-    phoneLabels?: string[]; // 可选的电话标签
-    wechat: string;
+    phone: string[];     // 电话号码数组
+    wechat: string;     // 微信号
+    address?: string;   // 公司地址
+    description?: string; // 公司简介
 }
 
 // Banner接口
 export interface Banner {
     id: string;
-    imageUrl: string;
-    title?: string;
-    subtitle?: string;
+    imageUrl: string;   // 对应数据库 image_url
+    title?: string;     // 对应数据库 title
+    subtitle?: string;  // 对应数据库 subtitle
 }
 
 // 首页数据接口

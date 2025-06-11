@@ -1,6 +1,3 @@
-// 防水涂料产品类型定义
-
-// 防水涂料产品类型
 export interface WaterproofCoating {
   id: number;
   title: string;             // 产品名称
@@ -26,7 +23,7 @@ export interface ApiResponse<T> {
 
 // 产品列表API响应
 export interface CoatingListResponse extends ApiResponse<WaterproofCoating[]> {
-  hasMore?: boolean; // 是否还有更多数据
+  hasMore?: boolean;
 }
 
 // 产品详情API响应

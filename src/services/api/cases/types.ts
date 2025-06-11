@@ -1,4 +1,3 @@
-// 案例数据接口
 export interface CaseData {
   id: number;
   title: string;
@@ -8,6 +7,7 @@ export interface CaseData {
   images: string[];
   videos?: string[];
   content: string;
+  coverImage?: string;
 }
 
 // 案例查询参数
@@ -28,18 +28,7 @@ export interface CaseApiResponse<T> {
 // 案例列表API响应
 export interface CasesApiResponse extends CaseApiResponse<CaseData[]> {
   hasMore?: boolean;
-}
-
-// 分页信息
-export interface PaginationInfo {
-  currentPage: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-}
-
-// 城市类型
-export interface CityType {
-  title: string;
-  value: string;
+  total?: number;
+  currentPage?: number;
+  totalPages?: number;
 }

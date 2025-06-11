@@ -1,0 +1,953 @@
+📁 pages
+  📁 cases
+    📄 index.tsx
+  📁 contact
+    📄 index.tsx
+  📁 index
+    📄 index.tsx
+  📁 product
+    📄 index.tsx
+
+===== File: cases\index.tsx =====
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { View } from '@tarojs/components'
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
+import { 
+  Empty, 
+  InfiniteLoading,
+  Popup,
+  Toast
+} from '@nutui/nutui-react-taro'
+import './index.scss'
+
+// Import components
+import PageHeader from 'src/components/PageHeader';
+import CaseCard from 'src/components/CaseCard';
+import CaseDetail from 'src/components/CaseDetail';
+
+// Import API and types
+import { 
+  CaseData, 
+  CaseQueryParams 
+} from 'src/services/api/cases/types'
+import {
+  getCases,
+  getCaseDetail,
+  handleCasesError,
+  CITY_TYPES,
+  PAGE_SIZE
+} from 'src/services/api/cases/casesApi'
+
+// 初始状态常量
+const INITIAL_STATE = {
+  loading: true,
+  cases: [] as CaseData[],
+  currentCity: 'all',
+  keyword: '',
+  selectedCase: null as CaseData | null,
+  showDetail: false,
+  page: 1,
+  hasMore: true,
+  showToast: false,
+  toastMsg: '',
+  toastType: 'fail' as 'success' | 'fail' | 'warn'
+};
+
+export default function CasesPage() {
+  // 状态管理
+  const [loading, setLoading] = useState(INITIAL_STATE.loading);
+  const [cases, setCases] = useState<CaseData[]>(INITIAL_STATE.cases);
+  const [currentCity, setCurrentCity] = useState(INITIAL_STATE.currentCity);
+  const [keyword, setKeyword] = useState(INITIAL_STATE.keyword);
+  const [selectedCase, setSelectedCase] = useState<CaseData | null>(INITIAL_STATE.selectedCase);
+  const [showDetail, setShowDetail] = useState(INITIAL_STATE.showDetail);
+  const [page, setPage] = useState(INITIAL_STATE.page);
+  const [hasMore, setHasMore] = useState(INITIAL_STATE.hasMore);
+  const [showToast, setShowToast] = useState(INITIAL_STATE.showToast);
+  const [toastMsg, setToastMsg] = useState(INITIAL_STATE.toastMsg);
+  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>(INITIAL_STATE.toastType);
+
+  // 组件挂载状态追踪
+  const isMounted = useRef(true);
+  const loadingRef = useRef(false);
+  
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // 分享功能
+  useShareAppMessage(() => ({
+    title: '郑式修缮防水工程案例',
+    path: '/pages/cases/index',
+    imageUrl: cases.length > 0 ? cases[0].images[0] : undefined,
+  }));
+
+  // 显示提示消息
+  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'fail') => {
+    if (!isMounted.current) return;
+    setToastMsg(message);
+    setToastType(type);
+    setShowToast(true);
+  }, []);
+
+  // 加载案例数据
+  const loadCases = useCallback(
+    async (isRefresh = false) => {
+      // 防止重复加载
+      if (loadingRef.current) return;
+      
+      try {
+        loadingRef.current = true;
+        const currentPage = isRefresh ? 1 : page;
+        
+        if (isRefresh) {
+          setLoading(true);
+        }
+
+        const res = await getCases({
+          city: currentCity,
+          keyword,
+          page: currentPage,
+          pageSize: PAGE_SIZE,
+        });
+
+        if (!isMounted.current) return;
+
+        if (res.success) {
+          const responseData = res.data || [];
+          
+          if (isRefresh) {
+            setCases(responseData);
+            setPage(1);
+            setHasMore(res.hasMore || false);
+          } else {
+            setCases(prev => [...prev, ...responseData]);
+            setPage(prev => prev + 1);
+            setHasMore(res.hasMore || false);
+          }
+        } else {
+          showToastMessage(res.error || '获取案例列表失败');
+        }
+      } catch (err) {
+        if (!isMounted.current) return;
+        showToastMessage(handleCasesError(err));
+      } finally {
+        if (!isMounted.current) return;
+        setLoading(false);
+        loadingRef.current = false;
+      }
+    },
+    [currentCity, keyword, page, showToastMessage]
+  );
+
+  // 城市或关键词变化时重新加载
+  useEffect(() => {
+    loadCases(true);
+  }, [currentCity, keyword]);
+
+  // 页面显示时检查数据
+  useDidShow(() => {
+    if (cases.length === 0 && !loading) {
+      loadCases(true);
+    }
+  });
+
+  // 处理搜索输入变化
+  const handleSearch = useCallback((value: string) => {
+    setKeyword(value);
+    setPage(1);
+  }, []);
+
+  // 处理城市变化
+  const handleCityChange = useCallback((value: string) => {
+    setCurrentCity(value);
+    setPage(1);
+  }, []);
+
+  // 处理加载更多
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !loading && !loadingRef.current) {
+      return loadCases(false);
+    }
+    return Promise.resolve();
+  }, [hasMore, loading, loadCases]);
+
+  // 处理案例点击
+  const handleCaseClick = useCallback(async (id: number) => {
+    try {
+      // 先检查缓存
+      const cachedCase = cases.find(c => c.id === id);
+      if (cachedCase) {
+        setSelectedCase(cachedCase);
+        setShowDetail(true);
+        return;
+      }
+      
+      setLoading(true);
+      const res = await getCaseDetail(id);
+      
+      if (!isMounted.current) return;
+      
+      if (res.success && res.data) {
+        setSelectedCase(res.data);
+        setShowDetail(true);
+      } else {
+        showToastMessage(res.error || '获取案例详情失败');
+      }
+    } catch (err) {
+      if (!isMounted.current) return;
+      showToastMessage(handleCasesError(err));
+    } finally {
+      if (!isMounted.current) return;
+      setLoading(false);
+    }
+  }, [cases, showToastMessage]);
+
+  // 处理预约服务
+  const handleBook = useCallback(() => {
+    setShowDetail(false);
+    // 直接跳转到联系页面
+    Taro.switchTab({
+      url: '/pages/contact/index',
+    });
+  }, []);
+
+  // 处理详情关闭
+  const handleCloseDetail = useCallback(() => {
+    setShowDetail(false);
+    // 延迟清理数据，等待动画结束
+    setTimeout(() => {
+      if (isMounted.current) {
+        setSelectedCase(null);
+      }
+    }, 300);
+  }, []);
+
+  // 骨架屏UI
+  const renderSkeletons = useMemo(() => {
+    return (
+      <View className="cases-page-skeletons">
+        {[1, 2, 3].map((i) => (
+          <View key={i} className="cases-page-skeleton">
+            <View className="cases-page-skeleton-image"></View>
+            <View className="cases-page-skeleton-content">
+              <View className="cases-page-skeleton-title"></View>
+              <View className="cases-page-skeleton-desc"></View>
+              <View className="cases-page-skeleton-date"></View>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  }, []);
+
+  return (
+    <View className="cases-page">
+      {/* Header容器 */}
+      <View className="cases-page-header">
+        <PageHeader
+          keyword={keyword}
+          onSearch={handleSearch}
+          searchPlaceholder="搜索城市案例"
+          currentType={currentCity}
+          onTypeChange={handleCityChange}
+          tabs={CITY_TYPES}
+        />
+      </View>
+
+      {/* 内容区域 */}
+      <View className="cases-page-content">
+        {/* 加载状态 */}
+        {loading && cases.length === 0 ? (
+          renderSkeletons
+        ) : cases.length > 0 ? (
+          <View className="cases-page-list">
+            {cases.map((item, index) => (
+              <View key={item.id} className={`cases-page-item cases-page-item-${Math.min(index + 1, 10)}`}>
+                <CaseCard
+                  id={item.id}
+                  title={item.title}
+                  description={item.description}
+                  date={item.date}
+                  image={item.images[0]}
+                  onClick={() => handleCaseClick(item.id)}
+                />
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View className="cases-page-empty">
+            <Empty description="暂无相关案例" image="empty" />
+          </View>
+        )}
+
+        {/* 无限加载 */}
+        {cases.length > 0 && (
+          <InfiniteLoading
+            hasMore={hasMore}
+            threshold={200}
+            loadingText="加载中..."
+            loadMoreText="已经到底啦"
+            onLoadMore={handleLoadMore}
+          />
+        )}
+      </View>
+
+      {/* 案例详情弹窗 */}
+      <Popup
+        visible={showDetail}
+        position="bottom"
+        round
+        style={{ height: '90%' }}
+        onClose={handleCloseDetail}
+        closeable={false}
+      >
+        {selectedCase && (
+          <CaseDetail 
+            caseData={selectedCase}
+            visible={showDetail}
+            onClose={handleCloseDetail}
+            onContactClick={handleBook}
+          />
+        )}
+      </Popup>
+
+      {/* Toast组件 */}
+      <Toast
+        msg={toastMsg}
+        visible={showToast}
+        type={toastType}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+        position="center"
+        closeOnOverlayClick
+      />
+    </View>
+  );
+}
+===== End of File: cases\index.tsx =====
+
+
+===== File: contact\index.tsx =====
+import { useState, useEffect } from 'react'
+import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { Loading, Toast } from '@nutui/nutui-react-taro'
+import BookingForm from '../../components/BookingForm'
+import ContactInfoCard from '../../components/ContactInfoCard'
+import './index.scss'
+
+import { 
+  ServiceType, 
+  ContactData, 
+  BookingFormData 
+} from 'src/services/api/contact/types'
+import { 
+  getServiceTypes, 
+  getContactData, 
+  submitBooking, 
+  handleContactError 
+} from 'src/services/api/contact/contactApi'
+
+export default function ContactPage() {
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
+  
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
+  const [contactData, setContactData] = useState<ContactData | null>(null);
+  
+  const [formData, setFormData] = useState<Partial<BookingFormData>>({
+    name: '',
+    phone: '',
+    serviceType: '',
+    serviceTypeName: '',
+    region: [],
+    address: '',
+    remark: ''
+  });
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const [serviceTypesRes, contactDataRes] = await Promise.all([
+          getServiceTypes(),
+          getContactData()
+        ]);
+        
+        if (serviceTypesRes.success && serviceTypesRes.data) {
+          setServiceTypes(serviceTypesRes.data);
+        } else {
+          showMessage(serviceTypesRes.error || '获取服务类型失败', 'fail');
+        }
+        
+        if (contactDataRes.success && contactDataRes.data) {
+          setContactData(contactDataRes.data);
+        } else {
+          showMessage(contactDataRes.error || '获取联系信息失败', 'fail');
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error);
+        showMessage('加载数据失败，请稍后重试', 'fail');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
+    setToastInfo({ content, icon });
+    setShowToast(true);
+  };
+  
+  const handleFormSubmit = async (data: BookingFormData) => {
+    setSubmitting(true);
+    
+    try {
+      const res = await submitBooking(data);
+      
+      if (res.success) {
+        Taro.vibrateShort({ type: 'medium' });
+        showMessage('预约成功，我们将尽快与您联系！');
+        
+        setFormData({
+          name: '',
+          phone: '',
+          serviceType: '',
+          serviceTypeName: '',
+          region: [],
+          address: '',
+          remark: ''
+        });
+      } else {
+        showMessage(res.error || '提交失败，请重试', 'fail');
+      }
+    } catch (error) {
+      showMessage(handleContactError(error), 'fail');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  
+  const handleServiceTypeSelect = (typeValue: string) => {
+    const selectedType = serviceTypes.find(type => type.value === typeValue);
+    setFormData(prev => ({
+      ...prev,
+      serviceType: typeValue,
+      serviceTypeName: selectedType?.text || ''
+    }));
+  };
+  
+  const handlePhoneCall = (phone: string) => {
+    Taro.makePhoneCall({
+      phoneNumber: phone,
+      fail: (err) => {
+        if (err.errMsg && !err.errMsg.includes('cancel')) {
+          showMessage('拨打电话失败，请重试', 'fail');
+        }
+      }
+    });
+  };
+  
+  const handleCopyWechat = () => {
+    if (!contactData) return;
+    
+    Taro.setClipboardData({
+      data: contactData.wechat,
+      success: () => {
+      },
+      fail: () => {
+        showMessage('复制失败，请重试', 'fail');
+      }
+    });
+  };
+  
+  if (loading || !contactData) {
+    return (
+      <View className="loading-container">
+        <Loading type="spinner" color="#2563EB" />
+        <Text className="loading-text">加载中...</Text>
+      </View>
+    );
+  }
+  
+  return (
+    <View className="contact-page">
+      <View className="contact-container">
+        <View className="contact-card booking-card">
+          <View className="card-header">
+            <Text className="card-title">预约服务</Text>
+            <Text className="card-subtitle">填写信息免费上门勘测</Text>
+          </View>
+          <View className="card-content">
+            <BookingForm 
+              serviceTypes={serviceTypes}
+              loading={submitting}
+              initialValues={formData}
+              onSubmit={handleFormSubmit}
+              onServiceTypeSelect={handleServiceTypeSelect}
+            />
+          </View>
+        </View>
+        
+        <View className="contact-card about-card">
+          <View className="card-header">
+            <Text className="card-title">联系我们</Text>
+            <Text className="card-subtitle">{contactData.address}</Text>
+          </View>
+          <View className="card-content">
+            <ContactInfoCard 
+              data={contactData}
+              onPhoneCall={handlePhoneCall}
+              onCopyWechat={handleCopyWechat}
+            />
+          </View>
+        </View>
+      </View>
+      
+      <Toast
+        visible={showToast}
+        content={toastInfo.content}
+        icon={toastInfo.icon as any}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+      />
+    </View>
+  );
+}
+===== End of File: contact\index.tsx =====
+
+
+===== File: index\index.tsx =====
+// pages/index/index.tsx
+import { useEffect, useState, useCallback } from 'react'
+import { View, Text } from '@tarojs/components'
+import { Toast, Loading } from '@nutui/nutui-react-taro'
+import Taro from '@tarojs/taro'
+import './index.scss'
+
+// 导入组件
+import BannerCarousel from 'src/components/BannerCarousel'
+import QuickContact from 'src/components/QuickContact'
+import ServiceSection from 'src/components/ServiceSection'
+import ShowcaseSection from 'src/components/ShowcaseSection'
+
+// 直接导入API和类型
+import { IndexData } from 'src/services/api/index/types'
+import { getIndexData, handleIndexError } from 'src/services/api/index/indexApi'
+
+export default function IndexPage() {
+  // 状态管理
+  const [loading, setLoading] = useState(true)
+  const [indexData, setIndexData] = useState<IndexData | null>(null)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMsg, setToastMsg] = useState('')
+  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('success')
+  
+  // 显示提示消息
+  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
+    if (showToast) {
+      setShowToast(false)
+      setTimeout(() => {
+        setToastMsg(message)
+        setToastType(type)
+        setShowToast(true)
+      }, 100)
+    } else {
+      setToastMsg(message)
+      setToastType(type)
+      setShowToast(true)
+    }
+  }, [showToast])
+  
+  // 获取数据
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    
+    try {
+      // 获取所有首页数据
+      const result = await getIndexData()
+      
+      if (result.success && result.data) {
+        setIndexData(result.data)
+      } else {
+        showToastMessage(result.error || '获取首页数据失败', 'fail')
+      }
+    } catch (error) {
+      console.error('加载数据失败:', error)
+      showToastMessage(handleIndexError(error), 'fail')
+    } finally {
+      setLoading(false)
+    }
+  }, [showToastMessage])
+  
+  // 下拉刷新处理
+  const handlePullDownRefresh = useCallback(async () => {
+    try {
+      // 刷新首页数据
+      const result = await getIndexData()
+      
+      if (result.success && result.data) {
+        setIndexData(result.data)
+        showToastMessage('刷新成功', 'success')
+      } else {
+        showToastMessage(result.error || '刷新数据失败', 'fail')
+      }
+    } catch (error) {
+      showToastMessage(handleIndexError(error), 'fail')
+    } finally {
+      Taro.stopPullDownRefresh()
+    }
+  }, [showToastMessage])
+  
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+  
+  // 下拉刷新事件监听
+  useEffect(() => {
+    Taro.eventCenter.on('pullDownRefresh', handlePullDownRefresh)
+    
+    return () => {
+      Taro.eventCenter.off('pullDownRefresh', handlePullDownRefresh)
+    }
+  }, [handlePullDownRefresh])
+  
+  // 加载状态
+  if (loading || !indexData) {
+    return (
+      <View className='loading-container'>
+        <Loading type='spinner' />
+        <Text className='loading-text'>加载中...</Text>
+      </View>
+    )
+  }
+  
+  return (
+    <View className='page'>
+      {/* Banner区域 */}
+      <BannerCarousel banners={indexData.banners} />
+      
+      {/* 快速联系 */}
+      <QuickContact 
+        contactInfo={indexData.contactInfo}
+        onShowToast={showToastMessage}
+      />
+      
+      {/* 服务项目 */}
+      <ServiceSection 
+        services={indexData.services}
+        title="我们的服务"
+      />
+      
+      {/* 精选案例 */}
+      <ShowcaseSection 
+        showcases={indexData.showcases}
+        onShowToast={showToastMessage}
+      />
+      
+      {/* Toast组件 */}
+      <Toast
+        msg={toastMsg}
+        visible={showToast}
+        type={toastType}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+        position='center'
+        closeOnOverlayClick
+      />
+    </View>
+  )
+}
+===== End of File: index\index.tsx =====
+
+
+===== File: product\index.tsx =====
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { View } from '@tarojs/components';
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro';
+import { 
+  Empty, 
+  Toast,
+  Popup,
+  InfiniteLoading
+} from '@nutui/nutui-react-taro';
+import ProductCard from 'src/components/ProductCard';
+import ProductDetail from 'src/components/ProductDetail';
+import { 
+  getCoatingList, 
+  getCoatingDetail, 
+  WaterproofCoating 
+} from 'src/services/api/product/coatingApi';
+import './index.scss';
+
+// 常量定义
+const SKELETON_COUNT = 4;
+const PAGE_SIZE = 10;
+const POPUP_HEIGHT = '92%';
+const TOAST_DURATION = 2000;
+
+// 状态类型定义
+interface PageState {
+  loading: boolean;
+  loadingMore: boolean;
+  products: WaterproofCoating[];
+  selectedProduct: WaterproofCoating | null;
+  showDetail: boolean;
+  currentPage: number;
+  hasMore: boolean;
+}
+
+interface ToastState {
+  show: boolean;
+  msg: string;
+  type: 'success' | 'fail' | 'warn';
+}
+
+// 初始状态
+const initialState: PageState = {
+  loading: true,
+  loadingMore: false,
+  products: [],
+  selectedProduct: null,
+  showDetail: false,
+  currentPage: 1,
+  hasMore: true
+};
+
+const initialToast: ToastState = {
+  show: false,
+  msg: '',
+  type: 'fail'
+};
+
+export default function ProductPage() {
+  const [state, setState] = useState<PageState>(initialState);
+  const [toast, setToast] = useState<ToastState>(initialToast);
+  const isMounted = useRef(true);
+  
+  // 生命周期管理
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  // 分享配置
+  useShareAppMessage(() => ({
+    title: '专业防水产品',
+    path: '/pages/product/index',
+    imageUrl: state.products[0]?.images[0]
+  }));
+
+  // 工具函数
+  const showToastMessage = useCallback((message: string, type: ToastState['type'] = 'fail') => {
+    if (!isMounted.current) return;
+    setToast({ show: true, msg: message, type });
+  }, []);
+
+  const updateState = useCallback((updates: Partial<PageState>) => {
+    if (!isMounted.current) return;
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  // 数据获取
+  const fetchProducts = useCallback(async (isRefresh = false) => {
+    try {
+      const page = isRefresh ? 1 : state.currentPage;
+      
+      updateState({
+        [isRefresh ? 'loading' : 'loadingMore']: true
+      });
+      
+      const response = await getCoatingList({ page, pageSize: PAGE_SIZE });
+
+      if (!isMounted.current) return;
+      
+      if (response.success) {
+        const productData = response.data || [];
+        
+        updateState({
+          products: isRefresh ? productData : [...state.products, ...productData],
+          currentPage: isRefresh ? 2 : state.currentPage + 1,
+          hasMore: response.hasMore || false,
+          loading: false,
+          loadingMore: false
+        });
+      } else {
+        throw new Error(response.error || '获取产品数据失败');
+      }
+    } catch (error) {
+      if (!isMounted.current) return;
+      console.error('获取产品数据错误', error);
+      showToastMessage(error instanceof Error ? error.message : '获取产品数据失败，请稍后重试');
+      updateState({ loading: false, loadingMore: false });
+    }
+  }, [state.currentPage, state.products, showToastMessage, updateState]);
+
+  // 初始化加载
+  useEffect(() => {
+    fetchProducts(true);
+  }, []);
+
+  // 页面显示时检查
+  useDidShow(() => {
+    if (state.products.length === 0 && !state.loading) {
+      fetchProducts(true);
+    }
+  });
+
+  // 下拉刷新
+  useEffect(() => {
+    const handlePullDownRefresh = async () => {
+      await fetchProducts(true);
+      Taro.stopPullDownRefresh();
+    };
+    
+    Taro.eventCenter.on('pullDownRefresh', handlePullDownRefresh);
+    return () => {
+      Taro.eventCenter.off('pullDownRefresh', handlePullDownRefresh);
+    };
+  }, [fetchProducts]);
+
+  // 事件处理
+  const handleProductClick = useCallback(async (id: number) => {
+    try {
+      updateState({ loading: true });
+      const response = await getCoatingDetail(id);
+      
+      if (!isMounted.current) return;
+      
+      if (response.success && response.data) {
+        updateState({
+          selectedProduct: response.data,
+          showDetail: true,
+          loading: false
+        });
+      } else {
+        throw new Error(response.error || '获取产品详情失败');
+      }
+    } catch (error) {
+      if (!isMounted.current) return;
+      console.error('获取产品详情错误', error);
+      showToastMessage(error instanceof Error ? error.message : '获取产品详情失败，请稍后重试');
+      updateState({ loading: false });
+    }
+  }, [showToastMessage, updateState]);
+
+  const handleCloseDetail = useCallback(() => {
+    updateState({ showDetail: false });
+    setTimeout(() => {
+      updateState({ selectedProduct: null });
+    }, 300);
+  }, [updateState]);
+
+  const handleContactClick = useCallback(() => {
+    handleCloseDetail();
+    Taro.switchTab({ url: '/pages/contact/index' });
+  }, [handleCloseDetail]);
+
+  const handleLoadMore = useCallback(() => {
+    if (state.hasMore && !state.loading && !state.loadingMore) {
+      return fetchProducts(false);
+    }
+    return Promise.resolve();
+  }, [state.hasMore, state.loading, state.loadingMore, fetchProducts]);
+
+  // 渲染函数
+  const renderSkeletons = useMemo(() => (
+    <View className="product-grid">
+      {Array.from({ length: SKELETON_COUNT }, (_, i) => (
+        <View key={i} className="product-skeleton">
+          <View className="product-skeleton__image" />
+          <View className="product-skeleton__content">
+            <View className="product-skeleton__title" />
+            <View className="product-skeleton__title" />
+            <View className="product-skeleton__price" />
+          </View>
+        </View>
+      ))}
+    </View>
+  ), []);
+
+  const renderProducts = useMemo(() => (
+    <>
+      <View className="product-grid">
+        {state.products.map((product) => (
+          <View key={product.id} className="product-grid__item">
+            <ProductCard
+              image={product.images[0]}
+              title={product.title}
+              specifications={product.specifications}
+              onClick={() => handleProductClick(product.id)}
+            />
+          </View>
+        ))}
+      </View>
+      
+      <InfiniteLoading
+        hasMore={state.hasMore}
+        threshold={100}
+        loadingText="加载中..."
+        loadMoreText="已经到底啦"
+        onLoadMore={handleLoadMore}
+      />
+    </>
+  ), [state.products, state.hasMore, handleProductClick, handleLoadMore]);
+
+  const renderEmpty = useMemo(() => (
+    <View className="product-page__empty">
+      <Empty description="暂无相关产品" image="empty" />
+    </View>
+  ), []);
+
+  return (
+    <View className="product-page">
+      <View className="product-page__container">
+        {state.loading && state.products.length === 0 
+          ? renderSkeletons 
+          : state.products.length > 0 
+            ? renderProducts 
+            : renderEmpty
+        }
+      </View>
+
+      <Popup
+        visible={state.showDetail}
+        position="bottom"
+        round
+        style={{ height: POPUP_HEIGHT }}
+        onClose={handleCloseDetail}
+        closeable={false}
+      >
+        {state.selectedProduct && (
+          <ProductDetail 
+            product={state.selectedProduct}
+            visible={state.showDetail}
+            onClose={handleCloseDetail}
+            onContactClick={handleContactClick}
+          />
+        )}
+      </Popup>
+
+      <Toast
+        msg={toast.msg}
+        visible={toast.show}
+        type={toast.type}
+        onClose={() => setToast(prev => ({ ...prev, show: false }))}
+        duration={TOAST_DURATION}
+        position="center"
+      />
+    </View>
+  );
+}
+===== End of File: product\index.tsx =====
+

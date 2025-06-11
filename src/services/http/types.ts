@@ -2,7 +2,7 @@
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 // 请求配置
-export interface RequestConfig {
+export interface HttpRequestConfig {
   // 基础URL
   baseURL?: string;
   // 是否显示加载提示
@@ -27,8 +27,8 @@ export interface RequestConfig {
   withToken?: boolean;
 }
 
-// 请求参数
-export interface RequestOptions extends RequestConfig {
+// 请求参数 - 重命名避免冲突
+export interface HttpRequestOptions extends HttpRequestConfig {
   // 请求地址
   url: string;
   // 请求方法
@@ -37,11 +37,14 @@ export interface RequestOptions extends RequestConfig {
   data?: any;
 }
 
-// 响应数据结构
+// jeecg-boot响应数据结构
 export interface ResponseData<T = any> {
-  code: number;
-  message: string;
-  data: T;
+  success?: boolean;  // jeecg-boot成功标识
+  code?: number;      // 状态码
+  message?: string;   // 消息
+  result?: T;         // jeecg-boot数据字段
+  data?: T;          // 通用数据字段
+  timestamp?: number; // 时间戳
 }
 
 // 缓存数据结构
@@ -57,11 +60,11 @@ export interface RequestError {
   data?: any;
 }
 
-// 请求拦截器
-export type RequestInterceptor = (options: RequestOptions) => RequestOptions | Promise<RequestOptions>;
+// 请求拦截器 - 使用重命名后的类型
+export type RequestInterceptor = (options: HttpRequestOptions) => HttpRequestOptions | Promise<HttpRequestOptions>;
 
 // 响应拦截器
-export type ResponseInterceptor = <T>(response: ResponseData<T>, options: RequestOptions) => ResponseData<T> | Promise<ResponseData<T>>;
+export type ResponseInterceptor = <T>(response: ResponseData<T>, options: HttpRequestOptions) => ResponseData<T> | Promise<ResponseData<T>>;
 
 // 错误拦截器
-export type ErrorInterceptor = (error: any, options: RequestOptions) => any;
+export type ErrorInterceptor = (error: any, options: HttpRequestOptions) => any;

@@ -1,13 +1,19 @@
+import http from '../../http';
 import { ServiceType, ContactData, BookingFormData, ApiResponse } from './types';
-import { serviceTypes, contactData } from './data';
+
+const ENDPOINTS = {
+  GET_SERVICES: '/api/contact/services',
+  GET_CONTACT_INFO: '/api/contact/info',
+  SUBMIT_BOOKING: '/api/contact/booking',
+};
 
 export const getServiceTypes = async (): Promise<ApiResponse<ServiceType[]>> => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    const response = await http.get<ServiceType[]>(ENDPOINTS.GET_SERVICES);
     
     return {
       success: true,
-      data: serviceTypes
+      data: response || []
     };
   } catch (error: any) {
     return {
@@ -19,11 +25,11 @@ export const getServiceTypes = async (): Promise<ApiResponse<ServiceType[]>> => 
 
 export const getContactData = async (): Promise<ApiResponse<ContactData>> => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    const response = await http.get<ContactData>(ENDPOINTS.GET_CONTACT_INFO);
     
     return {
       success: true,
-      data: contactData
+      data: response
     };
   } catch (error: any) {
     return {
@@ -35,13 +41,11 @@ export const getContactData = async (): Promise<ApiResponse<ContactData>> => {
 
 export const submitBooking = async (data: BookingFormData): Promise<ApiResponse<{ bookingId: string }>> => {
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await http.post(ENDPOINTS.SUBMIT_BOOKING, data);
     
     return {
       success: true,
-      data: {
-        bookingId: `ZX${Date.now().toString().slice(-6)}`
-      }
+      data: response
     };
   } catch (error: any) {
     return {
@@ -50,11 +54,3 @@ export const submitBooking = async (data: BookingFormData): Promise<ApiResponse<
     };
   }
 };
-
-export const handleContactError = (err: any): string => {
-  console.error(err);
-  return err instanceof Error ? err.message : '发生未知错误';
-};
-
-export * from './types';
-export * from './data';

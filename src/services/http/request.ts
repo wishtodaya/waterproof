@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import type { RequestOptions, ResponseData } from './types';
+import type { HttpRequestOptions, ResponseData } from './types';
 import { DEFAULT_CONFIG, BUSINESS_CODE } from './config';
 import { applyRequestInterceptors, applyResponseInterceptors, applyErrorInterceptors } from './interceptor';
 import { handleRequestError, handleBusinessError } from './errorHandler';
@@ -40,7 +40,7 @@ function delay(ms: number): Promise<void> {
 /**
  * 统一请求函数
  */
-export async function request<T = any>(options: RequestOptions): Promise<T> {
+export async function request<T = any>(options: HttpRequestOptions): Promise<T> {
   // 合并配置
   const config = { ...DEFAULT_CONFIG, ...options };
   const { url, method = 'GET', data, baseURL, showLoading: shouldShowLoading, loadingText, useCache, cacheTime, retry, retryDelay } = config;
@@ -86,23 +86,45 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
           throw { statusCode: response.statusCode };
         }
         
-        // 业务状态检查
-        const responseData = response.data as ResponseData<T>;
+        // jeecg-boot响应格式处理
+        const responseData = response.data as any;
         
-        if (responseData.code !== BUSINESS_CODE.SUCCESS) {
-          throw handleBusinessError(responseData);
+        // 检查是否为jeecg-boot格式的响应
+        if (responseData && typeof responseData === 'object') {
+          // 如果有success字段且为false，表示业务失败
+          if ('success' in responseData && responseData.success === false) {
+            throw handleBusinessError(responseData);
+          }
+          
+          // 如果有code字段且不是成功状态码
+          if ('code' in responseData && responseData.code !== BUSINESS_CODE.SUCCESS) {
+            throw handleBusinessError(responseData);
+          }
+          
+          // 响应拦截处理
+          const processedResponse = await applyResponseInterceptors(responseData, requestConfig);
+          
+          // 提取实际数据
+          let actualData: T;
+          
+          if (processedResponse.result !== undefined) {
+            actualData = processedResponse.result as T;
+          } else if (processedResponse.data !== undefined) {
+            actualData = processedResponse.data as T;
+          } else {
+            actualData = processedResponse as T;
+          }
+          
+          // 设置缓存
+          if (useCache && method === 'GET') {
+            const cacheKey = generateCacheKey(fullUrl, data);
+            setCacheData(cacheKey, actualData);
+          }
+          
+          return actualData;
         }
         
-        // 响应拦截处理
-        const processedResponse = await applyResponseInterceptors(responseData, requestConfig);
-        
-        // 设置缓存
-        if (useCache && method === 'GET') {
-          const cacheKey = generateCacheKey(fullUrl, data);
-          setCacheData(cacheKey, processedResponse.data);
-        }
-        
-        return processedResponse.data;
+        return responseData as T;
       } catch (error) {
         // 请求失败但还有重试次数
         if (retryCount > 0) {
