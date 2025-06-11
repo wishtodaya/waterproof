@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import { Button } from '@nutui/nutui-react-taro';
 import { WaterproofCoating } from 'src/services/api/product/types';
@@ -19,98 +19,109 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
+  // 产品切换时重置图片索引
   useEffect(() => {
-    setCurrentImageIndex(0);
+    if (product?.id) {
+      setCurrentImageIndex(0);
+    }
   }, [product?.id]);
   
-  const handleContactClick = () => {
-    if (onContactClick) {
-      onContactClick();
+  // 处理横向滚动
+  const handleScroll = useCallback((e: any) => {
+    if (!product || product.images.length <= 1) return;
+    
+    const { scrollLeft, scrollWidth } = e.detail;
+    const itemWidth = scrollWidth / product.images.length;
+    const index = Math.round(scrollLeft / itemWidth);
+    
+    if (index !== currentImageIndex && index >= 0 && index < product.images.length) {
+      setCurrentImageIndex(index);
     }
-  };
+  }, [currentImageIndex, product]);
+  
+  // 缓存图片指示器渲染
+  const imageIndicators = useMemo(() => {
+    if (!product || product.images.length <= 1) return null;
+    
+    return (
+      <View className="detail__gallery-indicators">
+        {product.images.map((_, index) => (
+          <View 
+            key={index}
+            className={`detail__gallery-indicator ${
+              currentImageIndex === index ? 'detail__gallery-indicator--active' : ''
+            }`}
+          />
+        ))}
+      </View>
+    );
+  }, [product, currentImageIndex]);
   
   if (!visible || !product) return null;
   
   return (
     <View className="detail">
-      {/* 关闭按钮 */}
-      <View className="detail__close" onClick={onClose}>
-        <Text className="detail__close-icon">×</Text>
+      {/* 顶部操作栏 */}
+      <View className="detail__header">
+        <View className="detail__close" onClick={onClose}>
+          <Text className="detail__close-icon">×</Text>
+        </View>
       </View>
       
+      {/* 主内容滚动区 */}
       <ScrollView 
         scrollY 
         className="detail__scroll"
         enhanced
         showScrollbar={false}
       >
-        {/* 图片轮播区域 */}
+        {/* 图片轮播 */}
         <View className="detail__gallery">
           <ScrollView 
             scrollX 
             className="detail__gallery-scroll"
             scrollWithAnimation
-            onScroll={(e) => {
-              if (product.images.length > 1) {
-                const { scrollLeft, scrollWidth } = e.detail;
-                const itemWidth = scrollWidth / product.images.length;
-                const index = Math.round(scrollLeft / itemWidth);
-                if (index !== currentImageIndex && index >= 0 && index < product.images.length) {
-                  setCurrentImageIndex(index);
-                }
-              }
-            }}
+            onScroll={handleScroll}
           >
             {product.images.map((image, index) => (
               <View 
-                key={`img-${index}`}
+                key={index}
                 className="detail__gallery-item"
               >
                 <Image 
                   src={image} 
                   className="detail__gallery-image" 
-                  mode="aspectFit" // 修改：确保完整图片显示并居中
+                  mode="aspectFit"
                   lazyLoad
                 />
               </View>
             ))}
           </ScrollView>
           
-          {/* 图片指示器 */}
-          {product.images.length > 1 && (
-            <View className="detail__gallery-indicators">
-              {product.images.map((_, index) => (
-                <View 
-                  key={`indicator-${index}`}
-                  className={`detail__gallery-indicator ${
-                    currentImageIndex === index ? 'detail__gallery-indicator--active' : ''
-                  }`}
-                />
-              ))}
-            </View>
-          )}
+          {imageIndicators}
         </View>
         
         {/* 产品信息 */}
-        <View className="detail__info">
-          {/* 产品标题 */}
-          <Text className="detail__title">{product.title}</Text>
-          
-          {/* 价格信息 */}
-          <View className="detail__price-info">
-            <Text className="detail__price-label">全国统一零售价：</Text>
-            <Text className="detail__price-value">{product.specifications}</Text>
+        <View className="detail__content">
+          <View className="detail__title-section">
+            <Text className="detail__title">{product.title}</Text>
           </View>
           
-          {/* 规格信息 */}
-          <View className="detail__specs">
-            <View className="detail__spec-item">
-              <Text className="detail__spec-label">规格:</Text>
-              <Text className="detail__spec-value">{product.type}</Text>
+          <View className="detail__info-card">
+            <View className="detail__info-item">
+              <Text className="detail__info-label">全国统一零售价</Text>
+              <Text className="detail__info-value detail__info-value--price">
+                {product.specifications}
+              </Text>
+            </View>
+            <View className="detail__info-item">
+              <Text className="detail__info-label">产品规格</Text>
+              <Text className="detail__info-value">{product.type}</Text>
             </View>
           </View>
           
-          {/* 产品简介 */}
+          <View className="detail__divider" />
+          
           <View className="detail__section">
             <View className="detail__section-header">
               <Text className="detail__section-title">产品简介</Text>
@@ -118,7 +129,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
             <Text className="detail__section-content">{product.description}</Text>
           </View>
           
-          {/* 适用范围 */}
           <View className="detail__section">
             <View className="detail__section-header">
               <Text className="detail__section-title">适用范围</Text>
@@ -128,13 +138,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
         </View>
       </ScrollView>
       
-      {/* 固定在底部的咨询按钮 */}
+      {/* 底部操作栏 */}
       <View className="detail__footer">
         <Button 
           type="primary" 
           block
           className="detail__contact-btn"
-          onClick={handleContactClick}
+          onClick={onContactClick}
         >
           咨询此产品
         </Button>

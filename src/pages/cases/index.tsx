@@ -1,19 +1,18 @@
-// pages/cases/index.tsx
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { View, Text, Image, ScrollView, Video } from '@tarojs/components'
+import { View } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { 
-  Button,
   Empty, 
   InfiniteLoading,
   Popup,
-  Toast,
-  Loading
+  Toast
 } from '@nutui/nutui-react-taro'
 import './index.scss'
 
-// Import PageHeader component
+// Import components
 import PageHeader from 'src/components/PageHeader';
+import CaseCard from 'src/components/CaseCard';
+import CaseDetail from 'src/components/CaseDetail';
 
 // Import API and types
 import { 
@@ -28,22 +27,38 @@ import {
   PAGE_SIZE
 } from 'src/services/api/cases/casesApi'
 
+// 初始状态常量
+const INITIAL_STATE = {
+  loading: true,
+  cases: [] as CaseData[],
+  currentCity: 'all',
+  keyword: '',
+  selectedCase: null as CaseData | null,
+  showDetail: false,
+  page: 1,
+  hasMore: true,
+  showToast: false,
+  toastMsg: '',
+  toastType: 'fail' as 'success' | 'fail' | 'warn'
+};
+
 export default function CasesPage() {
   // 状态管理
-  const [loading, setLoading] = useState(true);
-  const [cases, setCases] = useState<CaseData[]>([]);
-  const [currentCity, setCurrentCity] = useState<string>('all');
-  const [keyword, setKeyword] = useState('');
-  const [selectedCase, setSelectedCase] = useState<CaseData | null>(null);
-  const [showDetail, setShowDetail] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('fail');
+  const [loading, setLoading] = useState(INITIAL_STATE.loading);
+  const [cases, setCases] = useState<CaseData[]>(INITIAL_STATE.cases);
+  const [currentCity, setCurrentCity] = useState(INITIAL_STATE.currentCity);
+  const [keyword, setKeyword] = useState(INITIAL_STATE.keyword);
+  const [selectedCase, setSelectedCase] = useState<CaseData | null>(INITIAL_STATE.selectedCase);
+  const [showDetail, setShowDetail] = useState(INITIAL_STATE.showDetail);
+  const [page, setPage] = useState(INITIAL_STATE.page);
+  const [hasMore, setHasMore] = useState(INITIAL_STATE.hasMore);
+  const [showToast, setShowToast] = useState(INITIAL_STATE.showToast);
+  const [toastMsg, setToastMsg] = useState(INITIAL_STATE.toastMsg);
+  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>(INITIAL_STATE.toastType);
 
-  // Component mount state tracking
+  // 组件挂载状态追踪
   const isMounted = useRef(true);
+  const loadingRef = useRef(false);
   
   useEffect(() => {
     return () => {
@@ -69,7 +84,11 @@ export default function CasesPage() {
   // 加载案例数据
   const loadCases = useCallback(
     async (isRefresh = false) => {
+      // 防止重复加载
+      if (loadingRef.current) return;
+      
       try {
+        loadingRef.current = true;
         const currentPage = isRefresh ? 1 : page;
         
         if (isRefresh) {
@@ -91,12 +110,12 @@ export default function CasesPage() {
           if (isRefresh) {
             setCases(responseData);
             setPage(1);
+            setHasMore(res.hasMore || false);
           } else {
             setCases(prev => [...prev, ...responseData]);
             setPage(prev => prev + 1);
+            setHasMore(res.hasMore || false);
           }
-          
-          setHasMore(res.hasMore || false);
         } else {
           showToastMessage(res.error || '获取案例列表失败');
         }
@@ -106,12 +125,13 @@ export default function CasesPage() {
       } finally {
         if (!isMounted.current) return;
         setLoading(false);
+        loadingRef.current = false;
       }
     },
     [currentCity, keyword, page, showToastMessage]
   );
 
-  // 城市或关键词变化时加载案例
+  // 城市或关键词变化时重新加载
   useEffect(() => {
     loadCases(true);
   }, [currentCity, keyword]);
@@ -126,16 +146,18 @@ export default function CasesPage() {
   // 处理搜索输入变化
   const handleSearch = useCallback((value: string) => {
     setKeyword(value);
+    setPage(1);
   }, []);
 
   // 处理城市变化
   const handleCityChange = useCallback((value: string) => {
     setCurrentCity(value);
+    setPage(1);
   }, []);
 
   // 处理加载更多
   const handleLoadMore = useCallback(() => {
-    if (hasMore && !loading) {
+    if (hasMore && !loading && !loadingRef.current) {
       return loadCases(false);
     }
     return Promise.resolve();
@@ -144,6 +166,14 @@ export default function CasesPage() {
   // 处理案例点击
   const handleCaseClick = useCallback(async (id: number) => {
     try {
+      // 先检查缓存
+      const cachedCase = cases.find(c => c.id === id);
+      if (cachedCase) {
+        setSelectedCase(cachedCase);
+        setShowDetail(true);
+        return;
+      }
+      
       setLoading(true);
       const res = await getCaseDetail(id);
       
@@ -162,28 +192,27 @@ export default function CasesPage() {
       if (!isMounted.current) return;
       setLoading(false);
     }
-  }, [showToastMessage]);
+  }, [cases, showToastMessage]);
 
   // 处理预约服务
-  const handleBook = useCallback(async (data: CaseData) => {
-    try {
-      await Taro.setStorage({
-        key: 'selected_case',
-        data,
-      });
-      showToastMessage('已添加到咨询列表', 'success');
-      setTimeout(() => {
-        if (isMounted.current) {
-          Taro.switchTab({
-            url: '/pages/contact/index',
-          });
-        }
-      }, 1500);
-    } catch (err) {
-      if (!isMounted.current) return;
-      showToastMessage(handleCasesError(err));
-    }
-  }, [showToastMessage]);
+  const handleBook = useCallback(() => {
+    setShowDetail(false);
+    // 直接跳转到联系页面
+    Taro.switchTab({
+      url: '/pages/contact/index',
+    });
+  }, []);
+
+  // 处理详情关闭
+  const handleCloseDetail = useCallback(() => {
+    setShowDetail(false);
+    // 延迟清理数据，等待动画结束
+    setTimeout(() => {
+      if (isMounted.current) {
+        setSelectedCase(null);
+      }
+    }, 300);
+  }, []);
 
   // 骨架屏UI
   const renderSkeletons = useMemo(() => {
@@ -203,15 +232,9 @@ export default function CasesPage() {
     );
   }, []);
 
-  // 格式化日期字符串
-  const formatDate = useCallback((dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  }, []);
-
   return (
     <View className="cases-page">
-      {/* 使用容器包裹PageHeader */}
+      {/* Header容器 */}
       <View className="cases-page-header">
         <PageHeader
           keyword={keyword}
@@ -223,30 +246,23 @@ export default function CasesPage() {
         />
       </View>
 
-      {/* 内容 */}
+      {/* 内容区域 */}
       <View className="cases-page-content">
-        {/* 加载骨架屏 */}
+        {/* 加载状态 */}
         {loading && cases.length === 0 ? (
           renderSkeletons
         ) : cases.length > 0 ? (
           <View className="cases-page-list">
             {cases.map((item, index) => (
-              <View key={item.id} className={`cases-page-item cases-page-item-${index + 1}`}>
-                <View className="cases-page-card" onClick={() => handleCaseClick(item.id)}>
-                  <View className="cases-page-card-images">
-                    <Image 
-                      src={item.images[0]} 
-                      className="cases-page-card-image"
-                      mode="aspectFill"
-                      lazyLoad
-                    />
-                  </View>
-                  <View className="cases-page-card-content">
-                    <View className="cases-page-card-title">{item.title}</View>
-                    <View className="cases-page-card-description">{item.description}</View>
-                    <View className="cases-page-card-date">施工时间: {formatDate(item.date)}</View>
-                  </View>
-                </View>
+              <View key={item.id} className={`cases-page-item cases-page-item-${Math.min(index + 1, 10)}`}>
+                <CaseCard
+                  id={item.id}
+                  title={item.title}
+                  description={item.description}
+                  date={item.date}
+                  image={item.images[0]}
+                  onClick={() => handleCaseClick(item.id)}
+                />
               </View>
             ))}
           </View>
@@ -273,78 +289,17 @@ export default function CasesPage() {
         visible={showDetail}
         position="bottom"
         round
-        style={{ height: '80%' }}
-        onClose={() => setShowDetail(false)}
+        style={{ height: '90%' }}
+        onClose={handleCloseDetail}
+        closeable={false}
       >
         {selectedCase && (
-          <View className="cases-page-detail">
-            {/* 固定高度的头部 */}
-            <View className="cases-page-detail-header">
-              <View className="cases-page-detail-title">{selectedCase.title}</View>
-            </View>
-            
-            {/* 滚动内容区域 */}
-            <ScrollView 
-              scrollY
-              className="cases-page-detail-scroll"
-              enhanced={false}
-              showScrollbar={false}
-            >
-              <View className="cases-page-detail-content">
-                <View className="cases-page-detail-images">
-                  {selectedCase.images.map((img, idx) => (
-                    <Image 
-                      key={idx} 
-                      src={img} 
-                      className="cases-page-detail-image"
-                      mode="aspectFill"
-                      lazyLoad
-                      onClick={() => {
-                        Taro.previewImage({
-                          current: img,
-                          urls: selectedCase.images
-                        });
-                      }}
-                    />
-                  ))}
-                </View>
-                
-                {/* 视频区域 */}
-                {selectedCase.videos && selectedCase.videos.length > 0 && (
-                  <View className="cases-page-detail-videos">
-                    {selectedCase.videos.map((video, idx) => (
-                      <Video 
-                        key={idx}
-                        src={video}
-                        className="cases-page-detail-video"
-                        controls
-                        showFullscreenBtn
-                        showPlayBtn
-                        autoplay={false}
-                      />
-                    ))}
-                  </View>
-                )}
-                
-                <View className="cases-page-detail-info">
-                  <View className="cases-page-detail-date">
-                    施工时间: {formatDate(selectedCase.date)}
-                  </View>
-                  <View className="cases-page-detail-description">项目概述</View>
-                  <View className="cases-page-detail-text">{selectedCase.content}</View>
-                  <Button 
-                    type="primary" 
-                    block
-                    shape="round"
-                    className="cases-page-detail-button"
-                    onClick={() => handleBook(selectedCase)}
-                  >
-                    咨询类似方案
-                  </Button>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
+          <CaseDetail 
+            caseData={selectedCase}
+            visible={showDetail}
+            onClose={handleCloseDetail}
+            onContactClick={handleBook}
+          />
         )}
       </Popup>
 

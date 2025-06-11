@@ -1,23 +1,21 @@
-// services/api/cases/types.ts
-
 // 案例数据接口
 export interface CaseData {
   id: number;
   title: string;
-  city: string; // 城市，替代原来的type
+  city: string;
   description: string;
-  date: string; // 施工时间
+  date: string;
   images: string[];
-  videos?: string[]; // 视频列表（可选）
+  videos?: string[];
   content: string;
 }
 
 // 案例查询参数
 export interface CaseQueryParams {
-  city: string; // 城市筛选，替代原来的type
-  keyword: string;
-  page: number;
-  pageSize: number;
+  city?: string;
+  keyword?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 // 案例API响应基础接口
@@ -30,4 +28,18 @@ export interface CaseApiResponse<T> {
 // 案例列表API响应
 export interface CasesApiResponse extends CaseApiResponse<CaseData[]> {
   hasMore?: boolean;
+}
+
+// 分页信息
+export interface PaginationInfo {
+  currentPage: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+// 城市类型
+export interface CityType {
+  title: string;
+  value: string;
 }

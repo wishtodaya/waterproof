@@ -1,69 +1,88 @@
+// 产品详情组件样式
 .detail {
-  position: relative;
+  // 全屏布局
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
   background-color: #fff;
+  overflow: hidden;
+  z-index: 998;
   
-  /* 关闭按钮 */
-  &__close {
+  // 顶部操作栏
+  &__header {
     position: absolute;
-    top: 16px;
-    left: 16px;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    z-index: 10;
+  }
+  
+  // 关闭按钮
+  &__close {
     width: 36px;
     height: 36px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     
     &-icon {
-      color: #fff;
+      color: #333;
       font-size: 20px;
+      font-weight: 300;
       line-height: 1;
     }
   }
   
-  /* 滚动区域 */
+  // 滚动区域
   &__scroll {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 80px; /* 为底部按钮留出空间 */
+    // 为底部操作栏预留空间：按钮48px + padding 24+28 + 安全区域
+    padding-bottom: 110px;
   }
   
-  /* 图片轮播区域 */
+  // 图片轮播
   &__gallery {
     position: relative;
     width: 100%;
-    height: 280px;
-    background-color: #f5f5f5;
+    height: 320px;
+    background-color: #fff;
     
+    // 横向滚动容器
     &-scroll {
       height: 100%;
       width: 100%;
       white-space: nowrap;
       
+      // 隐藏滚动条
       &::-webkit-scrollbar {
         display: none;
       }
     }
     
+    // 图片项
     &-item {
       display: inline-block;
       width: 100%;
       height: 100%;
+      padding: 20px;
+      box-sizing: border-box;
     }
     
+    // 图片
     &-image {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* 修改：确保完整图片显示并居中 */
+      object-fit: contain;
     }
     
-    /* 指示器 */
+    // 指示器容器
     &-indicators {
       position: absolute;
       bottom: 16px;
@@ -72,147 +91,177 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 6px;
       z-index: 2;
     }
     
+    // 指示器点
     &-indicator {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.6);
-      margin: 0 4px;
+      background-color: #e0e0e0;
       transition: all 0.3s ease;
       
+      // 激活状态
       &--active {
-        width: 18px;
+        width: 20px;
         border-radius: 3px;
-        background-color: #fff;
+        background-color: #333;
       }
     }
   }
   
-  /* 产品信息 */
-  &__info {
-    padding: 16px 20px;
+  // 内容区域
+  &__content {
+    padding: 28px 24px 32px;
+  }
+  
+  // 标题区域
+  &__title-section {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  &__title {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.4;
+    margin-bottom: 24px;
+  }
+  
+  // 信息卡片
+  &__info-card {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 24px;
+    background-color: #fafbfc;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  &__info-item {
+    flex: 1;
     text-align: center;
   }
   
-  /* 产品标题 */
-  &__title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #333;
-    line-height: 1.4;
-    margin-bottom: 16px;
+  &__info-label {
     display: block;
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 8px;
   }
   
-  /* 价格信息 */
-  &__price-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    text-align: left;
-  }
-  
-  &__price-label {
-    font-size: 15px;
-    color: #666;
-    margin-right: 10px;
-    width: 60px;
-  }
-  
-  &__price-value {
-    font-size: 15px;
+  &__info-value {
+    display: block;
+    font-size: 18px;
     color: #333;
-    flex: 1;
-    font-weight: 500;
+    font-weight: 600;
+    
+    // 价格特殊样式
+    &--price {
+      color: #ff5722;
+      font-size: 28px;
+      font-weight: 700;
+    }
   }
   
-  /* 规格信息 */
-  &__specs {
-    text-align: left;
-    padding-bottom: 16px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #f0f0f0;
+  // 分割线
+  &__divider {
+    height: 1px;
+    background-color: #f5f5f5;
+    margin: 20px 0;
   }
   
-  &__spec-item {
-    display: flex;
-    align-items: center;
-  }
-  
-  &__spec-label {
-    font-size: 15px;
-    color: #666;
-    margin-right: 10px;
-    width: 60px;
-  }
-  
-  &__spec-value {
-    font-size: 15px;
-    color: #333;
-    flex: 1;
-    font-weight: 500;
-  }
-  
-  /* 内容区块 */
+  // 详情区块
   &__section {
-    text-align: left;
-    margin-bottom: 22px;
+    margin-bottom: 32px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
     
     &-header {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     
     &-title {
-      font-size: 17px;
-      font-weight: 600;
-      color: #333;
+      display: block;
       position: relative;
       padding-left: 12px;
-      display: block;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
       
+      // 左侧装饰条
       &::before {
         content: '';
         position: absolute;
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 4px;
-        height: 17px;
-        background-color: #2563EB; /* 原始的蓝色 */
+        width: 3px;
+        height: 18px;
+        background-color: #2563eb;
         border-radius: 2px;
       }
     }
     
     &-content {
-      font-size: 15px;
-      line-height: 1.7;
-      color: #555;
       display: block;
+      padding-left: 12px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #666;
     }
   }
   
-  /* 底部固定操作栏 */
+  // 底部操作栏
   &__footer {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     background-color: #fff;
-    padding: 16px 20px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    padding: 24px 24px 28px;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    z-index: 5;
+    z-index: 999;
+    
+    // 安全区域适配
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    }
+    
+    // 底部边缘修复
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: #fff;
+    }
   }
   
+  // 联系按钮
   &__contact-btn {
     height: 48px;
     font-size: 16px;
-    font-weight: 500;
-    border-radius: 8px;
-    background: #2563EB; /* 原始的蓝色 */
+    font-weight: 600;
+    border-radius: 12px;
+    background-color: #2563eb;
     border: none;
+    color: #fff;
+    transition: all 0.3s ease;
+    
+    &:active {
+      transform: scale(0.98);
+      background-color: #1e40af;
+    }
   }
 }

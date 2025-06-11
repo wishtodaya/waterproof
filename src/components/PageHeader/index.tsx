@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import './index.scss';
 
@@ -27,35 +27,57 @@ export default function PageHeader({
   debounceTime = 500
 }: PageHeaderProps) {
   const [searchValue, setSearchValue] = useState(keyword);
-  const [searchTimer, setSearchTimer] = useState<any>(null);
+  const searchTimerRef = useRef<any>(null);
+
+  // 同步外部keyword变化
+  useEffect(() => {
+    setSearchValue(keyword);
+  }, [keyword]);
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
 
   // 处理搜索输入变化
   const handleSearch = useCallback(
     (value: string) => {
       setSearchValue(value);
-      if (searchTimer) {
-        clearTimeout(searchTimer);
+      
+      // 清除之前的定时器
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
       }
       
-      const timer = setTimeout(() => {
+      // 设置新的定时器
+      searchTimerRef.current = setTimeout(() => {
         onSearch(value);
       }, debounceTime);
-      
-      setSearchTimer(timer);
     },
-    [onSearch, debounceTime, searchTimer]
+    [onSearch, debounceTime]
   );
   
   // 清空搜索
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setSearchValue('');
     onSearch('');
-  };
+    
+    // 清除定时器
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+  }, [onSearch]);
   
   // 处理标签切换
-  const handleTabChange = (value: string) => {
-    onTypeChange(value);
-  };
+  const handleTabChange = useCallback((value: string) => {
+    if (value !== currentType) {
+      onTypeChange(value);
+    }
+  }, [currentType, onTypeChange]);
 
   return (
     <View className="unified-header">
@@ -70,6 +92,7 @@ export default function PageHeader({
             onInput={(e) => handleSearch(e.detail.value)}
             confirmType="search"
             onConfirm={(e) => onSearch(e.detail.value)}
+            placeholderClass="search-placeholder"
           />
           {searchValue && (
             <Text className="search-clear" onClick={handleClear}>×</Text>
@@ -77,13 +100,14 @@ export default function PageHeader({
         </View>
       </View>
       
-      {/* 标签区域 - 使用ScrollView但不尝试手动控制滚动 */}
+      {/* 标签区域 */}
       <View className="header-tabs-container">
         <ScrollView 
           scrollX 
           scrollWithAnimation
           className="tabs-container"
           showScrollbar={false}
+          enhanced
         >
           <View className="tabs-list">
             {tabs.map((tab) => (

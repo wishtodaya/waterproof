@@ -1,27 +1,36 @@
-// services/index/api/types.ts
+// services/api/index/types.ts
 
-// 服务项接口 - 删除features属性
+// 服务项接口
 export interface Service {
     id: number | string;
     title: string;
     description: string;
 }
-  
-// 精选案例接口
-export interface Showcase {
-    id: string;
-    imageUrl: string;
+
+// 基础案例数据接口
+export interface CaseData {
+    id: number;
     title: string;
+    city: string;
     description: string;
+    date: string;
+    images: string[];
+    videos?: string[];
     content: string;
 }
-  
-// 联系信息接口
+
+// 精选案例接口 - 继承CaseData并添加封面图
+export interface Showcase extends CaseData {
+    coverImage: string; // 精选案例的封面图
+}
+
+// 联系信息接口 - 修改为支持多个电话号码
 export interface ContactInfo {
-    phone: string;
+    phone: string[]; // 改为数组支持多个号码
+    phoneLabels?: string[]; // 可选的电话标签
     wechat: string;
 }
-  
+
 // Banner接口
 export interface Banner {
     id: string;
@@ -29,7 +38,7 @@ export interface Banner {
     title?: string;
     subtitle?: string;
 }
-  
+
 // 首页数据接口
 export interface IndexData {
     services: Service[];
@@ -37,7 +46,7 @@ export interface IndexData {
     contactInfo: ContactInfo;
     banners: Banner[];
 }
-  
+
 // API响应包装器
 export interface ApiResponse<T> {
     success: boolean;

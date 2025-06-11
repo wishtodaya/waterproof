@@ -1,0 +1,301 @@
+// 案例详情组件样式
+.case-detail {
+  // 全屏布局
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  overflow: hidden;
+  z-index: 998;
+  
+  // 顶部操作栏
+  &__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    z-index: 10;
+    // 添加渐变背景增强可读性
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+  }
+  
+  // 关闭按钮
+  &__close {
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    
+    &:active {
+      transform: scale(0.95);
+      background-color: rgba(255, 255, 255, 1);
+    }
+    
+    &-icon {
+      color: #333;
+      font-size: 20px;
+      font-weight: 300;
+      line-height: 1;
+    }
+  }
+  
+  // 滚动区域
+  &__scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    // 为底部操作栏预留空间
+    padding-bottom: 110px;
+  }
+  
+  // 媒体轮播 - 高度调整
+  &__gallery {
+    position: relative;
+    width: 100%;
+    height: 240px; // 降低高度，从320px改为240px
+    background-color: #fff;
+    
+    // 横向滚动容器
+    &-scroll {
+      height: 100%;
+      width: 100%;
+      white-space: nowrap;
+      
+      // 隐藏滚动条
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+    
+    // 媒体项
+    &-item {
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      vertical-align: top;
+      
+      // 视频项特殊处理
+      &--video {
+        padding: 0;
+        background-color: #000;
+      }
+    }
+    
+    // 图片
+    &-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    // 视频
+    &-video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    // 指示器容器
+    &-indicators {
+      position: absolute;
+      bottom: 16px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    
+    // 指示器点
+    &-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.5);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      // 激活状态
+      &--active {
+        width: 20px;
+        border-radius: 3px;
+        background-color: #fff;
+      }
+    }
+  }
+  
+  // 内容区域
+  &__content {
+    padding: 24px 20px 32px; // 调整内边距
+  }
+  
+  // 标题区域
+  &__title-section {
+    text-align: center;
+    margin-bottom: 24px; // 减少间距
+  }
+  
+  &__title {
+    display: block;
+    font-size: 22px; // 稍微减小字号
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  
+  // 信息卡片 - 优化对齐
+  &__info-card {
+    display: flex;
+    justify-content: space-between; // 使用space-between保证对齐
+    align-items: flex-start; // 顶部对齐
+    gap: 20px;
+    background-color: #fafbfc;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  
+  &__info-item {
+    flex: 1;
+    text-align: left; // 改为左对齐
+    
+    &:last-child {
+      text-align: right; // 右侧项右对齐
+    }
+  }
+  
+  &__info-label {
+    display: block;
+    font-size: 12px; // 减小标签字号
+    color: #999;
+    margin-bottom: 6px;
+  }
+  
+  &__info-value {
+    display: block;
+    font-size: 16px; // 统一字号
+    color: #333;
+    font-weight: 600;
+    white-space: nowrap; // 确保不换行
+    
+    // 日期特殊样式
+    &--date {
+      color: #2563eb;
+      font-size: 16px; // 统一日期字号，不再特殊放大
+    }
+  }
+  
+  // 分割线
+  &__divider {
+    height: 1px;
+    background-color: #f5f5f5;
+    margin: 16px 0;
+  }
+  
+  // 详情区块
+  &__section {
+    margin-bottom: 32px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    &-header {
+      margin-bottom: 16px;
+    }
+    
+    &-title {
+      display: block;
+      position: relative;
+      padding-left: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      
+      // 左侧装饰条
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 18px;
+        background-color: #2563eb;
+        border-radius: 2px;
+      }
+    }
+    
+    &-content {
+      display: block;
+      padding-left: 12px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: #666;
+      text-align: justify;
+    }
+  }
+  
+  // 底部操作栏
+  &__footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    padding: 20px 20px 24px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 999;
+    
+    // 安全区域适配
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+    
+    // 底部边缘修复
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background-color: #fff;
+    }
+  }
+  
+  // 联系按钮
+  &__contact-btn {
+    height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    background-color: #2563eb;
+    border: none;
+    color: #fff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:active {
+      transform: scale(0.98);
+      background-color: #1e40af;
+    }
+  }
+}

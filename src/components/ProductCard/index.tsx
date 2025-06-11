@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { View, Text, Image } from '@tarojs/components';
 import { Loading } from '@nutui/nutui-react-taro';
 import './index.scss';
@@ -8,25 +8,25 @@ interface ProductCardProps {
   title: string;
   specifications: string;
   onClick?: () => void;
-  aspectRatio?: string; // 可选的宽高比（例如："1/1", "4/3", "16/9"）
-  imageFit?: "aspectFill" | "aspectFit" | "widthFix" | "heightFix" | "scaleToFill"; // 可选的填充模式
 }
+
+type ImageStatus = 'loading' | 'loaded' | 'error';
 
 const ProductCard: React.FC<ProductCardProps> = memo(({
   image,
   title,
   specifications,
-  onClick,
-  aspectRatio = "1/1",     // 默认正方形宽高比
-  imageFit = "aspectFit"   // 修改：默认填充模式改为 aspectFit
+  onClick
 }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [imageStatus, setImageStatus] = useState<ImageStatus>('loading');
 
-  // 图片加载完成时处理
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
+  const handleImageLoad = useCallback(() => {
+    setImageStatus('loaded');
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageStatus('error');
+  }, []);
 
   return (
     <View 
@@ -34,40 +34,41 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
       onClick={onClick} 
       hoverClass="product-card--active"
     >
-      <View 
-        className="product-card__image-wrap"
-        style={{ aspectRatio }}
-      >
-        {!imageLoaded && !imageError && (
+      <View className="product-card__image-wrap">
+        {imageStatus === 'loading' && (
           <View className="product-card__image-loading">
             <Loading />
           </View>
         )}
-        {imageError && (
+        
+        {imageStatus === 'error' && (
           <View className="product-card__image-error">
             <Text>加载失败</Text>
           </View>
         )}
+        
         <Image 
           src={image} 
-          mode={imageFit}
+          mode="aspectFit"
           className="product-card__image"
           lazyLoad
           onLoad={handleImageLoad}
-          onError={() => setImageError(true)}
-          style={{ opacity: imageLoaded ? 1 : 0 }}
+          onError={handleImageError}
+          style={{ opacity: imageStatus === 'loaded' ? 1 : 0 }}
         />
       </View>
       
       <View className="product-card__info">
         <Text className="product-card__title">{title}</Text>
         <View className="product-card__price-info">
-          <Text className="product-card__price-label">全国统一零售价：</Text>
+          <Text className="product-card__price-label">零售价</Text>
           <Text className="product-card__price-value">{specifications}</Text>
         </View>
       </View>
     </View>
   );
 });
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

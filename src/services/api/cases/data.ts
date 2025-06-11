@@ -1,9 +1,7 @@
-// services/api/cases/data.ts
-
-import { CaseData } from './types';
+import { CaseData, CityType } from './types';
 
 // 城市列表常量
-export const CITY_TYPES = [
+export const CITY_TYPES: CityType[] = [
   { title: '全部城市', value: 'all' },
   { title: '北京', value: '北京' },
   { title: '上海', value: '上海' },
@@ -12,8 +10,7 @@ export const CITY_TYPES = [
   { title: '成都', value: '成都' },
   { title: '杭州', value: '杭州' },
   { title: '郑州', value: '郑州' },
-
-];
+] as const;
 
 // 分页大小常量
 export const PAGE_SIZE = 10;

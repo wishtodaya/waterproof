@@ -1,5 +1,5 @@
 // pages/index/index.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
 import { Toast, Loading } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
@@ -24,7 +24,7 @@ export default function IndexPage() {
   const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('success')
   
   // 显示提示消息
-  const showToastMessage = (message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
+  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
     if (showToast) {
       setShowToast(false)
       setTimeout(() => {
@@ -37,57 +37,61 @@ export default function IndexPage() {
       setToastType(type)
       setShowToast(true)
     }
-  }
+  }, [showToast])
   
   // 获取数据
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      
-      try {
-        // 获取所有首页数据
-        const result = await getIndexData()
-        
-        if (result.success && result.data) {
-          setIndexData(result.data)
-        } else {
-          showToastMessage(result.error || '获取首页数据失败', 'fail')
-        }
-      } catch (error) {
-        console.error('加载数据失败:', error)
-        showToastMessage(handleIndexError(error), 'fail')
-      } finally {
-        setLoading(false)
-      }
-    }
+  const fetchData = useCallback(async () => {
+    setLoading(true)
     
-    fetchData()
-  }, [])
+    try {
+      // 获取所有首页数据
+      const result = await getIndexData()
+      
+      if (result.success && result.data) {
+        setIndexData(result.data)
+      } else {
+        showToastMessage(result.error || '获取首页数据失败', 'fail')
+      }
+    } catch (error) {
+      console.error('加载数据失败:', error)
+      showToastMessage(handleIndexError(error), 'fail')
+    } finally {
+      setLoading(false)
+    }
+  }, [showToastMessage])
   
   // 下拉刷新处理
-  useEffect(() => {
-    Taro.eventCenter.on('pullDownRefresh', async () => {
-      try {
-        // 刷新首页数据
-        const result = await getIndexData()
-        
-        if (result.success && result.data) {
-          setIndexData(result.data)
-          showToastMessage('刷新成功', 'success')
-        } else {
-          showToastMessage(result.error || '刷新数据失败', 'fail')
-        }
-      } catch (error) {
-        showToastMessage(handleIndexError(error), 'fail')
-      } finally {
-        Taro.stopPullDownRefresh()
+  const handlePullDownRefresh = useCallback(async () => {
+    try {
+      // 刷新首页数据
+      const result = await getIndexData()
+      
+      if (result.success && result.data) {
+        setIndexData(result.data)
+        showToastMessage('刷新成功', 'success')
+      } else {
+        showToastMessage(result.error || '刷新数据失败', 'fail')
       }
-    })
+    } catch (error) {
+      showToastMessage(handleIndexError(error), 'fail')
+    } finally {
+      Taro.stopPullDownRefresh()
+    }
+  }, [showToastMessage])
+  
+  // 组件挂载时获取数据
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+  
+  // 下拉刷新事件监听
+  useEffect(() => {
+    Taro.eventCenter.on('pullDownRefresh', handlePullDownRefresh)
     
     return () => {
-      Taro.eventCenter.off('pullDownRefresh')
+      Taro.eventCenter.off('pullDownRefresh', handlePullDownRefresh)
     }
-  }, [])
+  }, [handlePullDownRefresh])
   
   // 加载状态
   if (loading || !indexData) {
@@ -110,13 +114,15 @@ export default function IndexPage() {
         onShowToast={showToastMessage}
       />
       
-      {/* 服务分类 */}
-      <ServiceSection services={indexData.services} />
+      {/* 服务项目 */}
+      <ServiceSection 
+        services={indexData.services}
+        title="我们的服务"
+      />
       
       {/* 精选案例 */}
       <ShowcaseSection 
         showcases={indexData.showcases}
-        contactPhone={indexData.contactInfo.phone}
         onShowToast={showToastMessage}
       />
       

@@ -1,66 +1,130 @@
-// src/components/QuickContact/index.scss
-
-// 快速联系 - 修改后的样式（更大更醒目的按钮）
+/* 顶部按钮区域 */
 .quick-contact {
+  display: flex;
+  margin: 16px 16px 24px;
+  padding: 18px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+
+  .contact-btn {
+    flex: 1;
+    height: 50px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
     display: flex;
-    margin: 15px 15px 20px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.18s;
+
+    &:active { transform: scale(.97); }
+    &.disabled { opacity: .6; pointer-events: none; }
+
+    &.call-btn {
+      background: linear-gradient(135deg, var(--nutui-brand-stop-1), var(--nutui-brand-stop-2));
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(37, 99, 235, .17);
+    }
+    &.wechat-btn {
+      background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+      color: #fff;
+      box-shadow: 0 3px 8px rgba(16, 185, 129, .17);
+    }
+  }
+}
+
+/* 底部弹窗 */
+.phone-selector-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 999;
+
+  .phone-selector {
+    width: 100%;
+    max-width: 520px;
     background: #fff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    position: relative;
-    z-index: 10;
-    
-    .contact-btn {
-      flex: 1;
-      margin: 0 8px;
-      height: 54px;
-      font-weight: 600;
-      font-size: 16px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      
-      &:active {
-        transform: scale(0.98);
-        opacity: 0.9;
-      }
-      
-      .btn-icon {
-        margin-right: 6px;
-        font-size: 20px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: slideUp .28s cubic-bezier(.4,0,.2,1);
+
+    @keyframes slideUp { from { transform: translateY(100%);} to { transform: translateY(0);} }
+
+    .selector-header {
+      position: relative;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--nutui-gray-3);
+
+      .selector-title { font-size: 17px; font-weight: 600; color: var(--nutui-gray-7); }
+
+      .selector-close {
+        position: absolute;
+        right: 18px; top: 50%;
+        transform: translateY(-50%);
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        background: var(--nutui-gray-2);
+        display: flex; align-items: center; justify-content: center;
+        transition: transform .2s;
+
+        &:active { transform: translateY(-50%) rotate(90deg); }
+        .close-icon { font-size: 18px; color: var(--nutui-gray-5); }
       }
     }
-    
-    .call-btn {
-      background: #1155cc;
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(17, 85, 204, 0.3);
-    }
-    
-    .wechat-btn {
-      background: #09BB07;
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(9, 187, 7, 0.3);
-      
-      &.disabled {
-        opacity: 0.7;
-        background: #71c371;
-        box-shadow: none;
+
+    .phone-list {
+      padding: 8px 0;
+
+      .phone-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 0 18px 10px;
+        padding: 14px 20px;
+        border: 1px solid var(--nutui-gray-3);
+        border-radius: 12px;
+        transition: background .18s, transform .18s;
+
+        &:active { background: var(--nutui-gray-2); transform: translateY(1px); }
+
+        .phone-icon-wrapper {
+          width: 46px; height: 46px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, var(--nutui-brand-stop-1) 0%, var(--nutui-brand-stop-2) 100%);
+          display: flex; align-items: center; justify-content: center;
+        }
+
+        .phone-info {
+          display: flex; flex-direction: column; gap: 4px;
+          .phone-label  { font-size: 13px; color: var(--nutui-gray-5); }
+          .phone-number { font-size: 17px; font-weight: 600; color: var(--nutui-gray-7); }
+        }
       }
     }
   }
-  
-  // 响应式适配
-  @media screen and (max-width: 375px) {
-    .quick-contact {
-      padding: 12px;
-      
-      .contact-btn {
-        height: 48px;
-        font-size: 14px;
-      }
+}
+
+/* 共用 SVG 尺寸 */
+.icon-img { width: 22px; height: 22px; }
+
+/* 小屏优化 */
+@media screen and (max-width: 375px) {
+  .quick-contact { margin: 12px; padding: 15px; .contact-btn { height: 46px; font-size: 14px; } }
+  .phone-selector-wrapper .phone-selector {
+    border-radius: 18px 18px 0 0;
+    .selector-header { padding: 16px; .selector-title { font-size: 15px; } }
+    .phone-list .phone-item {
+      margin: 0 14px 8px; padding: 12px 16px;
+      .phone-icon-wrapper { width: 40px; height: 40px; }
+      .phone-number { font-size: 15px; }
     }
   }
+}
