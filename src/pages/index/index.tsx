@@ -1,4 +1,3 @@
-// pages/index/index.tsx
 import { useEffect, useState, useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
 import { Toast, Loading } from '@nutui/nutui-react-taro'
@@ -11,9 +10,14 @@ import QuickContact from 'src/components/QuickContact'
 import ServiceSection from 'src/components/ServiceSection'
 import ShowcaseSection from 'src/components/ShowcaseSection'
 
-// 直接导入API和类型
+// 修改API导入路径
 import { IndexData } from 'src/services/api/index/types'
-import { getIndexData, handleIndexError } from 'src/services/api/index/indexApi'
+import { getIndexData } from 'src/services/api/index/indexApi'
+
+// 简化错误处理函数
+const handleIndexError = (err: any): string => {
+  return err instanceof Error ? err.message : '获取首页数据时发生未知错误';
+};
 
 export default function IndexPage() {
   // 状态管理
@@ -44,7 +48,6 @@ export default function IndexPage() {
     setLoading(true)
     
     try {
-      // 获取所有首页数据
       const result = await getIndexData()
       
       if (result.success && result.data) {
@@ -63,7 +66,6 @@ export default function IndexPage() {
   // 下拉刷新处理
   const handlePullDownRefresh = useCallback(async () => {
     try {
-      // 刷新首页数据
       const result = await getIndexData()
       
       if (result.success && result.data) {

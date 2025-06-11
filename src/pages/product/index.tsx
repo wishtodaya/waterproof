@@ -9,20 +9,21 @@ import {
 } from '@nutui/nutui-react-taro';
 import ProductCard from 'src/components/ProductCard';
 import ProductDetail from 'src/components/ProductDetail';
+// 修改API导入路径
 import { 
   getCoatingList, 
-  getCoatingDetail, 
-  WaterproofCoating 
+  getCoatingDetail 
 } from 'src/services/api/product/coatingApi';
+import { WaterproofCoating } from 'src/services/api/product/types';
 import './index.scss';
 
-// 常量定义
+// 保持原有常量
 const SKELETON_COUNT = 4;
 const PAGE_SIZE = 10;
 const POPUP_HEIGHT = '92%';
 const TOAST_DURATION = 2000;
 
-// 状态类型定义
+// 保持原有状态类型
 interface PageState {
   loading: boolean;
   loadingMore: boolean;
@@ -39,7 +40,7 @@ interface ToastState {
   type: 'success' | 'fail' | 'warn';
 }
 
-// 初始状态
+// 保持原有初始状态
 const initialState: PageState = {
   loading: true,
   loadingMore: false,
@@ -61,21 +62,18 @@ export default function ProductPage() {
   const [toast, setToast] = useState<ToastState>(initialToast);
   const isMounted = useRef(true);
   
-  // 生命周期管理
   useEffect(() => {
     return () => {
       isMounted.current = false;
     };
   }, []);
   
-  // 分享配置
   useShareAppMessage(() => ({
     title: '专业防水产品',
     path: '/pages/product/index',
     imageUrl: state.products[0]?.images[0]
   }));
 
-  // 工具函数
   const showToastMessage = useCallback((message: string, type: ToastState['type'] = 'fail') => {
     if (!isMounted.current) return;
     setToast({ show: true, msg: message, type });
@@ -86,7 +84,7 @@ export default function ProductPage() {
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // 数据获取
+  // 修改API调用，保持其他逻辑
   const fetchProducts = useCallback(async (isRefresh = false) => {
     try {
       const page = isRefresh ? 1 : state.currentPage;
@@ -120,19 +118,16 @@ export default function ProductPage() {
     }
   }, [state.currentPage, state.products, showToastMessage, updateState]);
 
-  // 初始化加载
   useEffect(() => {
     fetchProducts(true);
   }, []);
 
-  // 页面显示时检查
   useDidShow(() => {
     if (state.products.length === 0 && !state.loading) {
       fetchProducts(true);
     }
   });
 
-  // 下拉刷新
   useEffect(() => {
     const handlePullDownRefresh = async () => {
       await fetchProducts(true);
@@ -145,7 +140,7 @@ export default function ProductPage() {
     };
   }, [fetchProducts]);
 
-  // 事件处理
+  // 修改API调用，保持其他逻辑
   const handleProductClick = useCallback(async (id: number) => {
     try {
       updateState({ loading: true });
@@ -189,7 +184,7 @@ export default function ProductPage() {
     return Promise.resolve();
   }, [state.hasMore, state.loading, state.loadingMore, fetchProducts]);
 
-  // 渲染函数
+  // 保持原有渲染逻辑
   const renderSkeletons = useMemo(() => (
     <View className="product-grid">
       {Array.from({ length: SKELETON_COUNT }, (_, i) => (

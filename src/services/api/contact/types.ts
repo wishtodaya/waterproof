@@ -1,6 +1,7 @@
 export interface ServiceType {
-  text: string;    // 对应数据库 services.text
-  value: string;   // 对应数据库 services.vlaue 转换为字符串
+  text: string;
+  value: string;
+  description: string; 
 }
 
 export interface ContactData {

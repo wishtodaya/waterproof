@@ -14,9 +14,13 @@ import {
 import { 
   getServiceTypes, 
   getContactData, 
-  submitBooking, 
-  handleContactError 
+  submitBooking
 } from 'src/services/api/contact/contactApi'
+
+const handleContactError = (err: any): string => {
+  console.error(err);
+  return err instanceof Error ? err.message : '发生未知错误';
+};
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(true);
@@ -129,6 +133,7 @@ export default function ContactPage() {
     Taro.setClipboardData({
       data: contactData.wechat,
       success: () => {
+        showMessage('微信号已复制');
       },
       fail: () => {
         showMessage('复制失败，请重试', 'fail');

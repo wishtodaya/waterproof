@@ -1,9 +1,14 @@
 import { View, Text } from '@tarojs/components'
-import { Service } from 'src/services/api/index/types'
 import './index.scss'
 
+interface ServiceType {
+  text: string;
+  value: string;
+  description: string;
+}
+
 interface ServiceSectionProps {
-  services: Service[];
+  services: ServiceType[];
   title?: string;
 }
 
@@ -19,8 +24,8 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({ services, title = "æˆ‘ä
       </View>
       <View className='service-grid'>
         {services.map(service => (
-          <View key={service.id} className='service-item'>
-            <Text className='service-item-title text-bold'>{service.title}</Text>
+          <View key={service.value} className='service-item'>
+            <Text className='service-item-title text-bold'>{service.text}</Text>
             <Text className='service-item-description'>{service.description}</Text>
           </View>
         ))}

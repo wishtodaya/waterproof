@@ -14,20 +14,34 @@ import PageHeader from 'src/components/PageHeader';
 import CaseCard from 'src/components/CaseCard';
 import CaseDetail from 'src/components/CaseDetail';
 
-// Import API and types
+// 修改API导入路径
 import { 
   CaseData, 
   CaseQueryParams 
 } from 'src/services/api/cases/types'
 import {
   getCases,
-  getCaseDetail,
-  handleCasesError,
-  CITY_TYPES,
-  PAGE_SIZE
+  getCaseDetail
 } from 'src/services/api/cases/casesApi'
 
-// 初始状态常量
+// 移动常量到本地，移除无用的导入
+const CITY_TYPES = [
+  { title: '全部', value: 'all' },
+  { title: '深圳', value: '深圳' },
+  { title: '广州', value: '广州' },
+  { title: '东莞', value: '东莞' },
+  { title: '佛山', value: '佛山' },
+  { title: '惠州', value: '惠州' }
+];
+
+const PAGE_SIZE = 10;
+
+// 简化错误处理
+const handleCasesError = (err: any): string => {
+  return err instanceof Error ? err.message : '发生未知错误，请稍后重试';
+};
+
+// 保持原有状态结构
 const INITIAL_STATE = {
   loading: true,
   cases: [] as CaseData[],
@@ -43,7 +57,7 @@ const INITIAL_STATE = {
 };
 
 export default function CasesPage() {
-  // 状态管理
+  // 保持原有状态管理结构
   const [loading, setLoading] = useState(INITIAL_STATE.loading);
   const [cases, setCases] = useState<CaseData[]>(INITIAL_STATE.cases);
   const [currentCity, setCurrentCity] = useState(INITIAL_STATE.currentCity);
@@ -56,7 +70,7 @@ export default function CasesPage() {
   const [toastMsg, setToastMsg] = useState(INITIAL_STATE.toastMsg);
   const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>(INITIAL_STATE.toastType);
 
-  // 组件挂载状态追踪
+  // 保持原有的ref管理
   const isMounted = useRef(true);
   const loadingRef = useRef(false);
   
@@ -66,14 +80,14 @@ export default function CasesPage() {
     };
   }, []);
 
-  // 分享功能
+  // 保持原有分享功能
   useShareAppMessage(() => ({
     title: '郑式修缮防水工程案例',
     path: '/pages/cases/index',
     imageUrl: cases.length > 0 ? cases[0].images[0] : undefined,
   }));
 
-  // 显示提示消息
+  // 保持原有Toast处理
   const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'fail') => {
     if (!isMounted.current) return;
     setToastMsg(message);
@@ -81,10 +95,9 @@ export default function CasesPage() {
     setShowToast(true);
   }, []);
 
-  // 加载案例数据
+  // 修改API调用，其他逻辑保持不变
   const loadCases = useCallback(
     async (isRefresh = false) => {
-      // 防止重复加载
       if (loadingRef.current) return;
       
       try {
@@ -96,8 +109,8 @@ export default function CasesPage() {
         }
 
         const res = await getCases({
-          city: currentCity,
-          keyword,
+          city: currentCity === 'all' ? undefined : currentCity,
+          keyword: keyword || undefined,
           page: currentPage,
           pageSize: PAGE_SIZE,
         });
@@ -131,31 +144,27 @@ export default function CasesPage() {
     [currentCity, keyword, page, showToastMessage]
   );
 
-  // 城市或关键词变化时重新加载
+  // 保持原有的useEffect和其他处理函数
   useEffect(() => {
     loadCases(true);
   }, [currentCity, keyword]);
 
-  // 页面显示时检查数据
   useDidShow(() => {
     if (cases.length === 0 && !loading) {
       loadCases(true);
     }
   });
 
-  // 处理搜索输入变化
   const handleSearch = useCallback((value: string) => {
     setKeyword(value);
     setPage(1);
   }, []);
 
-  // 处理城市变化
   const handleCityChange = useCallback((value: string) => {
     setCurrentCity(value);
     setPage(1);
   }, []);
 
-  // 处理加载更多
   const handleLoadMore = useCallback(() => {
     if (hasMore && !loading && !loadingRef.current) {
       return loadCases(false);
@@ -163,10 +172,9 @@ export default function CasesPage() {
     return Promise.resolve();
   }, [hasMore, loading, loadCases]);
 
-  // 处理案例点击
+  // 修改API调用，其他逻辑保持不变
   const handleCaseClick = useCallback(async (id: number) => {
     try {
-      // 先检查缓存
       const cachedCase = cases.find(c => c.id === id);
       if (cachedCase) {
         setSelectedCase(cachedCase);
@@ -194,19 +202,15 @@ export default function CasesPage() {
     }
   }, [cases, showToastMessage]);
 
-  // 处理预约服务
   const handleBook = useCallback(() => {
     setShowDetail(false);
-    // 直接跳转到联系页面
     Taro.switchTab({
       url: '/pages/contact/index',
     });
   }, []);
 
-  // 处理详情关闭
   const handleCloseDetail = useCallback(() => {
     setShowDetail(false);
-    // 延迟清理数据，等待动画结束
     setTimeout(() => {
       if (isMounted.current) {
         setSelectedCase(null);
@@ -214,7 +218,7 @@ export default function CasesPage() {
     }, 300);
   }, []);
 
-  // 骨架屏UI
+  // 保持原有骨架屏渲染
   const renderSkeletons = useMemo(() => {
     return (
       <View className="cases-page-skeletons">
