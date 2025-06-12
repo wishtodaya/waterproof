@@ -1,0 +1,745 @@
+📁 http
+  📄 cache.ts
+  📄 config.ts
+  📄 errorHandler.ts
+  📄 index.ts
+  📄 interceptor.ts
+  📄 request.ts
+  📄 types.ts
+
+===== File: cache.ts =====
+import Taro from '@tarojs/taro';
+import type { CacheData } from './types';
+
+// 缓存键前缀
+const CACHE_PREFIX = 'http_cache_';
+
+/**
+ * 生成缓存键
+ */
+export function generateCacheKey(url: string, data?: any): string {
+  return `${CACHE_PREFIX}${url}_${JSON.stringify(data || {})}`;
+}
+
+/**
+ * 获取缓存数据
+ */
+export function getCacheData<T>(key: string): CacheData<T> | null {
+  try {
+    const cacheData = Taro.getStorageSync(key);
+    return cacheData ? JSON.parse(cacheData) : null;
+  } catch (error) {
+    console.error('获取缓存数据失败', error);
+    return null;
+  }
+}
+
+/**
+ * 设置缓存数据
+ */
+export function setCacheData<T>(key: string, data: T): void {
+    try {
+      const cacheData: CacheData<T> = {
+        data,
+        timestamp: Date.now()
+      };
+      
+      Taro.setStorageSync(key, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('设置缓存数据失败', error);
+    }
+  }
+
+/**
+ * 清除缓存数据
+ */
+export function clearCacheData(key: string): void {
+  try {
+    Taro.removeStorageSync(key);
+  } catch (error) {
+    console.error('清除缓存数据失败', error);
+  }
+}
+
+/**
+ * 清除所有HTTP缓存
+ */
+export function clearAllCache(): void {
+  try {
+    const storageInfo = Taro.getStorageInfoSync();
+    const keys = storageInfo.keys || [];
+    
+    keys.forEach(key => {
+      if (key.startsWith(CACHE_PREFIX)) {
+        Taro.removeStorageSync(key);
+      }
+    });
+  } catch (error) {
+    console.error('清除所有缓存失败', error);
+  }
+}
+
+/**
+ * 检查缓存是否有效
+ */
+export function isCacheValid<T>(cache: CacheData<T>, cacheTime: number): boolean {
+  if (!cache || !cache.timestamp) return false;
+  
+  return Date.now() - cache.timestamp < cacheTime;
+}
+===== End of File: cache.ts =====
+
+
+===== File: config.ts =====
+import type { HttpRequestConfig } from './types';
+
+// API基础URL
+export const API_BASE_URL = {
+  // 开发环境
+  development: 'http://localhost:8080/jeecg-boot',
+  // 生产环境
+  production: 'https://your-api-domain.com/jeecg-boot'
+};
+
+// 环境判断
+export const ENV = process.env.NODE_ENV || 'development';
+
+// HTTP状态码
+export const HTTP_STATUS = {
+  SUCCESS: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500
+};
+
+// 业务状态码
+export const BUSINESS_CODE = {
+  SUCCESS: 200,           // jeecg-boot成功状态码
+  TOKEN_EXPIRED: 401,     // token过期
+  PARAM_ERROR: 400,       // 参数错误
+  SERVER_ERROR: 500       // 服务器错误
+};
+
+// 默认请求配置
+export const DEFAULT_CONFIG: HttpRequestConfig = {
+  baseURL: API_BASE_URL[ENV],
+  showLoading: true,
+  loadingText: '加载中',
+  showErrorToast: true,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 10000,       // 10秒
+  useCache: false,
+  cacheTime: 5 * 60 * 1000,  // 5分钟
+  retry: 0,
+  retryDelay: 1000,
+  withToken: true
+};
+===== End of File: config.ts =====
+
+
+===== File: errorHandler.ts =====
+import Taro from '@tarojs/taro';
+import { HTTP_STATUS, BUSINESS_CODE } from './config';
+import type { RequestError, HttpRequestOptions } from './types';
+
+/**
+ * 处理HTTP状态错误
+ */
+export function handleHttpError(statusCode: number): RequestError {
+  let message = '未知错误';
+  
+  switch (statusCode) {
+    case HTTP_STATUS.BAD_REQUEST:
+      message = '请求参数错误';
+      break;
+    case HTTP_STATUS.UNAUTHORIZED:
+      message = '未授权，请登录';
+      break;
+    case HTTP_STATUS.FORBIDDEN:
+      message = '没有权限访问';
+      break;
+    case HTTP_STATUS.NOT_FOUND:
+      message = '请求资源不存在';
+      break;
+    case HTTP_STATUS.SERVER_ERROR:
+      message = '服务器内部错误';
+      break;
+    default:
+      message = `HTTP错误 (${statusCode})`;
+  }
+  
+  return {
+    code: statusCode,
+    message
+  };
+}
+
+/**
+ * 处理jeecg-boot业务状态错误
+ */
+export function handleBusinessError<T>(response: { success?: boolean; code?: number; message?: string; data?: T }): RequestError {
+  let message = response.message || '未知错误';
+  let code = response.code || -1;
+  
+  // jeecg-boot返回格式处理
+  if (response.success === false) {
+    return {
+      code: code,
+      message: message,
+      data: response.data
+    };
+  }
+  
+  // 传统code处理
+  switch (code) {
+    case BUSINESS_CODE.TOKEN_EXPIRED:
+      message = '登录已过期，请重新登录';
+      break;
+    case BUSINESS_CODE.PARAM_ERROR:
+      message = '参数错误';
+      break;
+    case BUSINESS_CODE.SERVER_ERROR:
+      message = '服务器内部错误';
+      break;
+  }
+  
+  return {
+    code: code,
+    message,
+    data: response.data
+  };
+}
+
+/**
+ * 处理网络错误
+ */
+export function handleNetworkError(error: any): RequestError {
+  let message = '网络异常';
+  
+  if (error?.errMsg) {
+    if (error.errMsg.includes('timeout')) {
+      message = '请求超时，请检查网络';
+    } else if (error.errMsg.includes('fail')) {
+      message = '网络连接失败，请检查网络设置';
+    }
+  }
+  
+  return {
+    code: -1,
+    message
+  };
+}
+
+/**
+ * 综合错误处理
+ */
+export function handleRequestError(error: any, options: HttpRequestOptions): RequestError {
+  // 已格式化的错误
+  if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: error.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return error as RequestError;
+  }
+  
+  // HTTP错误
+  if (error && typeof error === 'object' && 'statusCode' in error) {
+    const httpError = handleHttpError(error.statusCode);
+    
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: httpError.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return httpError;
+  }
+  
+  // 网络错误
+  if (error && typeof error === 'object' && 'errMsg' in error) {
+    const networkError = handleNetworkError(error);
+    
+    if (options.showErrorToast) {
+      Taro.showToast({
+        title: networkError.message,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+    
+    return networkError;
+  }
+  
+  // 其他错误
+  const unknownError: RequestError = {
+    code: -1,
+    message: typeof error === 'string' ? error : '未知错误'
+  };
+  
+  if (options.showErrorToast) {
+    Taro.showToast({
+      title: unknownError.message,
+      icon: 'none',
+      duration: 2000
+    });
+  }
+  
+  return unknownError;
+}
+===== End of File: errorHandler.ts =====
+
+
+===== File: index.ts =====
+import { request } from './request';
+import type { HttpRequestOptions } from './types';
+import { addRequestInterceptor, addResponseInterceptor, addErrorInterceptor } from './interceptor';
+import { clearAllCache, clearCacheData } from './cache';
+
+/**
+ * HTTP客户端
+ */
+const http = {
+  /**
+   * 发送GET请求
+   */
+  get: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
+    request<T>({ url, method: 'GET', data, ...options }),
+  
+  /**
+   * 发送POST请求
+   */  
+  post: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
+    request<T>({ url, method: 'POST', data, ...options }),
+  
+  /**
+   * 发送PUT请求
+   */
+  put: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
+    request<T>({ url, method: 'PUT', data, ...options }),
+  
+  /**
+   * 发送DELETE请求
+   */
+  delete: <T = any>(url: string, data?: any, options?: Partial<HttpRequestOptions>) => 
+    request<T>({ url, method: 'DELETE', data, ...options }),
+  
+  /**
+   * 原始请求方法
+   */
+  request,
+  
+  /**
+   * 清除指定缓存
+   */
+  clearCache: clearCacheData,
+  
+  /**
+   * 清除所有缓存
+   */
+  clearAllCache,
+  
+  /**
+   * 添加请求拦截器
+   */
+  addRequestInterceptor,
+  
+  /**
+   * 添加响应拦截器
+   */
+  addResponseInterceptor,
+  
+  /**
+   * 添加错误拦截器
+   */
+  addErrorInterceptor
+};
+
+export default http;
+
+// 导出类型
+export * from './types';
+export { DEFAULT_CONFIG } from './config';
+===== End of File: index.ts =====
+
+
+===== File: interceptor.ts =====
+import Taro from '@tarojs/taro';
+import type { RequestInterceptor, ResponseInterceptor, ErrorInterceptor, HttpRequestOptions, ResponseData } from './types';
+import { BUSINESS_CODE } from './config';
+
+// 请求拦截器数组
+const requestInterceptors: RequestInterceptor[] = [];
+
+// 响应拦截器数组
+const responseInterceptors: ResponseInterceptor[] = [];
+
+// 错误拦截器数组
+const errorInterceptors: ErrorInterceptor[] = [];
+
+/**
+ * 添加请求拦截器
+ */
+export function addRequestInterceptor(interceptor: RequestInterceptor): void {
+  requestInterceptors.push(interceptor);
+}
+
+/**
+ * 添加响应拦截器
+ */
+export function addResponseInterceptor(interceptor: ResponseInterceptor): void {
+  responseInterceptors.push(interceptor);
+}
+
+/**
+ * 添加错误拦截器
+ */
+export function addErrorInterceptor(interceptor: ErrorInterceptor): void {
+  errorInterceptors.push(interceptor);
+}
+
+/**
+ * 应用请求拦截器
+ */
+export async function applyRequestInterceptors(options: HttpRequestOptions): Promise<HttpRequestOptions> {
+  let config = { ...options };
+  
+  for (const interceptor of requestInterceptors) {
+    config = await interceptor(config);
+  }
+  
+  return config;
+}
+
+/**
+ * 应用响应拦截器
+ */
+export async function applyResponseInterceptors<T>(response: ResponseData<T>, options: HttpRequestOptions): Promise<ResponseData<T>> {
+  let result = { ...response };
+  
+  for (const interceptor of responseInterceptors) {
+    result = await interceptor(result, options);
+  }
+  
+  return result;
+}
+
+/**
+ * 应用错误拦截器
+ */
+export async function applyErrorInterceptors(error: any, options: HttpRequestOptions): Promise<any> {
+  let result = error;
+  
+  for (const interceptor of errorInterceptors) {
+    result = await interceptor(result, options);
+  }
+  
+  return result;
+}
+
+// 添加微信Token拦截器
+addRequestInterceptor(async (options) => {
+  if (options.withToken) {
+    try {
+      // 优先使用微信token
+      let token = Taro.getStorageSync('wx_token');
+      
+      // 如果没有微信token，尝试使用普通token
+      if (!token) {
+        token = Taro.getStorageSync('token');
+      }
+      
+      if (token) {
+        options.headers = {
+          ...options.headers,
+          'X-Access-Token': token  // jeecg-boot使用X-Access-Token
+        };
+      }
+    } catch (error) {
+      console.error('获取Token失败', error);
+    }
+  }
+  
+  return options;
+});
+
+// 添加默认日志拦截器
+if (process.env.NODE_ENV === 'development') {
+  // 请求日志
+  addRequestInterceptor((options) => {
+    console.log(`[Request] ${options.method} ${options.url}`, options.data);
+    return options;
+  });
+  
+  // 响应日志
+  addResponseInterceptor((response, options) => {
+    console.log(`[Response] ${options.method} ${options.url}`, response);
+    return response;
+  });
+  
+  // 错误日志
+  addErrorInterceptor((error, options) => {
+    console.error(`[Error] ${options.method} ${options.url}`, error);
+    return error;
+  });
+}
+
+// 添加默认Token过期处理
+addErrorInterceptor((error, options) => {
+  if (error && (error.code === 401 || error.code === BUSINESS_CODE.TOKEN_EXPIRED)) {
+    // 清除本地Token
+    Taro.removeStorageSync('wx_token');
+    Taro.removeStorageSync('token');
+    Taro.removeStorageSync('wx_user_info');
+    
+    // 跳转到登录页
+    Taro.reLaunch({
+      url: '/pages/login/index'
+    });
+  }
+  
+  return error;
+});
+===== End of File: interceptor.ts =====
+
+
+===== File: request.ts =====
+import Taro from '@tarojs/taro';
+import type { HttpRequestOptions, ResponseData } from './types';
+import { DEFAULT_CONFIG, BUSINESS_CODE } from './config';
+import { applyRequestInterceptors, applyResponseInterceptors, applyErrorInterceptors } from './interceptor';
+import { handleRequestError, handleBusinessError } from './errorHandler';
+import { generateCacheKey, getCacheData, setCacheData, isCacheValid } from './cache';
+
+// 请求计数器
+let loadingCount = 0;
+
+/**
+ * 显示加载提示
+ */
+function showLoading(text: string): void {
+  loadingCount++;
+  
+  if (loadingCount === 1) {
+    Taro.showLoading({ title: text });
+  }
+}
+
+/**
+ * 隐藏加载提示
+ */
+function hideLoading(): void {
+  loadingCount--;
+  
+  if (loadingCount === 0) {
+    Taro.hideLoading();
+  }
+}
+
+/**
+ * 延迟函数
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * 统一请求函数
+ */
+export async function request<T = any>(options: HttpRequestOptions): Promise<T> {
+  // 合并配置
+  const config = { ...DEFAULT_CONFIG, ...options };
+  const { url, method = 'GET', data, baseURL, showLoading: shouldShowLoading, loadingText, useCache, cacheTime, retry, retryDelay } = config;
+  
+  // 完整URL
+  const fullUrl = url.startsWith('http') ? url : `${baseURL}${url.startsWith('/') ? url : `/${url}`}`;
+  
+  // 检查缓存
+  if (useCache && method === 'GET') {
+    const cacheKey = generateCacheKey(fullUrl, data);
+    const cached = getCacheData<T>(cacheKey);
+    
+    if (cached && isCacheValid(cached, cacheTime || DEFAULT_CONFIG.cacheTime || 0)) {
+      return cached.data;
+    }
+  }
+  
+  // 请求前处理
+  let requestConfig = await applyRequestInterceptors({ ...config, url: fullUrl });
+  
+  // 重试计数
+  let retryCount = retry || 0;
+  
+  // 显示加载提示
+  if (shouldShowLoading) {
+    showLoading(loadingText || '加载中');
+  }
+  
+  try {
+    // 发送请求
+    const executeRequest = async (): Promise<T> => {
+      try {
+        const response = await Taro.request({
+          url: fullUrl,
+          data: requestConfig.data,
+          method: requestConfig.method as any,
+          header: requestConfig.headers,
+          timeout: requestConfig.timeout
+        });
+        
+        // HTTP状态检查
+        if (response.statusCode !== 200) {
+          throw { statusCode: response.statusCode };
+        }
+        
+        // jeecg-boot响应格式处理
+        const responseData = response.data as any;
+        
+        // 检查是否为jeecg-boot格式的响应
+        if (responseData && typeof responseData === 'object') {
+          // 如果有success字段且为false，表示业务失败
+          if ('success' in responseData && responseData.success === false) {
+            throw handleBusinessError(responseData);
+          }
+          
+          // 如果有code字段且不是成功状态码
+          if ('code' in responseData && responseData.code !== BUSINESS_CODE.SUCCESS) {
+            throw handleBusinessError(responseData);
+          }
+          
+          // 响应拦截处理
+          const processedResponse = await applyResponseInterceptors(responseData, requestConfig);
+          
+          // 提取实际数据
+          let actualData: T;
+          
+          if (processedResponse.result !== undefined) {
+            actualData = processedResponse.result as T;
+          } else if (processedResponse.data !== undefined) {
+            actualData = processedResponse.data as T;
+          } else {
+            actualData = processedResponse as T;
+          }
+          
+          // 设置缓存
+          if (useCache && method === 'GET') {
+            const cacheKey = generateCacheKey(fullUrl, data);
+            setCacheData(cacheKey, actualData);
+          }
+          
+          return actualData;
+        }
+        
+        return responseData as T;
+      } catch (error) {
+        // 请求失败但还有重试次数
+        if (retryCount > 0) {
+          retryCount--;
+          // 延迟后重试
+          await delay(retryDelay || DEFAULT_CONFIG.retryDelay || 1000);
+          return executeRequest();
+        }
+        
+        // 重试次数用完，向上抛出错误
+        throw error;
+      }
+    };
+    
+    return await executeRequest();
+  } catch (error) {
+    // 错误处理
+    const processedError = await applyErrorInterceptors(error, requestConfig);
+    throw handleRequestError(processedError, requestConfig);
+  } finally {
+    // 隐藏加载提示
+    if (shouldShowLoading) {
+      hideLoading();
+    }
+  }
+}
+===== End of File: request.ts =====
+
+
+===== File: types.ts =====
+// 请求方法类型
+export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+// 请求配置
+export interface HttpRequestConfig {
+  // 基础URL
+  baseURL?: string;
+  // 是否显示加载提示
+  showLoading?: boolean;
+  // 加载提示文字
+  loadingText?: string;
+  // 是否显示错误提示
+  showErrorToast?: boolean;
+  // 请求头
+  headers?: Record<string, string>;
+  // 超时时间(ms)
+  timeout?: number;
+  // 是否使用缓存(仅GET请求)
+  useCache?: boolean;
+  // 缓存时间(ms)
+  cacheTime?: number;
+  // 重试次数
+  retry?: number;
+  // 重试延迟(ms)
+  retryDelay?: number;
+  // 是否自动携带token
+  withToken?: boolean;
+}
+
+// 请求参数 - 重命名避免冲突
+export interface HttpRequestOptions extends HttpRequestConfig {
+  // 请求地址
+  url: string;
+  // 请求方法
+  method?: RequestMethod;
+  // 请求数据
+  data?: any;
+}
+
+// jeecg-boot响应数据结构
+export interface ResponseData<T = any> {
+  success?: boolean;  // jeecg-boot成功标识
+  code?: number;      // 状态码
+  message?: string;   // 消息
+  result?: T;         // jeecg-boot数据字段
+  data?: T;          // 通用数据字段
+  timestamp?: number; // 时间戳
+}
+
+// 缓存数据结构
+export interface CacheData<T = any> {
+  data: T;
+  timestamp: number;
+}
+
+// 错误信息结构
+export interface RequestError {
+  code: number;
+  message: string;
+  data?: any;
+}
+
+// 请求拦截器 - 使用重命名后的类型
+export type RequestInterceptor = (options: HttpRequestOptions) => HttpRequestOptions | Promise<HttpRequestOptions>;
+
+// 响应拦截器
+export type ResponseInterceptor = <T>(response: ResponseData<T>, options: HttpRequestOptions) => ResponseData<T> | Promise<ResponseData<T>>;
+
+// 错误拦截器
+export type ErrorInterceptor = (error: any, options: HttpRequestOptions) => any;
+===== End of File: types.ts =====
+

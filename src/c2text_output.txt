@@ -1,417 +1,1145 @@
 📁 src
+  📁 components
+    📁 BookingForm
+      📄 index.scss
+      📄 index.tsx
+    📁 ContactInfoCard
+      📄 index.scss
+      📄 index.tsx
   📁 pages
-    📁 index
+    📁 contact
       📄 index.config.ts
       📄 index.scss
       📄 index.tsx
   📁 services
     📁 api
-      📁 index
-        📄 data.ts
-        📄 indexApi.ts
+      📁 contact
+        📄 contactApi.ts
         📄 types.ts
   📁 styles
     📄 theme.css
 
-===== File: pages\index\index.config.ts =====
-export default {
-  navigationBarTitleText: '郑式修缮',
-  enablePullDownRefresh: true,
-  backgroundColor: '#f5f5f5',
-  backgroundTextStyle: 'dark',
-  navigationBarBackgroundColor: '#ffffff',
-  navigationBarTextStyle: 'black'
+===== File: components\BookingForm\index.scss =====
+/* 预约表单样式 */
+.booking-form {
+  position: relative;
+  padding: 0 4px;
+  
+  /* ===== 基础表单项样式 ===== */
+  .form-item {
+    margin-bottom: 20px;
+  }
+  
+  /* 表单标签 */
+  .form-item-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 8px;
+    
+    /* 必填项标记 */
+    &.required::before {
+      content: '*';
+      color: #ef4444;
+      font-size: 16px;
+      margin-right: 4px;
+    }
+  }
+  
+  /* 错误提示 */
+  .form-error-tip {
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 4px;
+    padding-left: 16px;
+    position: relative;
+    
+    &::before {
+      content: "!";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+    }
+  }
+  
+  /* ===== 表单控件通用样式 ===== */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #dce0e4;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1e293b;
+    box-sizing: border-box;
+    margin-top: 8px;
+    transition: border-color 0.2s ease;
+    
+    &:focus, 
+    &:active {
+      border-color: #3b82f6;
+      outline: none;
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+  
+  /* 输入框 */
+  .form-input {
+    display: block;
+    height: 44px;
+    padding: 0 14px;
+  }
+  
+  /* 选择器 */
+  .form-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 14px;
+    position: relative;
+    
+    .select-placeholder {
+      color: #9ca3af;
+    }
+    
+    .select-value {
+      color: #1e293b;
+    }
+    
+    /* 箭头图标 */
+    .select-arrow {
+      width: 8px;
+      height: 8px;
+      border-top: 2px solid #94a3b8;
+      border-right: 2px solid #94a3b8;
+      transform: rotate(45deg);
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+  }
+  
+  /* 文本域 */
+  .form-textarea {
+    display: block;
+    min-height: 100px;
+    padding: 12px 14px;
+    resize: none;
+  }
+  
+  /* ===== 提交按钮 ===== */
+  .submit-container {
+    margin-top: 24px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .submit-button {
+    display: block;
+    width: 100%;
+    height: 46px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #2563EB;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    
+    &:active {
+      opacity: 0.9;
+    }
+    
+    &.loading {
+      opacity: 0.8;
+    }
+  }
 }
-===== End of File: pages\index\index.config.ts =====
+===== End of File: components\BookingForm\index.scss =====
 
 
-===== File: pages\index\index.scss =====
-/* 防水服务小程序样式 */
+===== File: components\BookingForm\index.tsx =====
+import { useState} from 'react'
+import { View, Text, Picker as TaroPicker, Input, Textarea, Button } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { Toast, Picker } from '@nutui/nutui-react-taro'
+import './index.scss'
 
-// 页面整体样式
-.page {
-  background-color: #f5f7fa;
+export interface BookingFormData {
+  name: string;
+  phone: string;
+  serviceType: string;
+  serviceTypeName: string;
+  region: string[];
+  address: string;
+  remark: string;
+}
+
+interface BookingFormProps {
+  serviceTypes: { text: string; value: string }[];
+  loading: boolean;
+  initialValues?: Partial<BookingFormData>;
+  onSubmit: (data: BookingFormData) => void;
+  onServiceTypeSelect: (type: string) => void;
+}
+
+const BookingForm: React.FC<BookingFormProps> = ({ 
+  serviceTypes, 
+  loading,
+  initialValues = {},
+  onSubmit, 
+  onServiceTypeSelect
+}) => {
+  // 表单状态
+  const [formData, setFormData] = useState<Partial<BookingFormData>>(initialValues);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showToast, setShowToast] = useState(false);
+  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
+  
+  // Picker状态
+  const [showServicePicker, setShowServicePicker] = useState(false);
+  
+  // 直接使用serviceTypes，不做映射转换
+  const pickerServiceOptions = [serviceTypes];
+  
+  // 显示提示消息
+  const showMessage = (content, icon = 'success') => {
+    setToastInfo({ content, icon });
+    setShowToast(true);
+  };
+  
+  // 更新表单字段
+  const updateField = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // 清除错误
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+  
+  // 处理服务类型确认
+  const handleServiceConfirm = (selectedOptions) => {
+    if (selectedOptions && selectedOptions[0]) {
+      updateField('serviceType', selectedOptions[0].value);
+      updateField('serviceTypeName', selectedOptions[0].text);
+      onServiceTypeSelect(selectedOptions[0].value);
+      
+      // 添加震动反馈
+      Taro.vibrateShort();
+    }
+  };
+  
+  // 处理地区选择
+  const handleRegionChange = (e) => {
+    updateField('region', e.detail.value);
+  };
+  
+  // 表单验证
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // 验证姓名
+    if (!formData.name || formData.name.trim().length < 2) {
+      newErrors.name = '请输入联系人姓名(至少2个字符)';
+    }
+    
+    // 验证手机号
+    if (!formData.phone || !/^1[3-9]\d{9}$/.test(formData.phone)) {
+      newErrors.phone = '请输入正确的手机号';
+    }
+    
+    // 验证服务类型
+    if (!formData.serviceType) {
+      newErrors.serviceType = '请选择服务类型';
+    }
+    
+    // 验证所在地区
+    if (!formData.region || !formData.region.length) {
+      newErrors.region = '请选择所在地区';
+    }
+    
+    // 验证详细地址
+    if (!formData.address || formData.address.trim().length < 5) {
+      newErrors.address = '请输入详细地址(至少5个字符)';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  // 提交表单
+  const handleSubmit = () => {
+    if (validateForm()) {
+      // 添加震动反馈
+      Taro.vibrateShort();
+      onSubmit(formData as BookingFormData);
+    } else {
+      // 提交失败震动
+      Taro.vibrateShort();
+      showMessage('请完善必填信息', 'fail');
+    }
+  };
+  
+  // 根据表单值获取显示文本
+  const getServiceTypeText = () => {
+    if (formData.serviceType) {
+      const selectedType = serviceTypes.find(item => item.value === formData.serviceType);
+      return selectedType?.text || '请选择服务类型';
+    }
+    return '请选择服务类型';
+  };
+  
+  const getRegionText = () => {
+    if (formData.region && formData.region.length > 0) {
+      return formData.region.join(' ');
+    }
+    return '请选择所在地区';
+  };
+  
+  return (
+    <View className="booking-form">
+      {/* 联系人姓名 */}
+      <View className="form-item">
+        <Text className="form-item-label required">联系人姓名</Text>
+        <Input 
+          className="form-input"
+          placeholder="请输入姓名"
+          value={formData.name}
+          onInput={e => updateField('name', e.detail.value)}
+        />
+        {errors.name && <Text className="form-error-tip">{errors.name}</Text>}
+      </View>
+      
+      {/* 联系电话 */}
+      <View className="form-item">
+        <Text className="form-item-label required">联系电话</Text>
+        <Input
+          className="form-input"
+          placeholder="请输入手机号码"
+          type="number"
+          value={formData.phone}
+          onInput={e => updateField('phone', e.detail.value)}
+        />
+        {errors.phone && <Text className="form-error-tip">{errors.phone}</Text>}
+      </View>
+      
+      {/* 服务类型 */}
+      <View className="form-item">
+        <Text className="form-item-label required">服务类型</Text>
+        <View 
+          className="form-select"
+          onClick={() => setShowServicePicker(true)}
+        >
+          <Text className={formData.serviceType ? 'select-value' : 'select-placeholder'}>
+            {getServiceTypeText()}
+          </Text>
+          <View className="select-arrow" />
+        </View>
+        {errors.serviceType && <Text className="form-error-tip">{errors.serviceType}</Text>}
+      </View>
+      
+      {/* 所在地区 */}
+      <View className="form-item">
+        <Text className="form-item-label required">所在地区</Text>
+        <TaroPicker
+          mode="region"
+          onChange={handleRegionChange}
+        >
+          <View className="form-select">
+            <Text className={formData.region?.length ? 'select-value' : 'select-placeholder'}>
+              {getRegionText()}
+            </Text>
+            <View className="select-arrow" />
+          </View>
+        </TaroPicker>
+        {errors.region && <Text className="form-error-tip">{errors.region}</Text>}
+      </View>
+      
+      {/* 详细地址 */}
+      <View className="form-item">
+        <Text className="form-item-label required">详细地址</Text>
+        <Input
+          className="form-input"
+          placeholder="请输入详细地址"
+          value={formData.address}
+          onInput={e => updateField('address', e.detail.value)}
+        />
+        {errors.address && <Text className="form-error-tip">{errors.address}</Text>}
+      </View>
+      
+      {/* 补充说明 */}
+      <View className="form-item">
+        <Text className="form-item-label">补充说明</Text>
+        <Textarea
+          className="form-textarea"
+          placeholder="请输入您的具体需求或其他说明（选填）"
+          maxlength={200}
+          value={formData.remark}
+          onInput={e => updateField('remark', e.detail.value)}
+        />
+      </View>
+      
+      {/* 提交按钮 */}
+      <View className="submit-container">
+        <Button
+          className={`submit-button ${loading ? 'loading' : ''}`}
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? '提交中...' : '立即预约'}
+        </Button>
+      </View>
+      
+      {/* NutUI Picker 服务类型选择器 */}
+      <Picker
+        title="选择服务类型"
+        visible={showServicePicker}
+        options={pickerServiceOptions}
+        defaultValue={formData.serviceType ? [formData.serviceType] : []}
+        onClose={() => setShowServicePicker(false)}
+        onConfirm={handleServiceConfirm}
+      />
+      
+      {/* 提示信息 */}
+      <Toast
+        visible={showToast}
+        content={toastInfo.content}
+        icon={toastInfo.icon}
+        onClose={() => setShowToast(false)}
+      />
+    </View>
+  );
+};
+
+export default BookingForm;
+===== End of File: components\BookingForm\index.tsx =====
+
+
+===== File: components\ContactInfoCard\index.scss =====
+.contact-info {
+  .company-intro {
+    padding: 20px 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border-bottom: 1px solid #e0f2fe;
+    
+    text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #475569;
+      text-align: left;
+    }
+  }
+  
+  .actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 24px 16px;
+    background: #ffffff;
+  }
+  
+  .action-card {
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+    
+    .card-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .card-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    &.call-card {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      border: 1px solid #93c5fd;
+      
+      &:active {
+        background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+      }
+      
+      .card-title {
+        color: #1e40af;
+      }
+    }
+    
+    &.wechat-card {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      border: 1px solid #86efac;
+      
+      &:active {
+        background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+      }
+      
+      .card-title {
+        color: #14532d;
+      }
+    }
+  }
+  
+  .phone-selector {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    
+    .selector-content {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      
+      .selector-header {
+        padding: 20px 20px 12px;
+        text-align: center;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        
+        .selector-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+      }
+      
+      .phone-options {
+        .phone-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 20px;
+          border-bottom: 1px solid #f1f5f9;
+          transition: all 0.2s;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          &:active {
+            background: #f8fafc;
+          }
+          
+          .option-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2563eb;
+          }
+          
+          .option-icon {
+            color: #64748b;
+            font-size: 18px;
+          }
+        }
+      }
+      
+      .selector-cancel {
+        padding: 16px 20px;
+        text-align: center;
+        background: #f1f5f9;
+        border-top: 1px solid #e2e8f0;
+        transition: all 0.2s;
+        
+        &:active {
+          background: #e2e8f0;
+        }
+        
+        .cancel-text {
+          color: #64748b;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+===== End of File: components\ContactInfoCard\index.scss =====
+
+
+===== File: components\ContactInfoCard\index.tsx =====
+import { useState } from 'react'
+import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { Toast } from '@nutui/nutui-react-taro'
+import { ContactData } from 'src/services/api/contact/types'
+import './index.scss'
+
+interface ContactInfoCardProps {
+  data: ContactData;
+  onCopyWechat?: () => void;
+  onPhoneCall?: (phone: string) => void;
+}
+
+const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ 
+  data,
+  onCopyWechat,
+  onPhoneCall
+}) => {
+  const [showToast, setShowToast] = useState(false);
+  const [toastContent, setToastContent] = useState('');
+  const [toastIcon, setToastIcon] = useState<'success' | 'fail' | 'loading'>('success');
+  const [showPhoneSelector, setShowPhoneSelector] = useState(false);
+  
+  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
+    setToastContent(content);
+    setToastIcon(icon);
+    setShowToast(true);
+  };
+  
+  const makePhoneCall = (phone: string) => {
+    Taro.vibrateShort({ type: 'heavy' });
+    setShowPhoneSelector(false);
+    
+    if (onPhoneCall) {
+      onPhoneCall(phone);
+    } else {
+      Taro.makePhoneCall({
+        phoneNumber: phone,
+        fail: () => {
+          showMessage('拨打失败', 'fail');
+        }
+      });
+    }
+  };
+  
+  const copyWechat = () => {
+    Taro.vibrateShort({ type: 'heavy' });
+    
+    if (onCopyWechat) {
+      onCopyWechat();
+    } else {
+      Taro.setClipboardData({
+        data: data.wechat,
+        success: () => {
+          showMessage('已复制到剪贴板');
+        },
+        fail: () => {
+          showMessage('复制失败', 'fail');
+        }
+      });
+    }
+  };
+  
+  const handleQuickCall = () => {
+    if (data.phone.length === 1) {
+      makePhoneCall(data.phone[0]);
+    } else {
+      setShowPhoneSelector(true);
+    }
+  };
+  
+  const handlePhoneSelectorClose = () => {
+    setShowPhoneSelector(false);
+  };
+  
+  return (
+    <View className="contact-info">
+      <View className="company-intro">
+        <Text>{data.description}</Text>
+      </View>
+      
+      <View className="actions-grid">
+        <View className="action-card call-card" onClick={handleQuickCall}>
+          <Text className="card-icon">📞</Text>
+          <Text className="card-title">立即致电</Text>
+        </View>
+        
+        <View className="action-card wechat-card" onClick={copyWechat}>
+          <Text className="card-icon">💬</Text>
+          <Text className="card-title">微信咨询</Text>
+        </View>
+      </View>
+      
+      {showPhoneSelector && (
+        <View className="phone-selector" onClick={handlePhoneSelectorClose}>
+          <View className="selector-content" onClick={(e) => e.stopPropagation()}>
+            <View className="selector-header">
+              <Text className="selector-title">选择号码拨打</Text>
+            </View>
+            <View className="phone-options">
+              {data.phone.map((phone, index) => (
+                <View 
+                  key={index}
+                  className="phone-option"
+                  onClick={() => makePhoneCall(phone)}
+                >
+                  <Text className="option-number">{phone}</Text>
+                  <Text className="option-icon">📞</Text>
+                </View>
+              ))}
+            </View>
+            <View className="selector-cancel" onClick={handlePhoneSelectorClose}>
+              <Text className="cancel-text">取消</Text>
+            </View>
+          </View>
+        </View>
+      )}
+      
+      <Toast
+        visible={showToast}
+        content={toastContent}
+        icon={toastIcon}
+        onClose={() => setShowToast(false)}
+        duration={2000}
+      />
+    </View>
+  );
+};
+
+export default ContactInfoCard;
+===== End of File: components\ContactInfoCard\index.tsx =====
+
+
+===== File: pages\contact\index.config.ts =====
+export default definePageConfig({
+    navigationBarTitleText: '联系我们'
+  })
+===== End of File: pages\contact\index.config.ts =====
+
+
+===== File: pages\contact\index.scss =====
+.contact-page {
   min-height: 100vh;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 16px 12px;
+  box-sizing: border-box;
 }
 
-// 加载状态
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: 100vh;
   
   .loading-text {
-    margin-top: 12px;
-    color: #666;
+    margin-top: 16px;
     font-size: 14px;
+    color: #64748b;
   }
 }
-===== End of File: pages\index\index.scss =====
+
+.contact-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-bottom: 16px;
+  
+  &.booking-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(203, 213, 225, 0.5);
+  }
+  
+  &.about-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+    border: 1px solid rgba(186, 230, 253, 0.5);
+  }
+}
+
+.card-header {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.card-subtitle {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.card-content {
+  padding: 16px;
+}
+
+@media screen and (min-width: 768px) {
+  .contact-page {
+    padding: 24px;
+  }
+  
+  .contact-container {
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: 6fr 5fr;
+    gap: 20px;
+  }
+  
+  .contact-card {
+    margin-bottom: 0;
+    height: fit-content;
+  }
+  
+  .about-card {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .contact-page {
+    padding: 12px 10px;
+  }
+  
+  .card-header {
+    padding: 14px 12px 12px;
+  }
+  
+  .card-content {
+    padding: 14px 12px;
+  }
+}
+===== End of File: pages\contact\index.scss =====
 
 
-===== File: pages\index\index.tsx =====
-import { useEffect, useState, useCallback } from 'react'
+===== File: pages\contact\index.tsx =====
+import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import { Toast, Loading } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
+import { Loading, Toast } from '@nutui/nutui-react-taro'
+import BookingForm from '../../components/BookingForm'
+import ContactInfoCard from '../../components/ContactInfoCard'
 import './index.scss'
 
-// 导入组件
-import BannerCarousel from 'src/components/BannerCarousel'
-import QuickContact from 'src/components/QuickContact'
-import ServiceSection from 'src/components/ServiceSection'
-import ShowcaseSection from 'src/components/ShowcaseSection'
+import { 
+  ServiceType, 
+  ContactData, 
+  BookingFormData 
+} from 'src/services/api/contact/types'
+import { 
+  getServiceTypes, 
+  getContactData, 
+  submitBooking
+} from 'src/services/api/contact/contactApi'
 
-// 修改API导入路径
-import { IndexData } from 'src/services/api/index/types'
-import { getIndexData } from 'src/services/api/index/indexApi'
-
-// 简化错误处理函数
-const handleIndexError = (err: any): string => {
-  return err instanceof Error ? err.message : '获取首页数据时发生未知错误';
+const handleContactError = (err: any): string => {
+  console.error(err);
+  return err instanceof Error ? err.message : '发生未知错误';
 };
 
-export default function IndexPage() {
-  // 状态管理
-  const [loading, setLoading] = useState(true)
-  const [indexData, setIndexData] = useState<IndexData | null>(null)
-  const [showToast, setShowToast] = useState(false)
-  const [toastMsg, setToastMsg] = useState('')
-  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('success')
+export default function ContactPage() {
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
   
-  // 显示提示消息
-  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
-    if (showToast) {
-      setShowToast(false)
-      setTimeout(() => {
-        setToastMsg(message)
-        setToastType(type)
-        setShowToast(true)
-      }, 100)
-    } else {
-      setToastMsg(message)
-      setToastType(type)
-      setShowToast(true)
-    }
-  }, [showToast])
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
+  const [contactData, setContactData] = useState<ContactData | null>(null);
   
-  // 获取数据
-  const fetchData = useCallback(async () => {
-    setLoading(true)
+  const [formData, setFormData] = useState<Partial<BookingFormData>>({
+    name: '',
+    phone: '',
+    serviceType: '',
+    serviceTypeName: '',
+    region: [],
+    address: '',
+    remark: ''
+  });
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const [serviceTypesRes, contactDataRes] = await Promise.all([
+          getServiceTypes(),
+          getContactData()
+        ]);
+        
+        if (serviceTypesRes.success && serviceTypesRes.data) {
+          setServiceTypes(serviceTypesRes.data);
+        } else {
+          showMessage(serviceTypesRes.error || '获取服务类型失败', 'fail');
+        }
+        
+        if (contactDataRes.success && contactDataRes.data) {
+          setContactData(contactDataRes.data);
+        } else {
+          showMessage(contactDataRes.error || '获取联系信息失败', 'fail');
+        }
+      } catch (error) {
+        console.error('加载数据失败:', error);
+        showMessage('加载数据失败，请稍后重试', 'fail');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
+    setToastInfo({ content, icon });
+    setShowToast(true);
+  };
+  
+  const handleFormSubmit = async (data: BookingFormData) => {
+    setSubmitting(true);
     
     try {
-      const result = await getIndexData()
+      const res = await submitBooking(data);
       
-      if (result.success && result.data) {
-        setIndexData(result.data)
+      if (res.success) {
+        Taro.vibrateShort({ type: 'medium' });
+        showMessage('预约成功，我们将尽快与您联系！');
+        
+        setFormData({
+          name: '',
+          phone: '',
+          serviceType: '',
+          serviceTypeName: '',
+          region: [],
+          address: '',
+          remark: ''
+        });
       } else {
-        showToastMessage(result.error || '获取首页数据失败', 'fail')
+        showMessage(res.error || '提交失败，请重试', 'fail');
       }
     } catch (error) {
-      console.error('加载数据失败:', error)
-      showToastMessage(handleIndexError(error), 'fail')
+      showMessage(handleContactError(error), 'fail');
     } finally {
-      setLoading(false)
+      setSubmitting(false);
     }
-  }, [showToastMessage])
+  };
   
-  // 下拉刷新处理
-  const handlePullDownRefresh = useCallback(async () => {
-    try {
-      const result = await getIndexData()
-      
-      if (result.success && result.data) {
-        setIndexData(result.data)
-        showToastMessage('刷新成功', 'success')
-      } else {
-        showToastMessage(result.error || '刷新数据失败', 'fail')
+  const handleServiceTypeSelect = (typeValue: string) => {
+    const selectedType = serviceTypes.find(type => type.value === typeValue);
+    setFormData(prev => ({
+      ...prev,
+      serviceType: typeValue,
+      serviceTypeName: selectedType?.text || ''
+    }));
+  };
+  
+  const handlePhoneCall = (phone: string) => {
+    Taro.makePhoneCall({
+      phoneNumber: phone,
+      fail: (err) => {
+        if (err.errMsg && !err.errMsg.includes('cancel')) {
+          showMessage('拨打电话失败，请重试', 'fail');
+        }
       }
-    } catch (error) {
-      showToastMessage(handleIndexError(error), 'fail')
-    } finally {
-      Taro.stopPullDownRefresh()
-    }
-  }, [showToastMessage])
+    });
+  };
   
-  // 组件挂载时获取数据
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-  
-  // 下拉刷新事件监听
-  useEffect(() => {
-    Taro.eventCenter.on('pullDownRefresh', handlePullDownRefresh)
+  const handleCopyWechat = () => {
+    if (!contactData) return;
     
-    return () => {
-      Taro.eventCenter.off('pullDownRefresh', handlePullDownRefresh)
-    }
-  }, [handlePullDownRefresh])
+    Taro.setClipboardData({
+      data: contactData.wechat,
+      success: () => {
+        showMessage('微信号已复制');
+      },
+      fail: () => {
+        showMessage('复制失败，请重试', 'fail');
+      }
+    });
+  };
   
-  // 加载状态
-  if (loading || !indexData) {
+  if (loading || !contactData) {
     return (
-      <View className='loading-container'>
-        <Loading type='spinner' />
-        <Text className='loading-text'>加载中...</Text>
+      <View className="loading-container">
+        <Loading type="spinner" color="#2563EB" />
+        <Text className="loading-text">加载中...</Text>
       </View>
-    )
+    );
   }
   
   return (
-    <View className='page'>
-      {/* Banner区域 */}
-      <BannerCarousel banners={indexData.banners} />
+    <View className="contact-page">
+      <View className="contact-container">
+        <View className="contact-card booking-card">
+          <View className="card-header">
+            <Text className="card-title">预约服务</Text>
+            <Text className="card-subtitle">填写信息免费上门勘测</Text>
+          </View>
+          <View className="card-content">
+            <BookingForm 
+              serviceTypes={serviceTypes}
+              loading={submitting}
+              initialValues={formData}
+              onSubmit={handleFormSubmit}
+              onServiceTypeSelect={handleServiceTypeSelect}
+            />
+          </View>
+        </View>
+        
+        <View className="contact-card about-card">
+          <View className="card-header">
+            <Text className="card-title">联系我们</Text>
+            <Text className="card-subtitle">{contactData.address}</Text>
+          </View>
+          <View className="card-content">
+            <ContactInfoCard 
+              data={contactData}
+              onPhoneCall={handlePhoneCall}
+              onCopyWechat={handleCopyWechat}
+            />
+          </View>
+        </View>
+      </View>
       
-      {/* 快速联系 */}
-      <QuickContact 
-        contactInfo={indexData.contactInfo}
-        onShowToast={showToastMessage}
-      />
-      
-      {/* 服务项目 */}
-      <ServiceSection 
-        services={indexData.services}
-        title="我们的服务"
-      />
-      
-      {/* 精选案例 */}
-      <ShowcaseSection 
-        showcases={indexData.showcases}
-        onShowToast={showToastMessage}
-      />
-      
-      {/* Toast组件 */}
       <Toast
-        msg={toastMsg}
         visible={showToast}
-        type={toastType}
+        content={toastInfo.content}
+        icon={toastInfo.icon as any}
         onClose={() => setShowToast(false)}
         duration={2000}
-        position='center'
-        closeOnOverlayClick
       />
     </View>
-  )
+  );
 }
-===== End of File: pages\index\index.tsx =====
+===== End of File: pages\contact\index.tsx =====
 
 
-===== File: services\api\index\data.ts =====
-// services/api/index/data.ts
-import { IndexData } from './types';
-
-// 首页模拟数据
-export const indexData: IndexData = {
-  // 服务数据
-  services: [
-    {
-      id: 1,
-      title: '漏水检测',
-      description: '专业检测技术，精准定位漏水点'
-    },
-    {
-      id: 2,
-      title: '防水施工',
-      description: '高标准防水工程，杜绝后顾之忧'
-    },
-    {
-      id: 3,
-      title: '渗漏维修',
-      description: '快速应对各类渗漏问题，及时修复'
-    },
-    {
-      id: 4,
-      title: '材料销售',
-      description: '优质防水材料，专业技术支持'
-    }
-  ],
-  
-  // 精选案例数据 - 使用新的CaseData结构
-  showcases: [
-    {
-      id: 1,
-      title: '城市花园小区屋顶防水工程',
-      city: '郑州',
-      description: '解决屋顶长期渗水问题，采用最新防水材料，5年质保',
-      date: '2024-03-15',
-      coverImage: 'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-      images: [
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png'
-      ],
-      videos: [],
-      content: '城市花园小区建于2010年，屋顶长期存在渗水问题，影响居民正常生活。我们使用高分子防水卷材对屋顶进行全面防水处理，并增加了排水系统改造，彻底解决了漏水问题。该工程覆盖面积达2000平方米，工期15天，提供5年质保服务。'
-    },
-    {
-      id: 2,
-      title: '滨江豪庭别墅防水工程',
-      city: '郑州',
-      description: '别墅地下室、游泳池、卫生间整体防水，确保万无一失',
-      date: '2024-02-20',
-      coverImage: 'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-      images: [
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png'
-      ],
-      videos: [],
-      content: '滨江豪庭别墅是高端住宅项目，业主要求对地下室、游泳池及卫生间进行高标准防水处理。我们采用了双层防水技术，内层使用柔性防水涂料，外层使用自粘防水卷材，并在关键部位增加了防水附加层。整个工程历时25天，防水面积达800平方米，通过了72小时蓄水测试，确保万无一失。'
-    },
-    {
-      id: 3,
-      title: '阳光商城外墙防水翻新',
-      city: '郑州',
-      description: '大型商业综合体外墙防水，美观与实用并重',
-      date: '2024-01-10',
-      coverImage: 'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-      images: [
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-        'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png'
-      ],
-      videos: [],
-      content: '阳光商城是市中心大型商业综合体，建成已有8年，外墙出现多处渗水和墙面脱落现象。我们对整个外墙进行了清洁、修复和防水处理，采用了新型纳米防水涂料，具有优异的防水性能和耐候性。工程面积达5000平方米，不仅解决了渗水问题，还恢复了建筑外观，使商城焕然一新。'
-    }
-  ],
-  
-  // 联系信息 - 支持多个电话号码
-  contactInfo: {
-    phone: ['17737709908', '13523490435'],
-    phoneLabels: ['电话', '备用电话'],
-    wechat: 'cszazwp19941114'
-  },
-  
-  // Banner数据
-  banners: [
-    {
-      id: '1',
-      imageUrl: 'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-      title: '郑式修缮',
-      subtitle: '专业修缮 · 品质保障'
-    },
-    {
-      id: '2',
-      imageUrl: 'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-      title: '郑式修缮',
-      subtitle: '专业修缮 · 品质保障'
-    },
-    {
-      id: '3',
-      imageUrl: 'https://img.picui.cn/free/2025/05/23/6830406aa07e5.png',
-      title: '郑式修缮',
-      subtitle: '专业修缮 · 品质保障'
-    }
-  ]
-};
-===== End of File: services\api\index\data.ts =====
-
-
-===== File: services\api\index\indexApi.ts =====
+===== File: services\api\contact\contactApi.ts =====
 import http from '../../http';
-import { IndexData, ApiResponse, Banner, Showcase, Service, ContactInfo } from './types';
+import { ServiceType, ContactData, BookingFormData, ApiResponse } from './types';
 
-// API端点
 const ENDPOINTS = {
-  GET_BANNERS: '/api/banners/list',
-  GET_SHOWCASES: '/api/cases/showcases',
-  GET_CONTACT_INFO: '/api/contact/info',
   GET_SERVICES: '/api/contact/services',
+  GET_CONTACT_INFO: '/api/contact/info',
+  SUBMIT_BOOKING: '/api/contact/booking',
 };
 
-/**
- * 获取首页所有数据
- */
-export const getIndexData = async (): Promise<ApiResponse<IndexData>> => {
+export const getServiceTypes = async (): Promise<ApiResponse<ServiceType[]>> => {
   try {
-    // 并行请求所有数据
-    const [bannersRes, showcasesRes, contactRes, servicesRes] = await Promise.all([
-      http.get<Banner[]>(ENDPOINTS.GET_BANNERS),
-      http.get<Showcase[]>(ENDPOINTS.GET_SHOWCASES),
-      http.get<ContactInfo>(ENDPOINTS.GET_CONTACT_INFO),
-      http.get<Service[]>(ENDPOINTS.GET_SERVICES)
-    ]);
-
-    // 组装首页数据
-    const indexData: IndexData = {
-      banners: bannersRes || [],
-      showcases: showcasesRes || [],
-      contactInfo: contactRes || { phone: [], wechat: '' },
-      services: servicesRes || []
-    };
-
+    const response = await http.get<ServiceType[]>(ENDPOINTS.GET_SERVICES);
+    
     return {
       success: true,
-      data: indexData
+      data: response || []
     };
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || '获取首页数据失败'
+      error: error.message || '获取服务类型失败'
     };
   }
 };
-===== End of File: services\api\index\indexApi.ts =====
+
+export const getContactData = async (): Promise<ApiResponse<ContactData>> => {
+  try {
+    const response = await http.get<ContactData>(ENDPOINTS.GET_CONTACT_INFO);
+    
+    return {
+      success: true,
+      data: response
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '获取联系信息失败'
+    };
+  }
+};
+
+export const submitBooking = async (data: BookingFormData): Promise<ApiResponse<{ bookingId: string }>> => {
+  try {
+    const response = await http.post(ENDPOINTS.SUBMIT_BOOKING, data);
+    
+    return {
+      success: true,
+      data: response
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || '提交预约失败'
+    };
+  }
+};
+===== End of File: services\api\contact\contactApi.ts =====
 
 
-===== File: services\api\index\types.ts =====
-export interface Service {
-    text: string;      // 对应数据库 services.text
-    value: string;     // 对应数据库 services.vlaue 转换为字符串
+===== File: services\api\contact\types.ts =====
+export interface ServiceType {
+  text: string;
+  value: string;
+  description: string; 
 }
 
-// 案例数据接口 
-export interface CaseData {
-    id: number;
-    title: string;
-    city: string;
-    description: string;
-    date: string;
-    images: string[];
-    videos?: string[];
-    content: string;
-    coverImage?: string; 
+export interface ContactData {
+  description: string;  // 公司简介
+  phone: string[];     // 电话号码数组
+  wechat: string;      // 微信号
+  address: string;     // 公司地址
 }
 
-// 精选案例接口
-export interface Showcase extends CaseData {
-    coverImage: string; // 精选案例必须有封面图
+export interface BookingFormData {
+  name: string;           // 客户姓名
+  phone: string;          // 联系电话
+  serviceType: string;    // 服务类型值
+  serviceTypeName: string; // 服务类型名称
+  region: string[];       // 地区数组
+  address: string;        // 详细地址
+  remark: string;         // 备注
 }
 
-// 联系信息接口
-export interface ContactInfo {
-    phone: string[];     // 电话号码数组
-    wechat: string;     // 微信号
-    address?: string;   // 公司地址
-    description?: string; // 公司简介
-}
-
-// Banner接口
-export interface Banner {
-    id: string;
-    imageUrl: string;   // 对应数据库 image_url
-    title?: string;     // 对应数据库 title
-    subtitle?: string;  // 对应数据库 subtitle
-}
-
-// 首页数据接口
-export interface IndexData {
-    services: Service[];
-    showcases: Showcase[];
-    contactInfo: ContactInfo;
-    banners: Banner[];
-}
-
-// API响应包装器
 export interface ApiResponse<T> {
-    success: boolean;
-    data?: T;
-    error?: string;
+  success: boolean;
+  data?: T;
+  error?: string;
 }
-===== End of File: services\api\index\types.ts =====
+===== End of File: services\api\contact\types.ts =====
 
 
 ===== File: styles\theme.css =====

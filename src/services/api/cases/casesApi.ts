@@ -1,10 +1,11 @@
 import http from '../../http';
-import { CaseData, CaseQueryParams, CaseApiResponse, CasesApiResponse } from './types';
+import { CaseData, CaseQueryParams, CaseApiResponse, CasesApiResponse, CityOption } from './types';
 
 // API端点常量
 const ENDPOINTS = {
   GET_CASES: '/api/cases/list',
   GET_CASE_DETAIL: '/api/cases',
+  GET_CITIES: '/api/cases/cities',
 } as const;
 
 /**
@@ -65,6 +66,27 @@ export const getCaseDetail = async (id: number): Promise<CaseApiResponse<CaseDat
     return {
       success: false,
       error: error.message || '获取案例详情失败'
+    };
+  }
+};
+
+/**
+ * 获取城市列表 - 新增
+ */
+export const getCities = async (): Promise<CaseApiResponse<CityOption[]>> => {
+  try {
+    const response = await http.get(ENDPOINTS.GET_CITIES);
+    
+    return {
+      success: true,
+      data: response || []
+    };
+  } catch (error: any) {
+    console.error('获取城市列表失败:', error);
+    return {
+      success: false,
+      error: error.message || '获取城市列表失败',
+      data: []
     };
   }
 };

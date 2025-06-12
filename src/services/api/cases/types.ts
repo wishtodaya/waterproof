@@ -1,3 +1,8 @@
+// 城市选项接口
+export interface CityOption {
+  title: string;
+  value: string;
+}
 export interface CaseData {
   id: number;
   title: string;
