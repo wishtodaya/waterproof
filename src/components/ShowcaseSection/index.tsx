@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import { Image } from '@nutui/nutui-react-taro'
-import { Showcase } from 'src/services/api/index/types'
+import { Showcase } from 'src/api/index/types'
 import CaseDetail from '../CaseDetail'
 import './index.scss'
 

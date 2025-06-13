@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { ContactData } from 'src/services/api/contact/types'
+import { ContactData } from 'src/api/contact/types'
 import './index.scss'
 
 interface ContactInfoCardProps {

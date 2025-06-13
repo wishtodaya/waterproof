@@ -1,36 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { Loading, Toast } from '@nutui/nutui-react-taro'
-import BookingForm from '../../components/BookingForm'
-import ContactInfoCard from '../../components/ContactInfoCard'
+import { Loading } from '@nutui/nutui-react-taro'
+import { useRequest } from 'src/utils/http/hooks'
+import { api } from 'src/api'
+import BookingForm from 'src/components/BookingForm'
+import ContactInfoCard from 'src/components/ContactInfoCard'
+import { BookingFormData } from 'src/api/contact/types'
 import './index.scss'
 
-import { 
-  ServiceType, 
-  ContactData, 
-  BookingFormData 
-} from 'src/services/api/contact/types'
-import { 
-  getServiceTypes, 
-  getContactData, 
-  submitBooking
-} from 'src/services/api/contact/contactApi'
-
-const handleContactError = (err: any): string => {
-  console.error(err);
-  return err instanceof Error ? err.message : '发生未知错误';
-};
-
 export default function ContactPage() {
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastInfo, setToastInfo] = useState({ content: '', icon: 'success' });
-  
-  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
-  const [contactData, setContactData] = useState<ContactData | null>(null);
-  
+  const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState<Partial<BookingFormData>>({
     name: '',
     phone: '',
@@ -39,92 +19,65 @@ export default function ContactPage() {
     region: [],
     address: '',
     remark: ''
-  });
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        const [serviceTypesRes, contactDataRes] = await Promise.all([
-          getServiceTypes(),
-          getContactData()
-        ]);
-        
-        if (serviceTypesRes.success && serviceTypesRes.data) {
-          setServiceTypes(serviceTypesRes.data);
-        } else {
-          showMessage(serviceTypesRes.error || '获取服务类型失败', 'fail');
-        }
-        
-        if (contactDataRes.success && contactDataRes.data) {
-          setContactData(contactDataRes.data);
-        } else {
-          showMessage(contactDataRes.error || '获取联系信息失败', 'fail');
-        }
-      } catch (error) {
-        console.error('加载数据失败:', error);
-        showMessage('加载数据失败，请稍后重试', 'fail');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
-  
-  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
-    setToastInfo({ content, icon });
-    setShowToast(true);
-  };
-  
+  })
+
+  // 获取服务类型
+  const { data: serviceTypes } = useRequest(api.contact.getServiceTypes)
+
+  // 获取联系信息
+  const { data: contactData, loading } = useRequest(api.contact.getContactInfo)
+
+  // 提交表单
   const handleFormSubmit = async (data: BookingFormData) => {
-    setSubmitting(true);
-    
+    setSubmitting(true)
+
     try {
-      const res = await submitBooking(data);
-      
-      if (res.success) {
-        Taro.vibrateShort({ type: 'medium' });
-        showMessage('预约成功，我们将尽快与您联系！');
-        
-        setFormData({
-          name: '',
-          phone: '',
-          serviceType: '',
-          serviceTypeName: '',
-          region: [],
-          address: '',
-          remark: ''
-        });
-      } else {
-        showMessage(res.error || '提交失败，请重试', 'fail');
-      }
+      await api.contact.submitBooking(data)
+
+      // 成功反馈
+      Taro.vibrateShort({ type: 'medium' })
+      Taro.showToast({
+        title: '预约成功，我们将尽快与您联系！',
+        icon: 'success',
+        duration: 2000
+      })
+
+      // 重置表单
+      setFormData({
+        name: '',
+        phone: '',
+        serviceType: '',
+        serviceTypeName: '',
+        region: [],
+        address: '',
+        remark: ''
+      })
     } catch (error) {
-      showMessage(handleContactError(error), 'fail');
+      // HTTP层已经处理了错误提示
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
-  
+  }
+
+  // 选择服务类型
   const handleServiceTypeSelect = (typeValue: string) => {
-    const selectedType = serviceTypes.find(type => type.value === typeValue);
+    const selectedType = (serviceTypes || []).find(type => type.value === typeValue)
     setFormData(prev => ({
       ...prev,
       serviceType: typeValue,
       serviceTypeName: selectedType?.text || ''
-    }));
-  };
-  
+    }))
+  }
+
   if (loading || !contactData) {
     return (
       <View className="loading-container">
         <Loading type="spinner" color="#2563EB" />
         <Text className="loading-text">加载中...</Text>
       </View>
-    );
+    )
   }
-  
+
   return (
     <View className="contact-page">
       <View className="contact-container">
@@ -134,8 +87,9 @@ export default function ContactPage() {
             <Text className="card-subtitle">填写信息免费上门勘测</Text>
           </View>
           <View className="card-content">
-            <BookingForm 
-              serviceTypes={serviceTypes}
+            <BookingForm
+              // FIX: Ensure serviceTypes is always an array
+              serviceTypes={serviceTypes || []}
               loading={submitting}
               initialValues={formData}
               onSubmit={handleFormSubmit}
@@ -143,27 +97,17 @@ export default function ContactPage() {
             />
           </View>
         </View>
-        
+
         <View className="contact-card about-card">
           <View className="card-header">
             <Text className="card-title">联系我们</Text>
             <Text className="card-subtitle">{contactData.address}</Text>
           </View>
           <View className="card-content">
-            <ContactInfoCard 
-              data={contactData}
-            />
+            <ContactInfoCard data={contactData} />
           </View>
         </View>
       </View>
-      
-      <Toast
-        visible={showToast}
-        content={toastInfo.content}
-        icon={toastInfo.icon as any}
-        onClose={() => setShowToast(false)}
-        duration={2000}
-      />
     </View>
-  );
+  )
 }

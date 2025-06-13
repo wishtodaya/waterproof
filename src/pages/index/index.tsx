@@ -1,7 +1,9 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
-import { Toast, Loading } from '@nutui/nutui-react-taro'
+import { Loading } from '@nutui/nutui-react-taro'
 import Taro from '@tarojs/taro'
+import { useRequest } from 'src/utils/http/hooks'
+import { api } from 'src/api'
 import './index.scss'
 
 // 导入组件
@@ -10,92 +12,37 @@ import QuickContact from 'src/components/QuickContact'
 import ServiceSection from 'src/components/ServiceSection'
 import ShowcaseSection from 'src/components/ShowcaseSection'
 
-// 修改API导入路径
-import { IndexData } from 'src/services/api/index/types'
-import { getIndexData } from 'src/services/api/index/indexApi'
-
-// 简化错误处理函数
-const handleIndexError = (err: any): string => {
-  return err instanceof Error ? err.message : '获取首页数据时发生未知错误';
-};
-
 export default function IndexPage() {
-  // 状态管理
-  const [loading, setLoading] = useState(true)
-  const [indexData, setIndexData] = useState<IndexData | null>(null)
-  const [showToast, setShowToast] = useState(false)
-  const [toastMsg, setToastMsg] = useState('')
-  const [toastType, setToastType] = useState<'success' | 'fail' | 'warn'>('success')
-  
-  // 显示提示消息
-  const showToastMessage = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
-    if (showToast) {
-      setShowToast(false)
-      setTimeout(() => {
-        setToastMsg(message)
-        setToastType(type)
-        setShowToast(true)
-      }, 100)
-    } else {
-      setToastMsg(message)
-      setToastType(type)
-      setShowToast(true)
-    }
-  }, [showToast])
-  
-  // 获取数据
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    
-    try {
-      const result = await getIndexData()
-      
-      if (result.success && result.data) {
-        setIndexData(result.data)
-      } else {
-        showToastMessage(result.error || '获取首页数据失败', 'fail')
-      }
-    } catch (error) {
-      console.error('加载数据失败:', error)
-      showToastMessage(handleIndexError(error), 'fail')
-    } finally {
-      setLoading(false)
-    }
-  }, [showToastMessage])
-  
-  // 下拉刷新处理
+  // 获取首页数据
+  const {
+    data: indexData,
+    loading,
+    refresh
+  } = useRequest(api.index.getIndexData)
+
+  // 下拉刷新
   const handlePullDownRefresh = useCallback(async () => {
-    try {
-      const result = await getIndexData()
-      
-      if (result.success && result.data) {
-        setIndexData(result.data)
-        showToastMessage('刷新成功', 'success')
-      } else {
-        showToastMessage(result.error || '刷新数据失败', 'fail')
-      }
-    } catch (error) {
-      showToastMessage(handleIndexError(error), 'fail')
-    } finally {
-      Taro.stopPullDownRefresh()
-    }
-  }, [showToastMessage])
-  
-  // 组件挂载时获取数据
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-  
-  // 下拉刷新事件监听
-  useEffect(() => {
-    Taro.eventCenter.on('pullDownRefresh', handlePullDownRefresh)
-    
-    return () => {
-      Taro.eventCenter.off('pullDownRefresh', handlePullDownRefresh)
-    }
-  }, [handlePullDownRefresh])
-  
-  // 加载状态
+    await refresh()
+    Taro.stopPullDownRefresh()
+    Taro.showToast({
+      title: '刷新成功',
+      icon: 'success',
+      duration: 1500
+    })
+  }, [refresh])
+
+  // Toast提示（FIX: 适配组件的类型要求）
+  const showToast = useCallback((message: string, type: 'success' | 'fail' | 'warn' = 'success') => {
+    Taro.showToast({
+      title: message,
+      icon: type === 'success' ? 'success' : type === 'fail' ? 'error' : 'none',
+      duration: 2000
+    })
+  }, [])
+
+  // 监听下拉刷新
+  Taro.usePullDownRefresh(handlePullDownRefresh)
+
   if (loading || !indexData) {
     return (
       <View className='loading-container'>
@@ -104,39 +51,28 @@ export default function IndexPage() {
       </View>
     )
   }
-  
+
   return (
     <View className='page'>
       {/* Banner区域 */}
       <BannerCarousel banners={indexData.banners} />
-      
+
       {/* 快速联系 */}
-      <QuickContact 
+      <QuickContact
         contactInfo={indexData.contactInfo}
-        onShowToast={showToastMessage}
+        onShowToast={showToast}
       />
-      
+
       {/* 服务项目 */}
-      <ServiceSection 
+      <ServiceSection
         services={indexData.services}
         title="我们的服务"
       />
-      
+
       {/* 精选案例 */}
-      <ShowcaseSection 
+      <ShowcaseSection
         showcases={indexData.showcases}
-        onShowToast={showToastMessage}
-      />
-      
-      {/* Toast组件 */}
-      <Toast
-        msg={toastMsg}
-        visible={showToast}
-        type={toastType}
-        onClose={() => setShowToast(false)}
-        duration={2000}
-        position='center'
-        closeOnOverlayClick
+        onShowToast={showToast}
       />
     </View>
   )

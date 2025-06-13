@@ -61,8 +61,8 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
       <View className="product-card__info">
         <Text className="product-card__title">{title}</Text>
         <View className="product-card__price-info">
-          <Text className="product-card__price-label">零售价</Text>
-          <Text className="product-card__price-value">{specifications}</Text>
+          <Text className="product-card__price-label">全国统一零售价</Text>
+          <Text className="product-card__price-value">{specifications}元</Text>
         </View>
       </View>
     </View>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import { Button } from '@nutui/nutui-react-taro';
-import { WaterproofCoating } from 'src/services/api/product/types';
+import { WaterproofCoating } from 'src/api/product/types';
 import './index.scss';
 
 interface ProductDetailProps {
@@ -111,7 +111,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
             <View className="detail__info-item">
               <Text className="detail__info-label">全国统一零售价</Text>
               <Text className="detail__info-value detail__info-value--price">
-                {product.specifications}
+                {product.specifications}元
               </Text>
             </View>
             <View className="detail__info-item">

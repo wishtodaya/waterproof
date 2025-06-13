@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { View, Text, Image, ScrollView, Video } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { Button } from '@nutui/nutui-react-taro';
-import { CaseData } from 'src/services/api/cases/types';
+import { CaseData } from 'src/api/cases/types';
 import './index.scss';
 
 interface CaseDetailProps {

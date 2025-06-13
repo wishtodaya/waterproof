@@ -88,8 +88,8 @@
   &__price-label {
     font-size: 13px;
     color: #6c757d;
+    white-space: nowrap; 
   }
-  
   // 价格数值
   &__price-value {
     font-size: 22px;

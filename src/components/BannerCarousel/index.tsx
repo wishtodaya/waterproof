@@ -1,5 +1,5 @@
 import { View, Text, Image, Swiper, SwiperItem } from '@tarojs/components'
-import { Banner } from 'src/services/api/index/types'
+import { Banner } from 'src/api/index/types'
 import './index.scss'
 
 interface BannerCarouselProps {
