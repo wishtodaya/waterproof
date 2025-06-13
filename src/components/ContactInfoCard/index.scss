@@ -9,37 +9,58 @@
       line-height: 1.6;
       color: #475569;
       text-align: left;
+      letter-spacing: 0.3px;
     }
   }
   
   .actions-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 14px;
     padding: 24px 16px;
     background: #ffffff;
   }
   
   .action-card {
-    padding: 16px;
-    border-radius: 12px;
+    padding: 18px 16px;
+    border-radius: 14px;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
     
     &:active {
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      
+      &::before {
+        opacity: 1;
+      }
     }
     
     .card-icon {
-      font-size: 24px;
-      margin-bottom: 8px;
+      font-size: 26px;
+      margin-bottom: 10px;
+      display: block;
     }
     
     .card-title {
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
+      letter-spacing: 0.5px;
     }
     
     &.call-card {
@@ -81,6 +102,17 @@
     justify-content: center;
     z-index: 9999;
     padding: 20px;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
     
     .selector-content {
       background: #ffffff;
@@ -88,32 +120,58 @@
       overflow: hidden;
       width: 100%;
       max-width: 320px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+      transform: translateY(0);
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
       
       .selector-header {
-        padding: 20px 20px 12px;
+        padding: 22px 20px 16px;
         text-align: center;
-        background: #f8fafc;
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
         border-bottom: 1px solid #e2e8f0;
         
         .selector-title {
-          font-size: 16px;
+          font-size: 17px;
           font-weight: 600;
           color: #1e293b;
+          letter-spacing: 0.3px;
         }
       }
       
       .phone-options {
+        padding: 8px 0;
+        
         .phone-option {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 18px 20px;
-          border-bottom: 1px solid #f1f5f9;
+          padding: 20px 24px;
           transition: all 0.2s;
+          position: relative;
           
-          &:last-child {
-            border-bottom: none;
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 24px;
+            right: 24px;
+            height: 1px;
+            background: #f1f5f9;
+          }
+          
+          &:last-child::after {
+            display: none;
           }
           
           &:active {
@@ -121,22 +179,28 @@
           }
           
           .option-number {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: #2563eb;
+            letter-spacing: 1px;
           }
           
           .option-icon {
             color: #64748b;
-            font-size: 18px;
+            font-size: 20px;
+            transition: transform 0.2s;
+          }
+          
+          &:active .option-icon {
+            transform: scale(1.2);
           }
         }
       }
       
       .selector-cancel {
-        padding: 16px 20px;
+        padding: 18px 20px;
         text-align: center;
-        background: #f1f5f9;
+        background: #f8fafc;
         border-top: 1px solid #e2e8f0;
         transition: all 0.2s;
         
@@ -146,8 +210,9 @@
         
         .cancel-text {
           color: #64748b;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 500;
+          letter-spacing: 0.3px;
         }
       }
     }

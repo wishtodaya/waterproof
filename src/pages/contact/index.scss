@@ -3,6 +3,18 @@
   background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%);
   padding: 16px 12px;
   box-sizing: border-box;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+  }
 }
 
 .loading-container {
@@ -16,6 +28,7 @@
     margin-top: 16px;
     font-size: 14px;
     color: #64748b;
+    letter-spacing: 0.3px;
   }
 }
 
@@ -25,69 +38,93 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .contact-card {
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   margin-bottom: 16px;
+  transition: all 0.3s ease;
   
   &.booking-card {
-    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid rgba(203, 213, 225, 0.5);
+    background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid rgba(226, 232, 240, 0.6);
   }
   
   &.about-card {
     background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
-    border: 1px solid rgba(186, 230, 253, 0.5);
+    border: 1px solid rgba(186, 230, 253, 0.4);
   }
 }
 
 .card-header {
-  padding: 16px 16px 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.5) 0%, transparent 100%);
 }
 
 .card-title {
   display: block;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
 }
 
 .card-subtitle {
   display: block;
   font-size: 13px;
   color: #64748b;
+  letter-spacing: 0.2px;
 }
 
 .card-content {
-  padding: 16px;
+  padding: 20px 16px;
 }
 
 @media screen and (min-width: 768px) {
   .contact-page {
-    padding: 24px;
+    padding: 28px 24px;
+    
+    &::before {
+      height: 300px;
+    }
   }
   
   .contact-container {
-    max-width: 720px;
+    max-width: 760px;
     display: grid;
     grid-template-columns: 6fr 5fr;
-    gap: 20px;
+    gap: 24px;
   }
   
   .contact-card {
     margin-bottom: 0;
     height: fit-content;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
   }
   
   .about-card {
     position: sticky;
-    top: 24px;
+    top: 28px;
+  }
+  
+  .card-header {
+    padding: 24px 24px 18px;
+  }
+  
+  .card-content {
+    padding: 24px 20px;
   }
 }
 
@@ -96,11 +133,23 @@
     padding: 12px 10px;
   }
   
+  .contact-container {
+    gap: 14px;
+  }
+  
+  .contact-card {
+    border-radius: 14px;
+  }
+  
   .card-header {
-    padding: 14px 12px 12px;
+    padding: 16px 14px 14px;
+  }
+  
+  .card-title {
+    font-size: 18px;
   }
   
   .card-content {
-    padding: 14px 12px;
+    padding: 16px 14px;
   }
 }

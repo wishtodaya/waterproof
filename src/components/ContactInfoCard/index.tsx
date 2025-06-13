@@ -1,64 +1,30 @@
 import { useState } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { Toast } from '@nutui/nutui-react-taro'
 import { ContactData } from 'src/services/api/contact/types'
 import './index.scss'
 
 interface ContactInfoCardProps {
   data: ContactData;
-  onCopyWechat?: () => void;
-  onPhoneCall?: (phone: string) => void;
 }
 
-const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ 
-  data,
-  onCopyWechat,
-  onPhoneCall
-}) => {
-  const [showToast, setShowToast] = useState(false);
-  const [toastContent, setToastContent] = useState('');
-  const [toastIcon, setToastIcon] = useState<'success' | 'fail' | 'loading'>('success');
+const ContactInfoCard: React.FC<ContactInfoCardProps> = ({ data }) => {
   const [showPhoneSelector, setShowPhoneSelector] = useState(false);
-  
-  const showMessage = (content: string, icon: 'success' | 'fail' | 'loading' = 'success') => {
-    setToastContent(content);
-    setToastIcon(icon);
-    setShowToast(true);
-  };
   
   const makePhoneCall = (phone: string) => {
     Taro.vibrateShort({ type: 'heavy' });
     setShowPhoneSelector(false);
     
-    if (onPhoneCall) {
-      onPhoneCall(phone);
-    } else {
-      Taro.makePhoneCall({
-        phoneNumber: phone,
-        fail: () => {
-          showMessage('拨打失败', 'fail');
-        }
-      });
-    }
+    Taro.makePhoneCall({
+      phoneNumber: phone
+    });
   };
   
   const copyWechat = () => {
-    Taro.vibrateShort({ type: 'heavy' });
-    
-    if (onCopyWechat) {
-      onCopyWechat();
-    } else {
-      Taro.setClipboardData({
-        data: data.wechat,
-        success: () => {
-          showMessage('已复制到剪贴板');
-        },
-        fail: () => {
-          showMessage('复制失败', 'fail');
-        }
-      });
-    }
+    Taro.vibrateShort({ type: 'medium' });
+    Taro.setClipboardData({
+      data: data.wechat
+    });
   };
   
   const handleQuickCall = () => {
@@ -115,14 +81,6 @@ const ContactInfoCard: React.FC<ContactInfoCardProps> = ({
           </View>
         </View>
       )}
-      
-      <Toast
-        visible={showToast}
-        content={toastContent}
-        icon={toastIcon}
-        onClose={() => setShowToast(false)}
-        duration={2000}
-      />
     </View>
   );
 };

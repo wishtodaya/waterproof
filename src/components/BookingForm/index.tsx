@@ -10,6 +10,7 @@ export interface BookingFormData {
   serviceType: string;
   serviceTypeName: string;
   region: string[];
+  regionCode: string[];  // 新增：存储区域代码
   address: string;
   remark: string;
 }
@@ -76,9 +77,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
   
-  // 处理地区选择
+  // 处理地区选择 - 同时保存文本和代码
   const handleRegionChange = (e) => {
+    // e.detail.value 是省市区名称数组
+    // e.detail.code 是省市区代码数组
     updateField('region', e.detail.value);
+    updateField('regionCode', e.detail.code);
   };
   
   // 表单验证
@@ -191,6 +195,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         <TaroPicker
           mode="region"
           onChange={handleRegionChange}
+          value={formData.regionCode || []}
         >
           <View className="form-select">
             <Text className={formData.region?.length ? 'select-value' : 'select-placeholder'}>

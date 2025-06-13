@@ -116,31 +116,6 @@ export default function ContactPage() {
     }));
   };
   
-  const handlePhoneCall = (phone: string) => {
-    Taro.makePhoneCall({
-      phoneNumber: phone,
-      fail: (err) => {
-        if (err.errMsg && !err.errMsg.includes('cancel')) {
-          showMessage('拨打电话失败，请重试', 'fail');
-        }
-      }
-    });
-  };
-  
-  const handleCopyWechat = () => {
-    if (!contactData) return;
-    
-    Taro.setClipboardData({
-      data: contactData.wechat,
-      success: () => {
-        showMessage('微信号已复制');
-      },
-      fail: () => {
-        showMessage('复制失败，请重试', 'fail');
-      }
-    });
-  };
-  
   if (loading || !contactData) {
     return (
       <View className="loading-container">
@@ -177,8 +152,6 @@ export default function ContactPage() {
           <View className="card-content">
             <ContactInfoCard 
               data={contactData}
-              onPhoneCall={handlePhoneCall}
-              onCopyWechat={handleCopyWechat}
             />
           </View>
         </View>
